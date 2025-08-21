@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { Button } from './ui/button';
 import { Home, Settings, LifeBuoy, FilePlus } from 'lucide-react';
 
 const Logo = () => (

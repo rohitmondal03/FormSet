@@ -1,18 +1,26 @@
-import type {Metadata} from 'next';
+import SupabaseListener from '@/components/supabase-listener';
+import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'FormFlow',
   description: 'Modern Form Builder Web App',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = createClient()
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -27,6 +35,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+          <SupabaseListener serverAccessToken={session?.access_token} />
           {children}
           <Toaster />
         </ThemeProvider>
