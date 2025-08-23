@@ -80,7 +80,7 @@ export default function Home() {
                     height={600}
                     alt="FormFlow App Screenshot"
                     className="w-full h-auto"
-                    data-ai-hint="dashboard forms"
+                    data-ai-hint="app screenshot"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
             </div>
