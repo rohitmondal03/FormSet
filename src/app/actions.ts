@@ -269,11 +269,10 @@ export async function updateProfile(formData: FormData) {
   const fullName = formData.get('fullName') as string;
   const avatarFile = formData.get('avatar') as File;
 
-  let avatar_url: string | undefined;
-
   if (avatarFile && avatarFile.size > 0) {
     const fileExt = avatarFile.name.split('.').pop();
     const filePath = `${user.id}-${Date.now()}.${fileExt}`;
+
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, avatarFile);
@@ -287,21 +286,22 @@ export async function updateProfile(formData: FormData) {
       .from('avatars')
       .getPublicUrl(filePath);
 
-    avatar_url = publicUrl;
-  }
+    console.log('Public URL:', publicUrl);
 
-  const profileData: Partial<Profile> = { full_name: fullName };
-  if (avatar_url) {
-    profileData.avatar_url = avatar_url;
-  }
+    const { error, data } = await supabase
+      .from('profiles')
+      .update({
+        full_name: fullName,
+        avatar_url: publicUrl
+      })
+      .eq('user_id', user.id);
 
-  const { error } = await supabase
-    .from('profiles')
-    .update(profileData)
-    .eq('user_id', user.id);
+      console.log('Profile update error:', error);
+      console.log('Profile update data:', data);
 
-  if (error) {
-    return { error: error.message };
+    if (error) {
+      return { error: error.message };
+    }
   }
 
   revalidatePath('/', 'layout');
