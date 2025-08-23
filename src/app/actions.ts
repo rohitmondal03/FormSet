@@ -1,35 +1,49 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { suggestFormContent } from '@/ai/flows/suggest-form-content'
-import { z } from 'zod'
+import {revalidatePath} from 'next/cache';
+import {redirect} from 'next/navigation';
+import {createClient} from '@/lib/supabase/server';
+import {suggestFormContent} from '@/ai/flows/suggest-form-content';
+import {z} from 'zod';
+import type {Form, FormField} from '@/lib/types';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
 });
 
 export async function getSuggestions(prevState: any, formData: FormData) {
+  const supabase = createClient();
+  const {
+    data: {user},
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {error: 'You must be logged in to create a form.'};
+  }
+
   const validatedFields = suggestionSchema.safeParse({
     description: formData.get('description'),
   });
 
   if (!validatedFields.success) {
     return {
-      error: validatedFields.error.flatten().fieldErrors.description?.[0]
+      error: validatedFields.error.flatten().fieldErrors.description?.[0],
     };
   }
 
   try {
-    const result = await suggestFormContent({ description: validatedFields.data.description });
+    const result = await suggestFormContent({
+      description: validatedFields.data.description,
+    });
     if (!result.suggestions || result.suggestions.length === 0) {
-        return { error: 'Could not generate suggestions based on the description. Please try again with more details.' };
+      return {
+        error:
+          'Could not generate suggestions based on the description. Please try again with more details.',
+      };
     }
-    return { suggestions: result.suggestions };
+    return {suggestions: result.suggestions};
   } catch (error) {
     console.error('AI suggestion error:', error);
-    return { error: 'An unexpected error occurred while generating suggestions.' };
+    return {error: 'An unexpected error occurred while generating suggestions.'};
   }
 }
 
@@ -39,35 +53,185 @@ const authSchema = z.object({
 });
 
 export async function signup(formData: FormData) {
-  const supabase = createClient()
+  const supabase = createClient();
   const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
-    return { error: validatedFields.error.flatten().fieldErrors };
+    return {error: validatedFields.error.flatten().fieldErrors};
   }
 
-  const { data, error } = await supabase.auth.signUp(validatedFields.data);
+  const {data, error} = await supabase.auth.signUp(validatedFields.data);
 
   if (error) {
-    return redirect('/error')
+    return redirect('/error');
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  revalidatePath('/', 'layout');
+  redirect('/dashboard');
 }
 
 export async function login(formData: FormData) {
-    const supabase = createClient()
-  
-    const { error } = await supabase.auth.signInWithPassword({
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+  const supabase = createClient();
+
+  const {error} = await supabase.auth.signInWithPassword({
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  });
+
+  if (error) {
+    return redirect('/error');
+  }
+
+  revalidatePath('/', 'layout');
+  redirect('/dashboard');
+}
+
+export async function saveForm(form: Form) {
+  const supabase = createClient();
+  const {
+    data: {user},
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('You must be logged in to save a form.');
+  }
+
+  const {id, title, description, fields} = form;
+
+  if (id === 'new') {
+    // Create new form
+    const {data: newForm, error: formError} = await supabase
+      .from('forms')
+      .insert({
+        user_id: user.id,
+        title,
+        description,
       })
-  
-    if (error) {
-      return redirect('/error')
+      .select('id')
+      .single();
+
+    if (formError || !newForm) {
+      console.error('Error creating form:', formError);
+      throw new Error('Could not create form.');
     }
-  
-    revalidatePath('/', 'layout')
-    redirect('/dashboard')
+
+    const formId = newForm.id;
+    if (fields.length > 0) {
+      const fieldsToInsert = fields.map(field => ({
+        form_id: formId,
+        ...field,
+        options: field.options || [],
+      }));
+
+      const {error: fieldsError} = await supabase
+        .from('form_fields')
+        .insert(fieldsToInsert);
+      if (fieldsError) {
+        console.error('Error saving form fields:', fieldsError);
+        // Optional: delete the form if fields fail to save
+        await supabase.from('forms').delete().eq('id', formId);
+        throw new Error('Could not save form fields.');
+      }
+    }
+    revalidatePath('/dashboard');
+    return {formId};
+  } else {
+    // Update existing form
+    const {error: formError} = await supabase
+      .from('forms')
+      .update({title, description})
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (formError) {
+      console.error('Error updating form:', formError);
+      throw new Error('Could not update form.');
+    }
+
+    // This is a simplified update. A more robust solution would diff fields.
+    // For now, we delete all existing fields and re-insert them.
+    const {error: deleteError} = await supabase
+      .from('form_fields')
+      .delete()
+      .eq('form_id', id);
+
+    if (deleteError) {
+      console.error('Error deleting old fields:', deleteError);
+      throw new Error('Could not update form fields.');
+    }
+
+    if (fields.length > 0) {
+      const fieldsToInsert = fields.map(field => ({
+        form_id: id,
+        ...field,
+        options: field.options || [],
+      }));
+
+      const {error: insertError} = await supabase
+        .from('form_fields')
+        .insert(fieldsToInsert);
+
+      if (insertError) {
+        console.error('Error inserting new fields:', insertError);
+        throw new Error('Could not update form fields.');
+      }
+    }
+    revalidatePath(`/dashboard/builder/${id}`);
+    revalidatePath('/dashboard');
+    return {formId: id};
+  }
+}
+
+export async function submitResponse(formId: string, formData: FormData) {
+  const supabase = createClient();
+
+  const responseData: Record<string, any> = {};
+  for (const [key, value] of formData.entries()) {
+    // Handle multiple values for checkboxes
+    if (responseData[key]) {
+      if (Array.isArray(responseData[key])) {
+        responseData[key].push(value);
+      } else {
+        responseData[key] = [responseData[key], value];
+      }
+    } else {
+      responseData[key] = value;
+    }
+  }
+
+  const {error} = await supabase
+    .from('form_responses')
+    .insert([{form_id: formId, data: responseData}]);
+
+  if (error) {
+    console.error('Error submitting response:', error);
+    return {error: 'There was an error submitting your response.'};
+  }
+
+  return {success: true};
+}
+
+export async function deleteForm(formId: string) {
+  const supabase = createClient();
+  const {
+    data: {user},
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('You must be logged in to delete a form.');
+  }
+
+  const {error} = await supabase
+    .from('forms')
+    .delete()
+    .eq('id', formId)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Error deleting form:', error);
+    return {error: 'Failed to delete form.'};
+  }
+
+  revalidatePath('/dashboard');
+  redirect('/dashboard');
 }
