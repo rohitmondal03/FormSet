@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Bot, Rows, Share2, BarChart, Edit } from 'lucide-react';
 import Image from 'next/image';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Home() {
   const features = [
@@ -46,7 +47,8 @@ export default function Home() {
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary"><path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 13H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           <span className="font-bold text-2xl">FormSet</span>
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2">
+          <ThemeToggle />
           <Button variant="ghost" asChild>
             <Link href="/login">Log In</Link>
           </Button>
@@ -76,12 +78,12 @@ export default function Home() {
         <section className="relative container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative rounded-xl shadow-2xl overflow-hidden border">
                 <Image
-                    src="https://placehold.co/1200x600.png"
+                    src="https://placehold.co/1200x675.png"
                     width={1200}
-                    height={600}
+                    height={675}
                     alt="FormSet App Screenshot"
                     className="w-full h-auto"
-                    data-ai-hint="app screenshot"
+                    data-ai-hint="app form builder"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
             </div>
