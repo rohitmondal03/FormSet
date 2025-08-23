@@ -1,4 +1,4 @@
--- Create users table (managed by Supabase Auth)
+
 -- Create forms table
 CREATE TABLE forms (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -8,25 +8,6 @@ CREATE TABLE forms (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Add RLS policies for forms table
-ALTER TABLE forms ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow authenticated users to create forms" ON forms
-    FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Allow owner to view their own forms" ON forms
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Allow owner to update their own forms" ON forms
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Allow owner to delete their own forms" ON forms
-    FOR DELETE USING (auth.uid() = user_id);
-
-CREATE POLICY "Allow public read access to forms" ON forms
-    FOR SELECT TO anon USING (true);
-
-
 -- Create form_fields table
 CREATE TABLE form_fields (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -35,22 +16,9 @@ CREATE TABLE form_fields (
     label TEXT NOT NULL,
     placeholder TEXT,
     required BOOLEAN NOT NULL DEFAULT false,
-    options JSONB, -- For radio, checkbox, select
-    "order" INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    options JSONB,
+    "order" INTEGER NOT NULL
 );
-
--- Add RLS policies for form_fields table
-ALTER TABLE form_fields ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow owner to manage fields of their forms" ON form_fields
-    FOR ALL USING (
-        (SELECT auth.uid() FROM forms WHERE forms.id = form_id) = auth.uid()
-    );
-
-CREATE POLICY "Allow public read access to form fields" ON form_fields
-    FOR SELECT TO anon USING (true);
-
 
 -- Create form_responses table
 CREATE TABLE form_responses (
@@ -60,13 +28,48 @@ CREATE TABLE form_responses (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Add RLS policies for form_responses table
+-- Enable Row Level Security
+ALTER TABLE forms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE form_fields ENABLE ROW LEVEL SECURITY;
 ALTER TABLE form_responses ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow owner to view responses to their forms" ON form_responses
-    FOR SELECT USING (
-        (SELECT auth.uid() FROM forms WHERE forms.id = form_id) = auth.uid()
-    );
+-- Policies for `forms` table
+CREATE POLICY "Users can create their own forms."
+ON forms FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Allow anyone to submit a response" ON form_responses
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can view their own forms."
+ON forms FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own forms."
+ON forms FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own forms."
+ON forms FOR DELETE TO authenticated USING (auth.uid() = user_id);
+
+-- Policies for `form_fields` table
+CREATE POLICY "Users can manage fields on their own forms."
+ON form_fields FOR ALL TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM forms WHERE forms.id = form_fields.form_id AND forms.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Anyone can view fields for a public form."
+ON form_fields FOR SELECT TO anon USING (true);
+
+
+-- Policies for `form_responses` table
+CREATE POLICY "Users can view responses to their own forms."
+ON form_responses FOR SELECT TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM forms WHERE forms.id = form_responses.form_id AND forms.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Anyone can submit a response to a form."
+ON form_responses FOR INSERT WITH CHECK (true);
+
+
+-- Public access for forms
+CREATE POLICY "Public forms are viewable by everyone."
+ON forms FOR SELECT TO anon USING (true);
