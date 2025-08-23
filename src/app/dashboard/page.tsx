@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Button} from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -14,29 +14,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {MoreHorizontal, BarChart, Edit, Share2, Trash2} from 'lucide-react';
-import {Badge} from '@/components/ui/badge';
-import {format} from 'date-fns';
-import type {Form} from '@/lib/types';
-import {createClient} from '@/lib/supabase/server';
-import {redirect} from 'next/navigation';
-import {deleteForm} from '../actions';
+import { MoreHorizontal, BarChart, Edit, Share2, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import type { Form } from '@/lib/types';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { deleteForm } from '../actions';
 
 export default async function DashboardPage() {
   const supabase = createClient();
-  const {
-    data: {user},
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/login');
   }
 
-  const {data, error} = await supabase
+  const { data, error } = await supabase
     .from('forms')
     .select(`id, title, created_at, form_responses(count)`)
     .eq('user_id', user.id)
-    .order('created_at', {ascending: false});
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching forms:', error);

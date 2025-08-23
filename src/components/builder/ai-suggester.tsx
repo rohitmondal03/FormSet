@@ -18,6 +18,7 @@ import { getSuggestions } from '@/app/actions';
 import { useFormState, useFormStatus } from 'react-dom';
 import type { FormField } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useActionState } from 'react';
 
 interface AISuggesterProps {
   fields: FormField[];
@@ -25,16 +26,16 @@ interface AISuggesterProps {
 }
 
 function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <Button type="submit" disabled={pending}>
-            {pending ? 'Generating...' : <><Sparkles className="mr-2 h-4 w-4" /> Generate Suggestions</>}
-        </Button>
-    )
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Generating...' : <><Sparkles className="mr-2 h-4 w-4" /> Generate Suggestions</>}
+    </Button>
+  )
 }
 
 export function AISuggester({ fields, setFields }: AISuggesterProps) {
-  const [state, formAction] = useFormState(getSuggestions, { suggestions: [], error: null });
+  const [state, formAction] = useActionState(getSuggestions, { suggestions: [], error: undefined });
 
   const addSuggestion = (suggestion: string) => {
     const newField: FormField = {
@@ -42,6 +43,7 @@ export function AISuggester({ fields, setFields }: AISuggesterProps) {
       type: 'text', // default to text, user can change it
       label: suggestion,
       required: true,
+      order: fields.length + 1,
     };
     setFields([...fields, newField]);
   };
@@ -77,24 +79,24 @@ export function AISuggester({ fields, setFields }: AISuggesterProps) {
           </DialogFooter>
         </form>
         {state.suggestions && state.suggestions.length > 0 && (
-            <div className="mt-6">
-                <h4 className="font-medium mb-2">Suggestions</h4>
-                <div className="space-y-2 rounded-md border p-4 max-h-60 overflow-y-auto">
-                    {state.suggestions.map((s, i) => (
-                        <div key={i} className="flex items-center justify-between group">
-                            <p className="text-sm">{s}</p>
-                            <Button variant="ghost" size="icon" onClick={() => addSuggestion(s)}>
-                                <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </Button>
-                        </div>
-                    ))}
+          <div className="mt-6">
+            <h4 className="font-medium mb-2">Suggestions</h4>
+            <div className="space-y-2 rounded-md border p-4 max-h-60 overflow-y-auto">
+              {state.suggestions.map((s, i) => (
+                <div key={i} className="flex items-center justify-between group">
+                  <p className="text-sm">{s}</p>
+                  <Button variant="ghost" size="icon" onClick={() => addSuggestion(s)}>
+                    <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </Button>
                 </div>
-                <DialogFooter className='mt-4'>
-                    <DialogClose asChild>
-                        <Button variant="outline">Close</Button>
-                    </DialogClose>
-                </DialogFooter>
+              ))}
             </div>
+            <DialogFooter className='mt-4'>
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </div>
         )}
       </DialogContent>
     </Dialog>
