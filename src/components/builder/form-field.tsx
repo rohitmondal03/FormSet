@@ -7,12 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Trash2, PlusCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '../ui/date-picker';
+import { Select, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface FormFieldWrapperProps {
   field: FormField;
@@ -36,8 +33,7 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
   };
 
   const removeOption = (optionIndex: number) => {
-    const newOptions = [...(field.options || [])];
-    newOptions.splice(optionIndex, 1);
+    const newOptions = (field.options || []).filter((_, i) => i !== optionIndex);
     onUpdate(field.id, { options: newOptions });
   };
 
@@ -49,32 +45,17 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
       case 'radio':
       case 'checkbox':
       case 'select':
-        const isRadio = field.type === 'radio';
-        const isCheckbox = field.type === 'checkbox';
-        const isSelect = field.type === 'select';
-
-        if (isSelect) {
-            return (
-                <Select disabled>
-                    <SelectTrigger>
-                        <SelectValue placeholder={field.placeholder || "Select an option"} />
-                    </SelectTrigger>
-                </Select>
-            )
-        }
-        
         return (
             <div className='space-y-2'>
-            {field.options?.map((opt, index) => (
+            {(field.options || []).map((opt, index) => (
               <div key={index} className="flex items-center space-x-2 group">
-                {isRadio && <RadioGroupItem value={opt.value} id={`${field.id}-${opt.value}`} disabled />}
-                {isCheckbox && <Checkbox id={`${field.id}-${opt.value}`} disabled />}
                 <Input 
                     value={opt.label} 
                     onChange={(e) => handleOptionChange(index, e.target.value)}
                     className="flex-1 text-sm"
+                    placeholder={`Option ${index + 1}`}
                 />
-                <Button variant="ghost" size="icon" className="invisible group-hover:visible" onClick={() => removeOption(index)}>
+                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => removeOption(index)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
