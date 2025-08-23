@@ -268,6 +268,10 @@ export async function updateProfile(formData: FormData) {
 
   const fullName = formData.get('fullName') as string;
   const avatarFile = formData.get('avatar') as File;
+  
+  const profileData: { full_name: string; avatar_url?: string } = {
+    full_name: fullName,
+  };
 
   if (avatarFile && avatarFile.size > 0) {
     const fileExt = avatarFile.name.split('.').pop();
@@ -275,7 +279,7 @@ export async function updateProfile(formData: FormData) {
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(filePath, avatarFile);
+      .upload(filePath, avatarFile, { upsert: true });
 
     if (uploadError) {
       console.error('Avatar upload error:', uploadError);
@@ -285,25 +289,20 @@ export async function updateProfile(formData: FormData) {
     const { data: { publicUrl } } = supabase.storage
       .from('avatars')
       .getPublicUrl(filePath);
-
-    console.log('Public URL:', publicUrl);
-
-    const { error, data } = await supabase
-      .from('profiles')
-      .update({
-        full_name: fullName,
-        avatar_url: publicUrl
-      })
-      .eq('user_id', user.id);
-
-      console.log('Profile update error:', error);
-      console.log('Profile update data:', data);
-
-    if (error) {
-      return { error: error.message };
-    }
+      
+    profileData.avatar_url = publicUrl;
   }
 
+  const { error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Profile update error:', error);
+    return { error: error.message };
+  }
+  
   revalidatePath('/', 'layout');
   return { success: true };
 }
