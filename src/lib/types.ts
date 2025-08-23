@@ -47,8 +47,10 @@ export interface FormResponse {
 
 // This corresponds to the profiles table
 export interface Profile {
-  id: string; // This is the user_id from auth.users
+  id: string; // This is the profile's own id
+  user_id: string; // This is the user_id from auth.users
   full_name: string | null;
   avatar_url: string | null;
   email: string | null;
 }
+

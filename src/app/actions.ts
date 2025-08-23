@@ -7,6 +7,7 @@ import {createActionClient} from '@/lib/supabase/server';
 import {suggestFormContent} from '@/ai/flows/suggest-form-content';
 import {z} from 'zod';
 import type {Form, Profile} from '@/lib/types';
+import {createClient} from '@/lib/supabase/server';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
@@ -254,23 +255,52 @@ export async function deleteForm(formId: string) {
   redirect('/dashboard');
 }
 
-export async function updateProfile(profileData: Partial<Profile>) {
-    const supabase = createActionClient();
-    const { data: { user } } = await supabase.auth.getUser();
+export async function updateProfile(formData: FormData) {
+  const supabase = createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { error: 'You must be logged in to update your profile.' };
-    }
+  if (!user) {
+    return { error: 'You must be logged in to update your profile.' };
+  }
 
-    const { error } = await supabase
-        .from('profiles')
-        .update(profileData)
-        .eq('id', user.id);
+  const fullName = formData.get('fullName') as string;
+  const avatarFile = formData.get('avatar') as File;
+  
+  let avatar_url: string | undefined;
+
+  if (avatarFile && avatarFile.size > 0) {
+    const fileExt = avatarFile.name.split('.').pop();
+    const filePath = `${user.id}-${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, avatarFile);
     
-    if (error) {
-        return { error: error.message };
+    if (uploadError) {
+      console.error('Avatar upload error:', uploadError);
+      return { error: 'Failed to upload avatar.' };
     }
 
-    revalidatePath('/', 'layout');
-    return {};
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+      
+    avatar_url = publicUrl;
+  }
+
+  const profileData: Partial<Profile> = { full_name: fullName };
+  if (avatar_url) {
+    profileData.avatar_url = avatar_url;
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(profileData)
+    .eq('user_id', user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/', 'layout');
+  return { success: true };
 }
