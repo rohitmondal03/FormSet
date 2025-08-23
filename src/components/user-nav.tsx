@@ -115,10 +115,10 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <form action={logout}>
-            <button type='submit' className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors w-full hover:bg-accent">
+            <Button variant={"destructive"} type='submit' className="relative w-full">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
-            </button>
+            </Button>
           </form>
         </DropdownMenuContent>
       </DropdownMenu>
