@@ -97,6 +97,12 @@ export async function login(prevState: any, formData: FormData) {
   redirect('/dashboard');
 }
 
+export async function logout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    redirect('/login');
+}
+
 export async function saveForm(form: Form) {
   const supabase = createClient();
   const {
