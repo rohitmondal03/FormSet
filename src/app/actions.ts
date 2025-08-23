@@ -1,25 +1,22 @@
 
 'use server';
 
-import {revalidatePath} from 'next/cache';
-import {redirect} from 'next/navigation';
-import {createActionClient} from '@/lib/supabase/server';
-import {suggestFormContent} from '@/ai/flows/suggest-form-content';
-import {z} from 'zod';
-import type {Form, Profile} from '@/lib/types';
-import {createClient} from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { createActionClient } from '@/lib/supabase/server';
+import { suggestFormContent } from '@/ai/flows/suggest-form-content';
+import { z } from 'zod';
+import type { Form, Profile } from '@/lib/types';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
 });
 
 export async function getSuggestions(prevState: any, formData: FormData) {
-  const supabase = createActionClient();
-  const {
-    data: {user},
-  } = await supabase.auth.getUser();
+  const supabase = await await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return {error: 'You must be logged in to create a form.'};
+    return { error: 'You must be logged in to create a form.' };
   }
 
   const validatedFields = suggestionSchema.safeParse({
@@ -42,10 +39,10 @@ export async function getSuggestions(prevState: any, formData: FormData) {
           'Could not generate suggestions based on the description. Please try again with more details.',
       };
     }
-    return {suggestions: result.suggestions};
+    return { suggestions: result.suggestions };
   } catch (error) {
     console.error('AI suggestion error:', error);
-    return {error: 'An unexpected error occurred while generating suggestions.'};
+    return { error: 'An unexpected error occurred while generating suggestions.' };
   }
 }
 
@@ -55,7 +52,7 @@ const authSchema = z.object({
 });
 
 export async function signup(prevState: any, formData: FormData) {
-  const supabase = createActionClient();
+  const supabase = await createActionClient();
   const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
@@ -64,7 +61,7 @@ export async function signup(prevState: any, formData: FormData) {
     };
   }
 
-  const {error} = await supabase.auth.signUp(validatedFields.data);
+  const { error } = await supabase.auth.signUp(validatedFields.data);
 
   if (error) {
     return {
@@ -77,17 +74,17 @@ export async function signup(prevState: any, formData: FormData) {
 }
 
 export async function login(prevState: any, formData: FormData) {
-  const supabase = createActionClient();
+  const supabase = await createActionClient();
 
   const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
 
-   if (!validatedFields.success) {
+  if (!validatedFields.success) {
     return {
       error: 'Invalid email or password.',
     };
   }
 
-  const {error} = await supabase.auth.signInWithPassword(validatedFields.data);
+  const { error } = await supabase.auth.signInWithPassword(validatedFields.data);
 
   if (error) {
     return {
@@ -100,26 +97,26 @@ export async function login(prevState: any, formData: FormData) {
 }
 
 export async function logout() {
-    const supabase = createActionClient();
-    await supabase.auth.signOut();
-    redirect('/login');
+  const supabase = await createActionClient();
+  await supabase.auth.signOut();
+  redirect('/login');
 }
 
 export async function saveForm(form: Form) {
-  const supabase = createActionClient();
+  const supabase = await createActionClient();
   const {
-    data: {user},
+    data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
     throw new Error('You must be logged in to save a form.');
   }
 
-  const {id, title, description, fields} = form;
+  const { id, title, description, fields } = form;
 
   if (id === 'new') {
     // Create new form
-    const {data: newForm, error: formError} = await supabase
+    const { data: newForm, error: formError } = await supabase
       .from('forms')
       .insert({
         user_id: user.id,
@@ -142,7 +139,7 @@ export async function saveForm(form: Form) {
         options: field.options || [],
       }));
 
-      const {error: fieldsError} = await supabase
+      const { error: fieldsError } = await supabase
         .from('form_fields')
         .insert(fieldsToInsert);
       if (fieldsError) {
@@ -153,12 +150,12 @@ export async function saveForm(form: Form) {
       }
     }
     revalidatePath('/dashboard');
-    return {formId};
+    return { formId };
   } else {
     // Update existing form
-    const {error: formError} = await supabase
+    const { error: formError } = await supabase
       .from('forms')
-      .update({title, description})
+      .update({ title, description })
       .eq('id', id)
       .eq('user_id', user.id);
 
@@ -169,7 +166,7 @@ export async function saveForm(form: Form) {
 
     // This is a simplified update. A more robust solution would diff fields.
     // For now, we delete all existing fields and re-insert them.
-    const {error: deleteError} = await supabase
+    const { error: deleteError } = await supabase
       .from('form_fields')
       .delete()
       .eq('form_id', id);
@@ -186,7 +183,7 @@ export async function saveForm(form: Form) {
         options: field.options || [],
       }));
 
-      const {error: insertError} = await supabase
+      const { error: insertError } = await supabase
         .from('form_fields')
         .insert(fieldsToInsert);
 
@@ -197,12 +194,12 @@ export async function saveForm(form: Form) {
     }
     revalidatePath(`/dashboard/builder/${id}`);
     revalidatePath('/dashboard');
-    return {formId: id};
+    return { formId: id };
   }
 }
 
 export async function submitResponse(formId: string, formData: FormData) {
-  const supabase = createActionClient();
+  const supabase = await createActionClient();
 
   const responseData: Record<string, any> = {};
   for (const [key, value] of formData.entries()) {
@@ -218,29 +215,29 @@ export async function submitResponse(formId: string, formData: FormData) {
     }
   }
 
-  const {error} = await supabase
+  const { error } = await supabase
     .from('form_responses')
-    .insert([{form_id: formId, data: responseData}]);
+    .insert([{ form_id: formId, data: responseData }]);
 
   if (error) {
     console.error('Error submitting response:', error);
-    return {error: 'There was an error submitting your response.'};
+    return { error: 'There was an error submitting your response.' };
   }
 
-  return {success: true};
+  return { success: true };
 }
 
 export async function deleteForm(formId: string) {
-  const supabase = createActionClient();
+  const supabase = await createActionClient();
   const {
-    data: {user},
+    data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
     throw new Error('You must be logged in to delete a form.');
   }
 
-  const {error} = await supabase
+  const { error } = await supabase
     .from('forms')
     .delete()
     .eq('id', formId)
@@ -248,7 +245,7 @@ export async function deleteForm(formId: string) {
 
   if (error) {
     console.error('Error deleting form:', error);
-    return {error: 'Failed to delete form.'};
+    return { error: 'Failed to delete form.' };
   }
 
   revalidatePath('/dashboard');
@@ -256,7 +253,7 @@ export async function deleteForm(formId: string) {
 }
 
 export async function updateProfile(formData: FormData) {
-  const supabase = createActionClient();
+  const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -265,7 +262,7 @@ export async function updateProfile(formData: FormData) {
 
   const fullName = formData.get('fullName') as string;
   const avatarFile = formData.get('avatar') as File;
-  
+
   let avatar_url: string | undefined;
 
   if (avatarFile && avatarFile.size > 0) {
@@ -274,7 +271,7 @@ export async function updateProfile(formData: FormData) {
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, avatarFile);
-    
+
     if (uploadError) {
       console.error('Avatar upload error:', uploadError);
       return { error: 'Failed to upload avatar.' };
@@ -283,7 +280,7 @@ export async function updateProfile(formData: FormData) {
     const { data: { publicUrl } } = supabase.storage
       .from('avatars')
       .getPublicUrl(filePath);
-      
+
     avatar_url = publicUrl;
   }
 

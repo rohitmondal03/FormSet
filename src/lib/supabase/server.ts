@@ -35,8 +35,8 @@ export async function createClient() {
   );
 }
 
-export function createActionClient() {
-    const cookieStore = cookies()
+export async function createActionClient() {
+    const cookieStore = await cookies()
 
     return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
