@@ -10,7 +10,7 @@ import SupabaseListener from '@/components/supabase-listener';
 import ClientLayout from './client-layout';
 
 export const metadata: Metadata = {
-  title: 'FormFlow',
+  title: 'FormSet',
   description: 'Modern Form Builder Web App',
 };
 

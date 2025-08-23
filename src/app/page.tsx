@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,7 +44,7 @@ export default function Home() {
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary"><path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 13H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          <span className="font-bold text-2xl">FormFlow</span>
+          <span className="font-bold text-2xl">FormSet</span>
         </Link>
         <nav className="flex items-center gap-4">
           <Button variant="ghost" asChild>
@@ -62,7 +63,7 @@ export default function Home() {
               Create Powerful Forms, Effortlessly
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Build, share, and analyze forms with FormFlow. From simple surveys to complex registrations, we provide the tools you need to succeed.
+              Build, share, and analyze forms with FormSet. From simple surveys to complex registrations, we provide the tools you need to succeed.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button size="lg" asChild>
@@ -78,7 +79,7 @@ export default function Home() {
                     src="https://placehold.co/1200x600.png"
                     width={1200}
                     height={600}
-                    alt="FormFlow App Screenshot"
+                    alt="FormSet App Screenshot"
                     className="w-full h-auto"
                     data-ai-hint="app screenshot"
                 />
@@ -116,7 +117,7 @@ export default function Home() {
                 <p className="mt-4 text-lg text-muted-foreground">Join thousands of creators and start collecting responses today. It's free to get started.</p>
                 <div className="mt-8">
                     <Button size="lg" asChild>
-                        <Link href="/signup">Create Your FormFlow Account</Link>
+                        <Link href="/signup">Create Your FormSet Account</Link>
                     </Button>
                 </div>
             </div>
@@ -128,9 +129,9 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary"><path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="font-semibold">FormFlow</span>
+            <span className="font-semibold">FormSet</span>
           </div>
-          <p className="text-muted-foreground text-sm mt-4 sm:mt-0">&copy; {new Date().getFullYear()} FormFlow. All rights reserved.</p>
+          <p className="text-muted-foreground text-sm mt-4 sm:mt-0">&copy; {new Date().getFullYear()} FormSet. All rights reserved.</p>
         </div>
       </footer>
     </div>

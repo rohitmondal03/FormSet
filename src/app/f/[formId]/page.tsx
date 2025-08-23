@@ -1,3 +1,4 @@
+
 'use client';
 import {useEffect, useState} from 'react';
 import {createClient} from '@/lib/supabase/client';
@@ -248,7 +249,7 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
           <p className="text-muted-foreground text-sm">
             Powered by{' '}
             <a href="/" className="font-semibold text-primary hover:underline">
-              FormFlow
+              FormSet
             </a>
           </p>
         </footer>

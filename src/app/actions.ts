@@ -1,3 +1,4 @@
+
 'use server';
 
 import {revalidatePath} from 'next/cache';
@@ -5,7 +6,7 @@ import {redirect} from 'next/navigation';
 import {createActionClient} from '@/lib/supabase/server';
 import {suggestFormContent} from '@/ai/flows/suggest-form-content';
 import {z} from 'zod';
-import type {Form} from '@/lib/types';
+import type {Form, Profile} from '@/lib/types';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
@@ -251,4 +252,25 @@ export async function deleteForm(formId: string) {
 
   revalidatePath('/dashboard');
   redirect('/dashboard');
+}
+
+export async function updateProfile(profileData: Partial<Profile>) {
+    const supabase = createActionClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { error: 'You must be logged in to update your profile.' };
+    }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+    
+    if (error) {
+        return { error: error.message };
+    }
+
+    revalidatePath('/', 'layout');
+    return {};
 }

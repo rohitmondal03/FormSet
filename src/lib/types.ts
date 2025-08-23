@@ -1,3 +1,4 @@
+
 export type FormFieldType =
   | 'text'
   | 'textarea'
@@ -42,4 +43,12 @@ export interface FormResponse {
   form_id?: string;
   submittedAt: Date;
   data: Record<string, any>;
+}
+
+// This corresponds to the profiles table
+export interface Profile {
+  id: string; // This is the user_id from auth.users
+  full_name: string | null;
+  avatar_url: string | null;
+  email: string | null;
 }

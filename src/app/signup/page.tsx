@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -94,10 +95,10 @@ export default function SignupPage() {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="font-bold text-2xl">FormFlow</span>
+            <span className="font-bold text-2xl">FormSet</span>
           </Link>
           <CardTitle>Create an Account</CardTitle>
-          <CardDescription>Get started with FormFlow for free</CardDescription>
+          <CardDescription>Get started with FormSet for free</CardDescription>
         </CardHeader>
         <CardContent>
           <form action={formAction} className="space-y-4">

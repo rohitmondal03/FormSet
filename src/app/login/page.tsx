@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -91,7 +92,7 @@ export default function LoginPage() {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="font-bold text-2xl">FormFlow</span>
+            <span className="font-bold text-2xl">FormSet</span>
           </Link>
           <CardTitle>Welcome Back</CardTitle>
           <CardDescription>
