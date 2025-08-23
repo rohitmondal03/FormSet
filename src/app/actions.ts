@@ -2,7 +2,7 @@
 
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {createClient} from '@/lib/supabase/server';
+import {createActionClient} from '@/lib/supabase/server';
 import {suggestFormContent} from '@/ai/flows/suggest-form-content';
 import {z} from 'zod';
 import type {Form} from '@/lib/types';
@@ -12,7 +12,7 @@ const suggestionSchema = z.object({
 });
 
 export async function getSuggestions(prevState: any, formData: FormData) {
-  const supabase = createClient();
+  const supabase = createActionClient();
   const {
     data: {user},
   } = await supabase.auth.getUser();
@@ -53,7 +53,7 @@ const authSchema = z.object({
 });
 
 export async function signup(prevState: any, formData: FormData) {
-  const supabase = createClient();
+  const supabase = createActionClient();
   const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
@@ -75,7 +75,7 @@ export async function signup(prevState: any, formData: FormData) {
 }
 
 export async function login(prevState: any, formData: FormData) {
-  const supabase = createClient();
+  const supabase = createActionClient();
 
   const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
 
@@ -98,13 +98,13 @@ export async function login(prevState: any, formData: FormData) {
 }
 
 export async function logout() {
-    const supabase = createClient();
+    const supabase = createActionClient();
     await supabase.auth.signOut();
     redirect('/login');
 }
 
 export async function saveForm(form: Form) {
-  const supabase = createClient();
+  const supabase = createActionClient();
   const {
     data: {user},
   } = await supabase.auth.getUser();
@@ -200,7 +200,7 @@ export async function saveForm(form: Form) {
 }
 
 export async function submitResponse(formId: string, formData: FormData) {
-  const supabase = createClient();
+  const supabase = createActionClient();
 
   const responseData: Record<string, any> = {};
   for (const [key, value] of formData.entries()) {
@@ -229,7 +229,7 @@ export async function submitResponse(formId: string, formData: FormData) {
 }
 
 export async function deleteForm(formId: string) {
-  const supabase = createClient();
+  const supabase = createActionClient();
   const {
     data: {user},
   } = await supabase.auth.getUser();
