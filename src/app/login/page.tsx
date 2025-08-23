@@ -13,9 +13,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '../actions';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
+import { useEffect, useActionState } from 'react';
 
 function GitHubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -71,7 +71,7 @@ const SubmitButton = () => {
 };
 
 export default function LoginPage() {
-  const [state, formAction] = useFormState(login, { error: null });
+  const [state, formAction] = useActionState(login, { error: null });
   const { toast } = useToast();
 
   useEffect(() => {
