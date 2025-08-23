@@ -13,7 +13,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { signup } from '@/app/actions';
-import { useFormStatus } from 'react-dom';
+import { useFormState, useFormStatus } from 'react-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 function GitHubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -69,6 +71,19 @@ const SubmitButton = () => {
 };
 
 export default function SignupPage() {
+  const [state, formAction] = useFormState(signup, { error: null });
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.error) {
+      toast({
+        title: 'Error',
+        description: state.error,
+        variant: 'destructive',
+      });
+    }
+  }, [state, toast]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
@@ -86,7 +101,7 @@ export default function SignupPage() {
               className="text-primary"
             >
               <path
-                d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 21.7893 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
@@ -127,7 +142,7 @@ export default function SignupPage() {
           <CardDescription>Get started with FormFlow for free</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={signup} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Button variant="outline">
                 <GoogleIcon className="mr-2 h-4 w-4" />

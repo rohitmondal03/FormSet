@@ -5,7 +5,7 @@ import {redirect} from 'next/navigation';
 import {createClient} from '@/lib/supabase/server';
 import {suggestFormContent} from '@/ai/flows/suggest-form-content';
 import {z} from 'zod';
-import type {Form, FormField} from '@/lib/types';
+import type {Form} from '@/lib/types';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
@@ -52,34 +52,45 @@ const authSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
-export async function signup(formData: FormData) {
+export async function signup(prevState: any, formData: FormData) {
   const supabase = createClient();
   const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
-    return {error: validatedFields.error.flatten().fieldErrors};
+    return {
+      error: 'Invalid email or password.',
+    };
   }
 
-  const {data, error} = await supabase.auth.signUp(validatedFields.data);
+  const {error} = await supabase.auth.signUp(validatedFields.data);
 
   if (error) {
-    return redirect('/error');
+    return {
+      error: error.message || 'An unexpected error occurred.',
+    };
   }
 
   revalidatePath('/', 'layout');
   redirect('/dashboard');
 }
 
-export async function login(formData: FormData) {
+export async function login(prevState: any, formData: FormData) {
   const supabase = createClient();
 
-  const {error} = await supabase.auth.signInWithPassword({
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  });
+  const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
+
+   if (!validatedFields.success) {
+    return {
+      error: 'Invalid email or password.',
+    };
+  }
+
+  const {error} = await supabase.auth.signInWithPassword(validatedFields.data);
 
   if (error) {
-    return redirect('/error');
+    return {
+      error: error.message || 'Invalid login credentials.',
+    };
   }
 
   revalidatePath('/', 'layout');
@@ -118,8 +129,8 @@ export async function saveForm(form: Form) {
     const formId = newForm.id;
     if (fields.length > 0) {
       const fieldsToInsert = fields.map(field => ({
-        form_id: formId,
         ...field,
+        form_id: formId,
         options: field.options || [],
       }));
 
@@ -162,8 +173,8 @@ export async function saveForm(form: Form) {
 
     if (fields.length > 0) {
       const fieldsToInsert = fields.map(field => ({
-        form_id: id,
         ...field,
+        form_id: id,
         options: field.options || [],
       }));
 

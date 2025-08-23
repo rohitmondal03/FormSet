@@ -13,7 +13,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '../actions';
-import { useFormStatus } from 'react-dom';
+import { useFormState, useFormStatus } from 'react-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 function GitHubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -69,6 +71,19 @@ const SubmitButton = () => {
 };
 
 export default function LoginPage() {
+  const [state, formAction] = useFormState(login, { error: null });
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.error) {
+      toast({
+        title: 'Error',
+        description: state.error,
+        variant: 'destructive',
+      });
+    }
+  }, [state, toast]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
@@ -126,7 +141,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={login} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Button variant="outline">
                 <GoogleIcon className="mr-2 h-4 w-4" />
