@@ -1,11 +1,15 @@
 
 -- Create profiles table
 create table profiles (
-  id uuid references auth.users on delete cascade not null primary key,
-  email text,
-  full_name text,
-  avatar_url text
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  email TEXT,
+  full_name TEXT,
+  avatar_url TEXT
 );
+
+-- search index on user_id
+create index idx_profiles_user_id on profiles(user_id);
 
 -- Set up Row Level Security
 alter table profiles
@@ -24,8 +28,8 @@ create policy "Users can update own profile." on profiles
 create function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (user_id, email, full_name)
+  values (new.id, new.email, new.raw_user_meta_data->>'full_name');
   return new;
 end;
 $$ language plpgsql security definer;

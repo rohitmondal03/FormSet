@@ -1,7 +1,7 @@
 # Supabase project config
 # Find your project ID in your project's General Settings: https://supabase.com/dashboard/project/_/settings/general
 
-project_id = "kninxxbcmvyklafdrdhm"
+project_id = "osyhrslmzxvnyjdsnuwz"
 
 [api]
 # Port to use for the API proxy.

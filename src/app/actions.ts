@@ -7,13 +7,14 @@ import { createActionClient } from '@/lib/supabase/server';
 import { suggestFormContent } from '@/ai/flows/suggest-form-content';
 import { z } from 'zod';
 import type { Form, Profile } from '@/lib/types';
+import { loginSchema, signupSchema } from '@/lib/zod/auth';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
 });
 
 export async function getSuggestions(prevState: any, formData: FormData) {
-  const supabase = await await createActionClient();
+  const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { error: 'You must be logged in to create a form.' };
@@ -46,22 +47,26 @@ export async function getSuggestions(prevState: any, formData: FormData) {
   }
 }
 
-const authSchema = z.object({
-  email: z.string().email('Invalid email address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
-});
-
 export async function signup(prevState: any, formData: FormData) {
   const supabase = await createActionClient();
-  const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
+  const validatedFields = signupSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
     return {
-      error: 'Invalid email or password.',
+      error: validatedFields.error.flatten().formErrors.map((error) => error).join(', '),
     };
   }
 
-  const { error } = await supabase.auth.signUp(validatedFields.data);
+  const { error } = await supabase.auth.signUp({
+    email: validatedFields.data.email,
+    password: validatedFields.data.password,
+    options: {
+      data: {
+        full_name: validatedFields.data.full_name,
+      },
+      emailRedirectTo: `${window.location.origin}/dashboard`,
+    },
+  });
 
   if (error) {
     return {
@@ -70,13 +75,14 @@ export async function signup(prevState: any, formData: FormData) {
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/dashboard');
   redirect('/dashboard');
 }
 
 export async function login(prevState: any, formData: FormData) {
   const supabase = await createActionClient();
 
-  const validatedFields = authSchema.safeParse(Object.fromEntries(formData));
+  const validatedFields = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!validatedFields.success) {
     return {
