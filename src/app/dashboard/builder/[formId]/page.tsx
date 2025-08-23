@@ -6,14 +6,14 @@ import {createClient} from '@/lib/supabase/client';
 import type {Form} from '@/lib/types';
 import {Skeleton} from '@/components/ui/skeleton';
 
-export default function FormBuilderPage({params}: {params: {formId: string}}) {
+export default function FormBuilderPage({params: {formId}}: {params: {formId: string}}) {
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    if (params.formId === 'new') {
+    if (formId === 'new') {
       setForm({
         id: 'new',
         title: 'Untitled Form',
@@ -31,7 +31,7 @@ export default function FormBuilderPage({params}: {params: {formId: string}}) {
       const {data: form_data, error: form_error} = await supabase
         .from('forms')
         .select(`*, form_fields (*), form_responses(count)`)
-        .eq('id', params.formId)
+        .eq('id', formId)
         .single();
 
       if (form_error || !form_data) {
@@ -56,7 +56,7 @@ export default function FormBuilderPage({params}: {params: {formId: string}}) {
     }
 
     fetchForm();
-  }, [params.formId, supabase]);
+  }, [formId, supabase]);
 
   if (loading) {
     return (

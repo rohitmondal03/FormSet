@@ -8,19 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, BarChart, Edit, Share2, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import type { Form } from '@/lib/types';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { deleteForm } from '../actions';
+import { FormActions } from '@/components/form-actions';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -38,7 +31,6 @@ export default async function DashboardPage() {
 
   if (error) {
     console.error('Error fetching forms:', error);
-    // Handle error appropriately
   }
 
   const forms: Form[] =
@@ -47,8 +39,8 @@ export default async function DashboardPage() {
       title: form.title,
       createdAt: new Date(form.created_at),
       responseCount: form.form_responses[0]?.count ?? 0,
-      description: '', // Not fetched here for brevity
-      fields: [], // Not fetched here for brevity
+      description: '', 
+      fields: [], 
       url: `/f/${form.id}`,
     })) ?? [];
 
@@ -86,47 +78,7 @@ export default async function DashboardPage() {
                   </TableCell>
                   <TableCell>{format(form.createdAt, 'MMM d, yyyy')}</TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/builder/${form.id}`}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/forms/${form.id}/responses`}>
-                            <BarChart className="mr-2 h-4 w-4" />
-                            <span>View Responses</span>
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigator.clipboard.writeText(
-                              `${window.location.origin}/f/${form.id}`
-                            )
-                          }
-                        >
-                          <Share2 className="mr-2 h-4 w-4" />
-                          <span>Share</span>
-                        </DropdownMenuItem>
-                        <form action={deleteForm.bind(null, form.id)}>
-                          <button
-                            type="submit"
-                            className="relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors w-full text-destructive focus:bg-accent focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </button>
-                        </form>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <FormActions formId={form.id} />
                   </TableCell>
                 </TableRow>
               ))

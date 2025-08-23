@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import type { FormField } from '@/lib/types';
+import type { FormField, FormFieldOption } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Trash2, GripVertical } from 'lucide-react';
+import { Trash2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '../ui/date-picker';
 
 interface FormFieldWrapperProps {
   field: FormField;
@@ -21,44 +21,71 @@ interface FormFieldWrapperProps {
 }
 
 export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapperProps) {
-  const [isFocused, setIsFocused] = useState(false);
+
+  const handleOptionChange = (optionIndex: number, newLabel: string) => {
+    const newOptions = [...(field.options || [])];
+    newOptions[optionIndex] = { ...newOptions[optionIndex], label: newLabel, value: newLabel.toLowerCase().replace(/\s+/g, '-') };
+    onUpdate(field.id, { options: newOptions });
+  };
+
+  const addOption = () => {
+    const newOptions = [...(field.options || [])];
+    const newOptionNumber = newOptions.length + 1;
+    newOptions.push({ value: `option-${newOptionNumber}`, label: `Option ${newOptionNumber}` });
+    onUpdate(field.id, { options: newOptions });
+  };
+
+  const removeOption = (optionIndex: number) => {
+    const newOptions = [...(field.options || [])];
+    newOptions.splice(optionIndex, 1);
+    onUpdate(field.id, { options: newOptions });
+  };
+
 
   const renderFieldPreview = () => {
     switch (field.type) {
       case 'textarea':
         return <Textarea placeholder={field.placeholder} disabled />;
       case 'radio':
+      case 'checkbox':
+      case 'select':
+        const isRadio = field.type === 'radio';
+        const isCheckbox = field.type === 'checkbox';
+        const isSelect = field.type === 'select';
+
+        if (isSelect) {
+            return (
+                <Select disabled>
+                    <SelectTrigger>
+                        <SelectValue placeholder={field.placeholder || "Select an option"} />
+                    </SelectTrigger>
+                </Select>
+            )
+        }
+        
         return (
-          <RadioGroup>
-            {field.options?.map((opt) => (
-              <div key={opt.value} className="flex items-center space-x-2">
-                <RadioGroupItem value={opt.value} id={`${field.id}-${opt.value}`} disabled />
-                <Label htmlFor={`${field.id}-${opt.value}`}>{opt.label}</Label>
+            <div className='space-y-2'>
+            {field.options?.map((opt, index) => (
+              <div key={index} className="flex items-center space-x-2 group">
+                {isRadio && <RadioGroupItem value={opt.value} id={`${field.id}-${opt.value}`} disabled />}
+                {isCheckbox && <Checkbox id={`${field.id}-${opt.value}`} disabled />}
+                <Input 
+                    value={opt.label} 
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    className="flex-1 text-sm"
+                />
+                <Button variant="ghost" size="icon" className="invisible group-hover:visible" onClick={() => removeOption(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
               </div>
             ))}
-          </RadioGroup>
+            <Button variant="outline" size="sm" onClick={addOption} className="mt-2">
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Option
+            </Button>
+          </div>
         );
-      case 'checkbox':
-        return (
-            <div className="space-y-2">
-                {field.options?.map((opt) => (
-                    <div key={opt.value} className="flex items-center space-x-2">
-                        <Checkbox id={`${field.id}-${opt.value}`} disabled />
-                        <Label htmlFor={`${field.id}-${opt.value}`}>{opt.label}</Label>
-                    </div>
-                ))}
-            </div>
-        );
-      case 'select':
-        return (
-            <Select disabled>
-                <SelectTrigger>
-                    <SelectValue placeholder={field.placeholder || "Select an option"} />
-                </SelectTrigger>
-            </Select>
-        )
       case 'date':
-        return <Input type="date" disabled />;
+        return <DatePicker disabled/>;
       case 'file':
         return <Input type="file" disabled />;
       default:
@@ -67,11 +94,8 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
   };
 
   return (
-    <Card 
-        className={cn("transition-all duration-300", isFocused ? 'border-primary shadow-lg' : '')}
-        onClick={() => setIsFocused(true)}
-    >
-        <CardContent className="p-4" onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}>
+    <Card className="transition-all duration-300 border-primary shadow-lg">
+        <CardContent className="p-4">
             <div className="flex gap-4">
                 <div className="flex-grow space-y-4">
                     <Input
@@ -83,22 +107,20 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
                     
                     {renderFieldPreview()}
                     
-                    {isFocused && (
-                        <div className="border-t pt-4 mt-4 flex items-center justify-end gap-4">
-                             <div className="flex items-center space-x-2">
-                                <Switch 
-                                    id={`required-${field.id}`} 
-                                    checked={field.required}
-                                    onCheckedChange={(checked) => onUpdate(field.id, { required: checked })}
-                                />
-                                <Label htmlFor={`required-${field.id}`}>Required</Label>
-                            </div>
-                            <Button variant="ghost" size="icon" onClick={() => onRemove(field.id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                                <span className="sr-only">Delete field</span>
-                            </Button>
+                    <div className="border-t pt-4 mt-4 flex items-center justify-end gap-4">
+                         <div className="flex items-center space-x-2">
+                            <Switch 
+                                id={`required-${field.id}`} 
+                                checked={field.required}
+                                onCheckedChange={(checked) => onUpdate(field.id, { required: checked })}
+                            />
+                            <Label htmlFor={`required-${field.id}`}>Required</Label>
                         </div>
-                    )}
+                        <Button variant="ghost" size="icon" onClick={() => onRemove(field.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <span className="sr-only">Delete field</span>
+                        </Button>
+                    </div>
                 </div>
             </div>
       </CardContent>

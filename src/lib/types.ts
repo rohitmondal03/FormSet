@@ -20,7 +20,7 @@ export interface FormField {
   label: string;
   placeholder?: string | null;
   required: boolean;
-  options?: FormFieldOption[] | null;
+  options: FormFieldOption[] | null;
   order: number;
 }
 

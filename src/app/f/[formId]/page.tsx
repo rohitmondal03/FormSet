@@ -1,6 +1,5 @@
 'use client';
 import {useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
 import {createClient} from '@/lib/supabase/client';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -19,12 +18,15 @@ import {useToast} from '@/hooks/use-toast';
 import type {Form, FormField} from '@/lib/types';
 import {submitResponse} from '@/app/actions';
 import {Skeleton} from '@/components/ui/skeleton';
+import { DatePicker } from '@/components/ui/date-picker';
+import { format } from 'date-fns';
 
-export default function PublicFormPage({params}: {params: {formId: string}}) {
+export default function PublicFormPage({ params: {formId} }: { params: { formId: string } }) {
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [formValues, setFormValues] = useState<Record<string, any>>({});
   const {toast} = useToast();
   const supabase = createClient();
 
@@ -33,7 +35,7 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
       const {data: formData, error: formError} = await supabase
         .from('forms')
         .select('*, form_fields(*)')
-        .eq('id', params.formId)
+        .eq('id', formId)
         .single();
 
       if (formError || !formData) {
@@ -56,13 +58,22 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
       setLoading(false);
     }
     fetchForm();
-  }, [params.formId, supabase]);
+  }, [formId, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-    const result = await submitResponse(params.formId, formData);
+    const formData = new FormData();
+    for (const key in formValues) {
+        const value = formValues[key];
+        if (Array.isArray(value)) {
+            value.forEach(item => formData.append(key, item));
+        } else if (value) {
+            formData.append(key, value);
+        }
+    }
+
+    const result = await submitResponse(formId, formData);
 
     setSubmitting(false);
 
@@ -77,10 +88,23 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
         title: 'Response Submitted',
         description: 'Thank you for filling out the form!',
       });
-      // Optionally, you can reset the form or redirect to a thank you page
-      (e.target as HTMLFormElement).reset();
+      setFormValues({});
     }
   };
+
+  const handleValueChange = (fieldId: string, value: any, type: FormField['type']) => {
+    setFormValues(prev => {
+        if (type === 'checkbox') {
+            const existing: any[] = prev[fieldId] || [];
+            if (value.checked) {
+                return {...prev, [fieldId]: [...existing, value.value]};
+            } else {
+                return {...prev, [fieldId]: existing.filter(item => item !== value.value)};
+            }
+        }
+      return {...prev, [fieldId]: value}
+    });
+  }
 
   const renderField = (field: FormField) => {
     const id = `field-${field.id}`;
@@ -98,6 +122,8 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
                 name={field.id}
                 placeholder={field.placeholder}
                 required={field.required}
+                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
+                value={formValues[field.id] || ''}
               />
             ),
             textarea: (
@@ -106,22 +132,27 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
                 name={field.id}
                 placeholder={field.placeholder}
                 required={field.required}
+                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
+                value={formValues[field.id] || ''}
               />
             ),
             date: (
-              <Input id={id} name={field.id} type="date" required={field.required} />
+              <DatePicker 
+                value={formValues[field.id] ? new Date(formValues[field.id]) : undefined}
+                onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
+              />
             ),
             file: (
               <Input id={id} name={field.id} type="file" required={field.required} />
             ),
             radio: (
-              <RadioGroup id={id} required={field.required}>
+              <RadioGroup id={id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value, field.type)} value={formValues[field.id]}>
                 {field.options?.map(opt => (
                   <div key={opt.value} className="flex items-center space-x-2">
                     <RadioGroupItem
                       value={opt.value}
                       id={`${id}-${opt.value}`}
-                      name={field.id}
+                      
                     />
                     <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
                   </div>
@@ -134,8 +165,8 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
                   <div key={opt.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`${id}-${opt.value}`}
-                      name={field.id}
-                      value={opt.value}
+                      onCheckedChange={(checked) => handleValueChange(field.id, {value: opt.value, checked: checked}, field.type)}
+                      checked={(formValues[field.id] || []).includes(opt.value)}
                     />
                     <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
                   </div>
@@ -143,7 +174,7 @@ export default function PublicFormPage({params}: {params: {formId: string}}) {
               </div>
             ),
             select: (
-              <Select name={field.id} required={field.required}>
+              <Select name={field.id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value, field.type)} value={formValues[field.id]}>
                 <SelectTrigger id={id}>
                   <SelectValue placeholder={field.placeholder || 'Select an option'} />
                 </SelectTrigger>

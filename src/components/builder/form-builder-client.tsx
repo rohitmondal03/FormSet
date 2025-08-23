@@ -31,6 +31,7 @@ export function FormBuilderClient({existingForm}: FormBuilderClientProps) {
       label: `New ${type} field`,
       required: false,
       order: fields.length,
+      options: [],
     };
     if (type === 'radio' || type === 'select' || type === 'checkbox') {
       newField.options = [{value: 'option1', label: 'Option 1'}];

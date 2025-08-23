@@ -10,7 +10,7 @@ import {ResponseTable} from '@/components/response-table';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Skeleton} from '@/components/ui/skeleton';
 
-export default function FormResponsesPage({params}: {params: {formId: string}}) {
+export default function FormResponsesPage({params: {formId}}: {params: {formId: string}}) {
   const [form, setForm] = useState<Form | null>(null);
   const [responses, setResponses] = useState<FormResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ export default function FormResponsesPage({params}: {params: {formId: string}}) 
       const {data: formData, error: formError} = await supabase
         .from('forms')
         .select('*, form_fields(*)')
-        .eq('id', params.formId)
+        .eq('id', formId)
         .single();
 
       if (formError || !formData) {
@@ -47,7 +47,7 @@ export default function FormResponsesPage({params}: {params: {formId: string}}) 
       const {data: responseData, error: responseError} = await supabase
         .from('form_responses')
         .select('*')
-        .eq('form_id', params.formId)
+        .eq('form_id', formId)
         .order('created_at', {ascending: false});
 
       if (responseError) {
@@ -69,7 +69,7 @@ export default function FormResponsesPage({params}: {params: {formId: string}}) 
     }
 
     fetchFormAndResponses();
-  }, [params.formId, supabase]);
+  }, [formId, supabase]);
 
   if (loading) {
     return (
