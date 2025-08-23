@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, BarChart, Edit, Share2, Trash2 } from 'lucide-react';
 import { deleteForm } from '@/app/actions';
-import { useToast } from './hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export function FormActions({ formId }: { formId: string }) {
   const { toast } = useToast();
