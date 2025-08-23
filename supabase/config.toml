@@ -1,0 +1,24 @@
+# Supabase project config
+# Find your project ID in your project's General Settings: https://supabase.com/dashboard/project/_/settings/general
+
+project_id = "your-project-id"
+
+[api]
+# Port to use for the API proxy.
+port = 54321
+# Schemas to expose in the API.
+schemas = ["public", "storage", "graphql"]
+# Extra schemas to add to the search_path of roles.
+extra_search_path = ["public"]
+# Maximum number of rows to return from a view, function, or table.
+max_rows = 1000
+
+[db]
+# Port to use for the local database.
+port = 54322
+# Use a major version number.
+major_version = 15
+
+[studio]
+# Port to use for Supabase Studio.
+port = 54323
