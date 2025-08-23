@@ -28,3 +28,8 @@ port = 54323
 enable_email_autocomfirm = true
 # Enable Google provider.
 external_providers = ["google"]
+
+# Config for Google provider
+external_google_enabled = true
+external_google_client_id = "${GOOGLE_OAUTH_CLIENT_ID}"
+external_google_secret = "${GOOGLE_OAUTH_CLIENT_SECRET}"
