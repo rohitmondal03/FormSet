@@ -24,12 +24,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { LogOut, Settings, User as UserIcon, Upload } from 'lucide-react';
+import { LogOut, Settings, User as UserIcon, Upload, FileUp } from 'lucide-react';
 import { logout, updateProfile } from '@/app/actions';
 import { createClient } from '@/lib/supabase/client';
 import { Skeleton } from './ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import type { Profile } from '@/lib/types';
+import Image from 'next/image';
 
 export function UserNav() {
   const [user, setUser] = useState<User | null>(null);
@@ -155,27 +156,31 @@ export function UserNav() {
             </DialogDescription>
           </DialogHeader>
           <form ref={formRef} onSubmit={handleProfileSave} className="space-y-4 py-4">
-             <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={avatarPreview || profile?.avatar_url || ''} />
-                  <AvatarFallback>{getInitials(profile?.full_name, user?.email || '')}</AvatarFallback>
-                </Avatar>
-                <div className='flex-1'>
-                    <Label htmlFor="avatar">Profile Picture</Label>
-                    <Input id="avatar" name="avatar" type="file" accept="image/*" onChange={handleAvatarChange} />
-                </div>
+              <div className="flex flex-col items-center gap-4">
+                <Label htmlFor='avatar' className='cursor-pointer'>
+                  <div className="w-32 h-32 rounded-full border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors relative">
+                    {avatarPreview || profile?.avatar_url ? (
+                        <Image src={avatarPreview || profile!.avatar_url!} alt="Avatar preview" layout="fill" objectFit="cover" className="rounded-full" />
+                    ): (
+                       <div className='text-center'>
+                         <FileUp className="w-8 h-8 mx-auto" />
+                         <span>Upload</span>
+                       </div>
+                    )}
+                  </div>
+                </Label>
+                <Input id="avatar" name="avatar" type="file" accept="image/*" onChange={handleAvatarChange} className="hidden"/>
               </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">Email</Label>
-              <Input id="email" defaultValue={user?.email} readOnly className="col-span-3 bg-muted" />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" defaultValue={user?.email} readOnly className="bg-muted" />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">Full Name</Label>
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
                 name="fullName"
                 defaultValue={profile?.full_name || ''}
-                className="col-span-3"
               />
             </div>
             <DialogFooter>

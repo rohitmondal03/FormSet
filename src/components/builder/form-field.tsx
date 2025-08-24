@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { FormField, FormFieldOption } from '@/lib/types';
@@ -6,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Trash2, PlusCircle } from 'lucide-react';
+import { Trash2, PlusCircle, FileUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { DatePicker } from '../ui/date-picker';
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -68,7 +69,17 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
       case 'date':
         return <DatePicker disabled/>;
       case 'file':
-        return <Input type="file" disabled />;
+        return (
+          <div className="flex items-center justify-center w-full">
+            <Label htmlFor={`file-upload-preview-${field.id}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <FileUp className="w-8 h-8 mb-4 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                </div>
+                <Input id={`file-upload-preview-${field.id}`} type="file" className="hidden" disabled />
+            </Label>
+          </div>
+        );
       default:
         return <Input placeholder={field.placeholder} disabled />;
     }
