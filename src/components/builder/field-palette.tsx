@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,9 @@ import {
   CircleDot,
   FileUp,
   CalendarDays,
-  FormInput,
+  Hash,
   Clock,
   Star,
-  Minus,
-  Plus,
   SlidersHorizontal,
   Heading1,
 } from 'lucide-react';
@@ -31,8 +30,8 @@ const fieldTypes: { type: FormFieldType; label: string; icon: React.ReactNode }[
   { type: 'select', label: 'Dropdown', icon: <ChevronDownSquare className="h-4 w-4" /> },
   { type: 'date', label: 'Date Picker', icon: <CalendarDays className="h-4 w-4" /> },
   { type: 'file', label: 'File Upload', icon: <FileUp className="h-4 w-4" /> },
-  { type: 'number', label: 'Number Input', icon: <FormInput className="h-4 w-4" /> },
-  { type: 'time', label: 'Time Picker', icon: <Clock className="h-4 w-4" /> },
+  { type: 'number', label: 'Number', icon: <Hash className="h-4 w-4" /> },
+  { type: 'time', label: 'Time', icon: <Clock className="h-4 w-4" /> },
   { type: 'rating', label: 'Rating', icon: <Star className="h-4 w-4" /> },
   { type: 'slider', label: 'Slider', icon: <SlidersHorizontal className="h-4 w-4" /> },
 ];

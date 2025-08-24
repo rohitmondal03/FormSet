@@ -7,10 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Trash2, PlusCircle, FileUp } from 'lucide-react';
+import { Trash2, PlusCircle, FileUp, Star, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { DatePicker } from '../ui/date-picker';
-import { Select, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 
 interface FormFieldWrapperProps {
   field: FormField;
@@ -50,8 +50,8 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
             <div className='space-y-2'>
             {(field.options || []).map((opt, index) => (
               <div key={index} className="flex items-center space-x-2 group">
-                <Input 
-                    value={opt.label} 
+                <Input
+                    value={opt.label}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
                     className="flex-1 text-sm"
                     placeholder={`Option ${index + 1}`}
@@ -80,6 +80,25 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
             </Label>
           </div>
         );
+      case 'number':
+        return <Input type="number" placeholder={field.placeholder} disabled />;
+      case 'time':
+        return (
+            <div className="relative">
+                <Input type="time" disabled className="pr-10" />
+                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+        );
+      case 'rating':
+        return (
+            <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-6 w-6 text-yellow-400" />
+                ))}
+            </div>
+        );
+      case 'slider':
+          return <Slider defaultValue={[50]} max={100} step={1} disabled/>;
       default:
         return <Input placeholder={field.placeholder} disabled />;
     }
@@ -96,13 +115,13 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
                         className="text-base font-medium border-none shadow-none focus-visible:ring-1 focus-visible:ring-ring p-2"
                         placeholder="Your question here"
                     />
-                    
+
                     {renderFieldPreview()}
-                    
+
                     <div className="border-t pt-4 mt-4 flex items-center justify-end gap-4">
                          <div className="flex items-center space-x-2">
-                            <Switch 
-                                id={`required-${field.id}`} 
+                            <Switch
+                                id={`required-${field.id}`}
                                 checked={field.required}
                                 onCheckedChange={(checked) => onUpdate(field.id, { required: checked })}
                             />

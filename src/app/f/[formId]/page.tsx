@@ -21,6 +21,9 @@ import {submitResponse} from '@/app/actions';
 import {Skeleton} from '@/components/ui/skeleton';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
+import { Slider } from '@/components/ui/slider';
+import { Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function PublicFormPage({ params: {formId} }: { params: { formId: string } }) {
   const [form, setForm] = useState<Form | null>(null);
@@ -138,7 +141,7 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
               />
             ),
             date: (
-              <DatePicker 
+              <DatePicker
                 value={formValues[field.id] ? new Date(formValues[field.id]) : undefined}
                 onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
               />
@@ -188,6 +191,55 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
                 </SelectContent>
               </Select>
             ),
+            number: (
+              <Input
+                id={id}
+                name={field.id}
+                type="number"
+                placeholder={field.placeholder}
+                required={field.required}
+                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
+                value={formValues[field.id] || ''}
+              />
+            ),
+            time: (
+                <Input
+                  id={id}
+                  name={field.id}
+                  type="time"
+                  required={field.required}
+                  onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
+                  value={formValues[field.id] || ''}
+                />
+            ),
+            rating: (
+                <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                        <Star
+                            key={value}
+                            className={cn(
+                                "h-6 w-6 cursor-pointer",
+                                (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                            )}
+                            onClick={() => handleValueChange(field.id, value, field.type)}
+                        />
+                    ))}
+                </div>
+            ),
+            slider: (
+                <div className="flex items-center gap-4">
+                    <Slider
+                        id={id}
+                        min={field.properties?.min || 0}
+                        max={field.properties?.max || 100}
+                        step={field.properties?.step || 1}
+                        value={[formValues[field.id] || 50]}
+                        onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
+                        required={field.required}
+                    />
+                    <span className="text-sm font-medium w-12 text-center">{formValues[field.id] || 50}</span>
+                </div>
+            )
           }[field.type]
         }
       </div>
