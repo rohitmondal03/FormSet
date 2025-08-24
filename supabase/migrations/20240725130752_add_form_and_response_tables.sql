@@ -15,11 +15,11 @@ CREATE TABLE IF NOT EXISTS form_fields (
     type TEXT NOT NULL,
     label TEXT NOT NULL,
     placeholder TEXT,
-    required BOOLEAN DEFAULT FALSE,
-    options JSONB, -- For select, radio, checkbox
+    required BOOLEAN DEFAULT false,
+    options JSONB,
     "order" INTEGER NOT NULL,
-    validation JSONB, -- For custom validation rules
-    properties JSONB, -- For other field properties (e.g., min/max for number)
+    validation JSONB,
+    properties JSONB,
     created_at TIMESTAMPTZ DEFAULT timezone('utc', now()),
     updated_at TIMESTAMPTZ DEFAULT timezone('utc', now())
 );
@@ -32,33 +32,20 @@ CREATE TABLE IF NOT EXISTS form_responses (
     data JSONB NOT NULL
 );
 
--- Create the form_answers table
-CREATE TABLE IF NOT EXISTS form_answers (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    form_response_id UUID REFERENCES form_responses(id) ON DELETE CASCADE NOT NULL,
-    field_id UUID REFERENCES form_fields(id) ON DELETE CASCADE NOT NULL,
-    value JSONB,
-    created_at TIMESTAMPTZ DEFAULT timezone('utc', now())
-);
-
--- RLS Policies for forms
+-- Create policies for forms
 ALTER TABLE forms ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow authenticated users to create forms" ON forms FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated users to create forms" ON forms FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Allow owner to view their forms" ON forms FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Allow owner to update their forms" ON forms FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Allow owner to delete their forms" ON forms FOR DELETE USING (auth.uid() = user_id);
 
--- RLS Policies for form_fields
+-- Create policies for form_fields
 ALTER TABLE form_fields ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow owner to manage form fields" ON form_fields FOR ALL USING (auth.uid() = (SELECT user_id FROM forms WHERE id = form_id));
+CREATE POLICY "Allow form owner to manage fields" ON form_fields FOR ALL USING (auth.uid() = (SELECT user_id FROM forms WHERE id = form_id));
+CREATE POLICY "Allow public read access to form fields" ON form_fields FOR SELECT TO anon, authenticated USING (true);
 
--- RLS Policies for form_responses
+
+-- Create policies for form_responses
 ALTER TABLE form_responses ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public to submit responses" ON form_responses FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow owner to view form responses" ON form_responses FOR SELECT USING (auth.uid() = (SELECT user_id FROM forms WHERE id = form_id));
-
--- RLS Policies for form_answers
-ALTER TABLE form_answers ENABLE ROW LEVEL SECURITY;
-
--- Allow users who submitted the response to view their answers
-CREATE POLICY "Allow owner to view form_answers" ON public.form_answers FOR SELECT USING (auth.uid() = (SELECT f.user_id FROM public.forms f JOIN public.form_responses fr ON f.id = fr.form_id WHERE fr.id = form_response_id));
+CREATE POLICY "Allow anyone to submit a response" ON form_responses FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow form owner to view responses" ON form_responses FOR SELECT USING (auth.uid() = (SELECT user_id FROM forms WHERE id = form_id));
