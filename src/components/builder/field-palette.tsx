@@ -8,7 +8,13 @@ import {
   ChevronDownSquare,
   CircleDot,
   FileUp,
-  Calendar,
+  CalendarDays,
+  FormInput,
+  Clock,
+  Star,
+  Minus,
+  Plus,
+  SlidersHorizontal,
   Heading1,
 } from 'lucide-react';
 import type { FormFieldType } from '@/lib/types';
@@ -23,8 +29,12 @@ const fieldTypes: { type: FormFieldType; label: string; icon: React.ReactNode }[
   { type: 'radio', label: 'Multiple Choice', icon: <CircleDot className="h-4 w-4" /> },
   { type: 'checkbox', label: 'Checkboxes', icon: <CheckSquare className="h-4 w-4" /> },
   { type: 'select', label: 'Dropdown', icon: <ChevronDownSquare className="h-4 w-4" /> },
-  { type: 'date', label: 'Date Picker', icon: <Calendar className="h-4 w-4" /> },
+  { type: 'date', label: 'Date Picker', icon: <CalendarDays className="h-4 w-4" /> },
   { type: 'file', label: 'File Upload', icon: <FileUp className="h-4 w-4" /> },
+  { type: 'number', label: 'Number Input', icon: <FormInput className="h-4 w-4" /> },
+  { type: 'time', label: 'Time Picker', icon: <Clock className="h-4 w-4" /> },
+  { type: 'rating', label: 'Rating', icon: <Star className="h-4 w-4" /> },
+  { type: 'slider', label: 'Slider', icon: <SlidersHorizontal className="h-4 w-4" /> },
 ];
 
 export function FieldPalette({ onAddField }: FieldPaletteProps) {

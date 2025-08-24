@@ -142,7 +142,9 @@ export async function saveForm(form: Form) {
       const fieldsToInsert = fields.map(field => ({
         ...field,
         form_id: formId,
-        options: field.options || [],
+        type: field.type, // Ensure type is included
+ validation: field.validation || {}, // Include validation
+ properties: field.properties || {}, // Include properties
       }));
 
       const { error: fieldsError } = await supabase
@@ -186,7 +188,9 @@ export async function saveForm(form: Form) {
       const fieldsToInsert = fields.map(field => ({
         ...field,
         form_id: id,
-        options: field.options || [],
+ type: field.type, // Ensure type is included
+ validation: field.validation || {}, // Include validation
+ properties: field.properties || {}, // Include properties
       }));
 
       const { error: insertError } = await supabase
@@ -204,26 +208,32 @@ export async function saveForm(form: Form) {
   }
 }
 
+// This function is no longer used as responses are stored in form_answers
 export async function submitResponse(formId: string, formData: FormData) {
   const supabase = await createActionClient();
 
-  const responseData: Record<string, any> = {};
-  for (const [key, value] of formData.entries()) {
-    // Handle multiple values for checkboxes
-    if (responseData[key]) {
-      if (Array.isArray(responseData[key])) {
-        responseData[key].push(value);
-      } else {
-        responseData[key] = [responseData[key], value];
-      }
-    } else {
-      responseData[key] = value;
-    }
+ // Insert into form_responses first to get the response_id
+  const { data: response, error: responseError } = await supabase
+ .from('form_responses')
+ .insert([{ form_id: formId }])
+ .select('id')
+ .single();
+
+  if (responseError || !response) {
+ console.error('Error creating form response:', responseError);
+ return { error: 'There was an error submitting your response.' };
   }
+
+  const responseId = response.id;
+  const answersToInsert = [];
+
+ // Iterate over form data and prepare answers for insertion
+ // You'll need to retrieve field IDs based on form data keys (field names)
+ // For simplicity, this example assumes form data keys are field IDs.
 
   const { error } = await supabase
     .from('form_responses')
-    .insert([{ form_id: formId, data: responseData }]);
+    .insert([{ form_id: formId, data: response }]);
 
   if (error) {
     console.error('Error submitting response:', error);

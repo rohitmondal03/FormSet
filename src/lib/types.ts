@@ -1,12 +1,18 @@
 
 export type FormFieldType =
   | 'text'
+  | 'paragraph'
+  | 'number'
+  | 'time'
   | 'textarea'
   | 'radio'
   | 'checkbox'
   | 'select'
   | 'date'
-  | 'file';
+  | 'file'
+  | 'slider'
+  | 'rating'
+
 
 export interface FormFieldOption {
   value: string;
@@ -21,8 +27,22 @@ export interface FormField {
   label: string;
   placeholder?: string | null;
   required: boolean;
-  options: FormFieldOption[] | null;
+  options?: FormFieldOption[] | null; // Make options optional and nullable
   order: number;
+  // New fields based on schema update
+  validation?: any; // JSONB for Zod validation rules (can be more specific later)
+  properties?: any; // JSONB for type-specific properties (e.g., min/max, steps)
+}
+
+// This corresponds to the form_answers table
+export interface FormAnswer {
+  id: string; // UUID from the database
+  response_id: string; // References form_responses(id)
+  field_id: string; // References form_fields(id)
+  value: any; // JSONB to accommodate different answer data types
+  created_at: string; // TIMESTAMPTZ from the database
+  updated_at: string; // TIMESTAMPTZ from the database
+
 }
 
 // This corresponds to the forms table
@@ -40,7 +60,6 @@ export interface Form {
 // This corresponds to the form_responses table
 export interface FormResponse {
   id: string;
-  form_id?: string;
   submittedAt: Date;
   data: Record<string, any>;
 }
@@ -51,6 +70,4 @@ export interface Profile {
   user_id: string; // This is the user_id from auth.users
   full_name: string | null;
   avatar_url: string | null;
-  email: string | null;
 }
-
