@@ -47,7 +47,7 @@ export function MainSidebar() {
         </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
+            <SidebarMenuButton asChild active={isActive('/dashboard')}>
               <Link href="/dashboard" className='flex items-center justify-center py-4 text-sm font-medium text-gray-900 rounded-lg hover:bg-gray-100'>
                 <Home />
                 <span>My Forms</span>

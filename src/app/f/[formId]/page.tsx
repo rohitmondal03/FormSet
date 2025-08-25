@@ -1,13 +1,13 @@
 
 'use client';
-import {useEffect, useState} from 'react';
-import {createClient} from '@/lib/supabase/client';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
-import {Textarea} from '@/components/ui/textarea';
-import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
-import {Checkbox} from '@/components/ui/checkbox';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -15,28 +15,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {useToast} from '@/hooks/use-toast';
-import type {Form, FormField} from '@/lib/types';
-import {submitResponse} from '@/app/actions';
-import {Skeleton} from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import type { Form, FormField } from '@/lib/types';
+import { submitResponse } from '@/app/actions';
+import { Skeleton } from '@/components/ui/skeleton';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 import { Slider } from '@/components/ui/slider';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { text } from 'stream/consumers';
 
-export default function PublicFormPage({ params: {formId} }: { params: { formId: string } }) {
+export default function PublicFormPage({ params: { formId } }: { params: { formId: string } }) {
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
-  const {toast} = useToast();
+  const { toast } = useToast();
   const supabase = createClient();
 
   useEffect(() => {
     async function fetchForm() {
-      const {data: formData, error: formError} = await supabase
+      const { data: formData, error: formError } = await supabase
         .from('forms')
         .select('*, form_fields(*)')
         .eq('id', formId)
@@ -48,7 +49,7 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
         setLoading(false);
         return;
       }
-      
+
       const fetchedForm: Form = {
         id: formData.id,
         title: formData.title,
@@ -69,12 +70,12 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
     setSubmitting(true);
     const formData = new FormData();
     for (const key in formValues) {
-        const value = formValues[key];
-        if (Array.isArray(value)) {
-            value.forEach(item => formData.append(key, item));
-        } else if (value) {
-            formData.append(key, value);
-        }
+      const value = formValues[key];
+      if (Array.isArray(value)) {
+        value.forEach(item => formData.append(key, item));
+      } else if (value) {
+        formData.append(key, value);
+      }
     }
 
     const result = await submitResponse(formId, formData);
@@ -98,15 +99,15 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
 
   const handleValueChange = (fieldId: string, value: any, type: FormField['type']) => {
     setFormValues(prev => {
-        if (type === 'checkbox') {
-            const existing: any[] = prev[fieldId] || [];
-            if (value.checked) {
-                return {...prev, [fieldId]: [...existing, value.value]};
-            } else {
-                return {...prev, [fieldId]: existing.filter(item => item !== value.value)};
-            }
+      if (type === 'checkbox') {
+        const existing: any[] = prev[fieldId] || [];
+        if (value.checked) {
+          return { ...prev, [fieldId]: [...existing, value.value] };
+        } else {
+          return { ...prev, [fieldId]: existing.filter(item => item !== value.value) };
         }
-      return {...prev, [fieldId]: value}
+      }
+      return { ...prev, [fieldId]: value }
     });
   }
 
@@ -156,7 +157,7 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
                     <RadioGroupItem
                       value={opt.value}
                       id={`${id}-${opt.value}`}
-                      
+
                     />
                     <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
                   </div>
@@ -169,7 +170,7 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
                   <div key={opt.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`${id}-${opt.value}`}
-                      onCheckedChange={(checked) => handleValueChange(field.id, {value: opt.value, checked: checked}, field.type)}
+                      onCheckedChange={(checked) => handleValueChange(field.id, { value: opt.value, checked: checked }, field.type)}
                       checked={(formValues[field.id] || []).includes(opt.value)}
                     />
                     <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
@@ -203,82 +204,82 @@ export default function PublicFormPage({ params: {formId} }: { params: { formId:
               />
             ),
             time: (
-                <Input
-                  id={id}
-                  name={field.id}
-                  type="time"
-                  required={field.required}
-                  onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
-                  value={formValues[field.id] || ''}
-                />
+              <Input
+                id={id}
+                name={field.id}
+                type="time"
+                required={field.required}
+                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
+                value={formValues[field.id] || ''}
+              />
             ),
             rating: (
-                <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((value) => (
-                        <Star
-                            key={value}
-                            className={cn(
-                                "h-6 w-6 cursor-pointer",
-                                (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
-                            )}
-                            onClick={() => handleValueChange(field.id, value, field.type)}
-                        />
-                    ))}
-                </div>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <Star
+                    key={value}
+                    className={cn(
+                      "h-6 w-6 cursor-pointer",
+                      (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                    )}
+                    onClick={() => handleValueChange(field.id, value, field.type)}
+                  />
+                ))}
+              </div>
             ),
             slider: (
-                <div className="flex items-center gap-4">
-                    <Slider
-                        id={id}
-                        min={field.properties?.min || 0}
-                        max={field.properties?.max || 100}
-                        step={field.properties?.step || 1}
-                        value={[formValues[field.id] || 50]}
-                        onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
-                        required={field.required}
-                    />
-                    <span className="text-sm font-medium w-12 text-center">{formValues[field.id] || 50}</span>
-                </div>
+              <div className="flex items-center gap-4">
+                <Slider
+                  id={id}
+                  min={field.properties?.min || 0}
+                  max={field.properties?.max || 100}
+                  step={field.properties?.step || 1}
+                  value={[formValues[field.id] || 50]}
+                  onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
+                  required={field.required}
+                />
+                <span className="text-sm font-medium w-12 text-center">{formValues[field.id] || 50}</span>
+              </div>
             )
           }[field.type]
         }
       </div>
     );
   };
-  
+
   if (loading) {
     return (
-        <div className="min-h-screen bg-background">
-          <div className="container mx-auto max-w-2xl py-12 px-4">
-            <div className="bg-card p-8 rounded-lg border shadow-lg space-y-6">
-                <Skeleton className="h-10 w-3/4" />
-                <Skeleton className="h-6 w-full" />
-                <hr />
-                <div className="space-y-8">
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                     <div className="space-y-2">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-20 w-full" />
-                    </div>
-                     <div className="space-y-2">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                </div>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto max-w-2xl py-12 px-4">
+          <div className="bg-card p-8 rounded-lg border shadow-lg space-y-6">
+            <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-6 w-full" />
+            <hr />
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
             </div>
           </div>
         </div>
-      );
+      </div>
+    );
   }
 
   if (error || !form) {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <p className="text-destructive text-lg">{error}</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-destructive text-lg">{error}</p>
+      </div>
     )
   }
 

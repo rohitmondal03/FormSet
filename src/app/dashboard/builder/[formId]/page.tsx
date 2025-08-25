@@ -1,12 +1,12 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {FormBuilderClient} from '@/components/builder/form-builder-client';
-import {createClient} from '@/lib/supabase/client';
-import type {Form} from '@/lib/types';
-import {Skeleton} from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
+import { FormBuilderClient } from '@/components/builder/form-builder-client';
+import { createClient } from '@/lib/supabase/client';
+import type { Form, FormField, FormFieldType } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function FormBuilderPage({params: {formId}}: {params: {formId: string}}) {
+export default function FormBuilderPage({ params: { formId } }: { params: { formId: string } }) {
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export default function FormBuilderPage({params: {formId}}: {params: {formId: st
     }
 
     async function fetchForm() {
-      const {data: form_data, error: form_error} = await supabase
+      const { data: form_data, error: form_error } = await supabase
         .from('forms')
         .select(`*, form_fields (*), form_responses(count)`)
         .eq('id', formId)
@@ -45,7 +45,7 @@ export default function FormBuilderPage({params: {formId}}: {params: {formId: st
         id: form_data.id,
         title: form_data.title,
         description: form_data.description ?? '',
-        fields: form_data.form_fields.sort((a, b) => a.order - b.order),
+        fields: form_data.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
         createdAt: new Date(form_data.created_at),
         responseCount: form_data.form_responses[0]?.count || 0,
         url: `/f/${form_data.id}`,
