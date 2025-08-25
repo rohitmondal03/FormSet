@@ -13,7 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet'; // Assuming you'll use a Sheet for the panel
+} from '@/components/ui/sheet';
 import { Trash2, X } from 'lucide-react';
 
 interface FieldSettingsPanelProps {
@@ -42,13 +42,11 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
     onClose(); // Close the panel after deleting
   };
 
-  // Function to render type-specific settings
   const renderTypeSpecificSettings = (field: FormField) => {
     switch (field.type) {
       case 'radio':
       case 'checkbox':
       case 'select':
-        // Assuming options are stored as an array of strings in field.options
         const options: { value: string; label: string }[] = field.options || [];
         return (
           <div className="space-y-2">
@@ -90,50 +88,79 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
           </div>
         );
       case 'number':
-      case 'rating':
-      case 'slider':
-        // Assuming min/max/step or scale are in field.properties
         return (
-          <div className="space-y-2">
-            <Label>Properties</Label>
-            {/* Implement inputs for min, max, step, or scale */}
-            {/* Example for Number Input min/max */}
-            {field.type === 'number' && (
-              <>
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor={`${field.id}-min`}>Min</Label>
-                  <Input
-                    id={`${field.id}-min`}
-                    type="number"
-                    value={field.properties?.min || ''}
-                    onChange={(e) =>
-                      updateField(field.id, { properties: { ...field.properties, min: parseFloat(e.target.value) } })
-                    }
-                    className="flex-1"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor={`${field.id}-max`}>Max</Label>
-                  <Input
-                    id={`${field.id}-max`}
-                    type="number"
-                    value={field.properties?.max || ''}
-                    onChange={(e) =>
-                      updateField(field.id, { properties: { ...field.properties, max: parseFloat(e.target.value) } })
-                    }
-                    className="flex-1"
-                  />
-                </div>
-              </>
-            )}
-            {/* Implement settings for Rating (scale) and Slider (min, max, step) similarly */}
+          <div className="space-y-4">
+            <Label>Number Range (Optional)</Label>
+            <div className="flex items-center space-x-2">
+                <Input
+                  id={`${field.id}-min`}
+                  type="number"
+                  placeholder='Min'
+                  value={field.properties?.min ?? ''}
+                  onChange={(e) =>
+                    updateField(field.id, { properties: { ...field.properties, min: e.target.value ? parseFloat(e.target.value) : undefined } })
+                  }
+                  className="flex-1"
+                />
+                <Input
+                  id={`${field.id}-max`}
+                  type="number"
+                  placeholder='Max'
+                  value={field.properties?.max ?? ''}
+                  onChange={(e) =>
+                    updateField(field.id, { properties: { ...field.properties, max: e.target.value ? parseFloat(e.target.value) : undefined } })
+                  }
+                  className="flex-1"
+                />
+            </div>
           </div>
         );
+      case 'slider':
+          return (
+            <div className="space-y-4">
+              <Label>Slider Properties</Label>
+              <div className="flex items-center space-x-2">
+                  <Input
+                    type="number"
+                    placeholder='Min'
+                    value={field.properties?.min ?? 0}
+                    onChange={(e) => updateField(field.id, { properties: { ...field.properties, min: parseFloat(e.target.value) } })}
+                  />
+                  <Input
+                    type="number"
+                    placeholder='Max'
+                    value={field.properties?.max ?? 100}
+                    onChange={(e) => updateField(field.id, { properties: { ...field.properties, max: parseFloat(e.target.value) } })}
+                  />
+                  <Input
+                    type="number"
+                    placeholder='Step'
+                    value={field.properties?.step ?? 1}
+                    onChange={(e) => updateField(field.id, { properties: { ...field.properties, step: parseFloat(e.target.value) } })}
+                  />
+              </div>
+            </div>
+          );
       case 'file':
-        // Implement settings for allowed file types, size limit (using field.validation)
-        return <div>File Upload Settings (Validation)</div>;
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={`${field.id}-file-types`}>Accepted File Types</Label>
+            <Input
+              id={`${field.id}-file-types`}
+              name="accept"
+              placeholder="e.g., image/*, .pdf, .docx"
+              value={field.properties?.accept || ''}
+              onChange={(e) =>
+                updateField(field.id, { properties: { ...field.properties, accept: e.target.value } })
+              }
+            />
+             <p className="text-xs text-muted-foreground">
+                Comma-separated list of file types.
+              </p>
+          </div>
+        );
       default:
-        return null; // No type-specific settings for other types
+        return null;
     }
   };
 
@@ -145,7 +172,6 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
           <SheetDescription>Configure the properties and validation for this field.</SheetDescription>
         </SheetHeader>
         <div className="py-4 space-y-6">
-          {/* General Settings */}
           <div className="space-y-2">
             <Label htmlFor="label">Label</Label>
             <Input
@@ -182,22 +208,12 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
             <Label htmlFor="required">Required</Label>
           </div>
 
-          {/* Type-Specific Settings */}
           {renderTypeSpecificSettings(field)}
 
-          {/* Validation Settings (Placeholder) */}
-          <div className="space-y-2">
-            <Label>Validation Rules</Label>
-            {/* Implement inputs to configure Zod validation rules based on field type and `field.validation` */}
-            <div>Validation settings coming soon...</div>
-          </div>
-
-          {/* Delete Button */}
           <Button variant="destructive" onClick={handleDeleteField} className="w-full">
             <Trash2 className="mr-2 h-4 w-4" /> Delete Field
           </Button>
         </div>
-        {/* Close Button */}
         <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={onClose}>
             <X className="h-4 w-4" />
         </Button>

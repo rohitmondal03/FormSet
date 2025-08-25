@@ -22,9 +22,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DatePicker } from '@/components/ui/date-picker';
 import { format } from 'date-fns';
 import { Slider } from '@/components/ui/slider';
-import { Star } from 'lucide-react';
+import { Star, FileUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+<<<<<<< HEAD
 import { text } from 'stream/consumers';
+=======
+import { TimePicker } from '@/components/ui/time-picker';
+>>>>>>> 59df7dd (1. Enhance time time picker component to more attractive UI such as that)
 
 export default function PublicFormPage({ params: { formId } }: { params: { formId: string } }) {
   const [form, setForm] = useState<Form | null>(null);
@@ -34,6 +38,8 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const { toast } = useToast();
   const supabase = createClient();
+  const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
+
 
   useEffect(() => {
     async function fetchForm() {
@@ -68,6 +74,7 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
+<<<<<<< HEAD
     const formData = new FormData();
     for (const key in formValues) {
       const value = formValues[key];
@@ -78,6 +85,10 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
       }
     }
 
+=======
+    const formData = new FormData(e.currentTarget);
+    
+>>>>>>> 59df7dd (1. Enhance time time picker component to more attractive UI such as that)
     const result = await submitResponse(formId, formData);
 
     setSubmitting(false);
@@ -94,6 +105,7 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
         description: 'Thank you for filling out the form!',
       });
       setFormValues({});
+      setFilePreviews({});
     }
   };
 
@@ -110,6 +122,19 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
       return { ...prev, [fieldId]: value }
     });
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldId: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFilePreviews(prev => ({...prev, [fieldId]: file.name}));
+    } else {
+        setFilePreviews(prev => {
+            const newPreviews = {...prev};
+            delete newPreviews[fieldId];
+            return newPreviews;
+        });
+    }
+  };
 
   const renderField = (field: FormField) => {
     const id = `field-${field.id}`;
@@ -148,10 +173,20 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
               />
             ),
             file: (
-              <Input id={id} name={field.id} type="file" required={field.required} />
+                <Label htmlFor={id} className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", filePreviews[field.id] && "border-primary")}>
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <FileUp className="w-8 h-8 mb-4 text-muted-foreground" />
+                        {filePreviews[field.id] ? (
+                            <p className="font-semibold text-primary">{filePreviews[field.id]}</p>
+                        ) : (
+                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                        )}
+                    </div>
+                    <Input id={id} name={field.id} type="file" required={field.required} className="hidden" accept={field.properties?.accept} onChange={(e) => handleFileChange(e, field.id)}/>
+                </Label>
             ),
             radio: (
-              <RadioGroup id={id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value, field.type)} value={formValues[field.id]}>
+              <RadioGroup id={id} name={field.id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value, field.type)} value={formValues[field.id]}>
                 {field.options?.map(opt => (
                   <div key={opt.value} className="flex items-center space-x-2">
                     <RadioGroupItem
@@ -170,7 +205,13 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
                   <div key={opt.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`${id}-${opt.value}`}
+<<<<<<< HEAD
                       onCheckedChange={(checked) => handleValueChange(field.id, { value: opt.value, checked: checked }, field.type)}
+=======
+                      name={field.id}
+                      value={opt.value}
+                      onCheckedChange={(checked) => handleValueChange(field.id, {value: opt.value, checked: checked}, field.type)}
+>>>>>>> 59df7dd (1. Enhance time time picker component to more attractive UI such as that)
                       checked={(formValues[field.id] || []).includes(opt.value)}
                     />
                     <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
@@ -199,11 +240,14 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
                 type="number"
                 placeholder={field.placeholder}
                 required={field.required}
+                min={field.properties?.min}
+                max={field.properties?.max}
                 onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
                 value={formValues[field.id] || ''}
               />
             ),
             time: (
+<<<<<<< HEAD
               <Input
                 id={id}
                 name={field.id}
@@ -240,9 +284,46 @@ export default function PublicFormPage({ params: { formId } }: { params: { formI
                 />
                 <span className="text-sm font-medium w-12 text-center">{formValues[field.id] || 50}</span>
               </div>
+=======
+                <TimePicker
+                  value={formValues[field.id] || ''}
+                  onChange={(value) => handleValueChange(field.id, value, field.type)}
+                />
+            ),
+            rating: (
+                <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                        <Star
+                            key={value}
+                            className={cn(
+                                "h-6 w-6 cursor-pointer",
+                                (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                            )}
+                            onClick={() => handleValueChange(field.id, value, field.type)}
+                        />
+                    ))}
+                    <Input type="hidden" name={field.id} value={formValues[field.id] || 0} />
+                </div>
+            ),
+            slider: (
+                <div className="flex items-center gap-4">
+                    <Slider
+                        id={id}
+                        name={field.id}
+                        min={field.properties?.min || 0}
+                        max={field.properties?.max || 100}
+                        step={field.properties?.step || 1}
+                        value={[formValues[field.id] || 50]}
+                        onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
+                        required={field.required}
+                    />
+                    <span className="text-sm font-medium w-12 text-center">{formValues[field.id] || 50}</span>
+                </div>
+>>>>>>> 59df7dd (1. Enhance time time picker component to more attractive UI such as that)
             )
           }[field.type]
         }
+        {field.properties?.description && <p className="text-sm text-muted-foreground">{field.properties.description}</p>}
       </div>
     );
   };

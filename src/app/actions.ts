@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { createActionClient } from '@/lib/supabase/server';
 import { suggestFormContent } from '@/ai/flows/suggest-form-content';
 import { z } from 'zod';
-import type { Form, Profile } from '@/lib/types';
+import type { Form, FormField, Profile } from '@/lib/types';
 import { loginSchema, signupSchema } from '@/lib/zod/auth';
 
 const suggestionSchema = z.object({
@@ -64,7 +64,7 @@ export async function signup(prevState: any, formData: FormData) {
       data: {
         full_name: validatedFields.data.full_name,
       },
-      emailRedirectTo: `${window.location.origin}/dashboard`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
     },
   });
 
@@ -142,9 +142,9 @@ export async function saveForm(form: Form) {
       const fieldsToInsert = fields.map(field => ({
         ...field,
         form_id: formId,
-        type: field.type, // Ensure type is included
-        validation: field.validation || {}, // Include validation
-        properties: field.properties || {}, // Include properties
+        type: field.type, 
+        validation: field.validation || {},
+        properties: field.properties || {},
       }));
 
       const { error: fieldsError } = await supabase
@@ -152,7 +152,6 @@ export async function saveForm(form: Form) {
         .insert(fieldsToInsert);
       if (fieldsError) {
         console.error('Error saving form fields:', fieldsError);
-        // Optional: delete the form if fields fail to save
         await supabase.from('forms').delete().eq('id', formId);
         throw new Error('Could not save form fields.');
       }
@@ -172,8 +171,6 @@ export async function saveForm(form: Form) {
       throw new Error('Could not update form.');
     }
 
-    // This is a simplified update. A more robust solution would diff fields.
-    // For now, we delete all existing fields and re-insert them.
     const { error: deleteError } = await supabase
       .from('form_fields')
       .delete()
@@ -188,9 +185,9 @@ export async function saveForm(form: Form) {
       const fieldsToInsert = fields.map(field => ({
         ...field,
         form_id: id,
-        type: field.type, // Ensure type is included
-        validation: field.validation || {}, // Include validation
-        properties: field.properties || {}, // Include properties
+        type: field.type,
+        validation: field.validation || {},
+        properties: field.properties || {},
       }));
 
       const { error: insertError } = await supabase
@@ -208,14 +205,61 @@ export async function saveForm(form: Form) {
   }
 }
 
-// This function is no longer used as responses are stored in form_answers
 export async function submitResponse(formId: string, formData: FormData) {
   const supabase = await createActionClient();
+  
+  const { data: formFields, error: fieldsError } = await supabase
+    .from('form_fields')
+    .select('*')
+    .eq('form_id', formId);
 
-  // Insert into form_responses first to get the response_id
+  if (fieldsError) {
+    console.error("Error fetching form fields:", fieldsError);
+    return { error: 'Could not load form details for submission.' };
+  }
+
+  const responseData: Record<string, any> = {};
+  const fileUploadPromises: Promise<any>[] = [];
+
+  for (const field of formFields) {
+    const value = formData.getAll(field.id);
+
+    // Validation for number range
+    if (field.type === 'number') {
+        const numValue = Number(value[0]);
+        const { min, max } = field.properties || {};
+        if (min !== undefined && numValue < min) return { error: `${field.label} must be at least ${min}.` };
+        if (max !== undefined && numValue > max) return { error: `${field.label} must be no more than ${max}.` };
+    }
+
+    if (field.type === 'file') {
+        const file = formData.get(field.id) as File;
+        if (file && file.size > 0) {
+            const filePath = `form_uploads/${formId}/${crypto.randomUUID()}-${file.name}`;
+            const uploadPromise = supabase.storage
+                .from('form-uploads')
+                .upload(filePath, file)
+                .then(({ data, error }) => {
+                    if (error) throw new Error(`File upload failed for ${field.label}: ${error.message}`);
+                    const { data: { publicUrl } } = supabase.storage.from('form-uploads').getPublicUrl(data!.path);
+                    responseData[field.id] = publicUrl;
+                });
+            fileUploadPromises.push(uploadPromise);
+        }
+    } else {
+        responseData[field.id] = value.length === 1 ? value[0] : value;
+    }
+  }
+
+  try {
+      await Promise.all(fileUploadPromises);
+  } catch (error: any) {
+      return { error: error.message };
+  }
+  
   const { data: response, error: responseError } = await supabase
     .from('form_responses')
-    .insert([{ form_id: formId }])
+    .insert([{ form_id: formId, data: responseData }])
     .select('id')
     .single();
 
@@ -223,7 +267,8 @@ export async function submitResponse(formId: string, formData: FormData) {
     console.error('Error creating form response:', responseError);
     return { error: 'There was an error submitting your response.' };
   }
-
+  
+  revalidatePath(`/dashboard/forms/${formId}/responses`);
   return { success: true };
 }
 

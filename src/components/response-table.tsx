@@ -9,6 +9,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import type { Form, FormResponse } from '@/lib/types';
+import { Button } from './ui/button';
+import { ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 
 interface ResponseTableProps {
   form: Form;
@@ -19,6 +22,15 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
   const headers = ['Submitted At', ...form.fields.map((f) => f.label)];
 
   const renderCell = (data: any) => {
+    if (typeof data === 'string' && (data.startsWith('http') || data.startsWith('https:'))) {
+        return (
+            <Button asChild variant="link" className='p-0 h-auto'>
+                <Link href={data} target='_blank' rel='noopener noreferrer'>
+                    View File <ExternalLink className='ml-2 h-4 w-4' />
+                </Link>
+            </Button>
+        )
+    }
     if (Array.isArray(data)) {
       return (
         <div className="flex flex-wrap gap-1">
@@ -46,13 +58,11 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
           {responses.length > 0 ? (
             responses.map((response) => (
               <TableRow key={response.id}>
-                <TableCell>{format(response.submittedAt, 'MMM d, yyyy, h:mm a')}</TableCell>
+                <TableCell>{format(new Date(response.submittedAt), 'MMM d, yyyy, h:mm a')}</TableCell>
                 {form.fields.map((field) => (
-                  response.data[field.id] ? (
-                    <TableCell key={field.id}>{renderCell(response.data[field.id])}</TableCell>
-                  ) : (
-                    <TableCell key={field.id}>-</TableCell>
-                  )
+                  <TableCell key={field.id}>
+                    {response.data[field.id] ? renderCell(response.data[field.id]) : '-'}
+                  </TableCell>
                 ))}
               </TableRow>
             ))
