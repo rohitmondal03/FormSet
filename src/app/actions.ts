@@ -142,7 +142,7 @@ export async function saveForm(form: Form) {
       const fieldsToInsert = fields.map(field => ({
         ...field,
         form_id: formId,
-        type: field.type, 
+        type: field.type,
         validation: field.validation || {},
         properties: field.properties || {},
       }));
@@ -207,7 +207,7 @@ export async function saveForm(form: Form) {
 
 export async function submitResponse(formId: string, formData: FormData) {
   const supabase = await createActionClient();
-  
+
   const { data: formFields, error: fieldsError } = await supabase
     .from('form_fields')
     .select('*')
@@ -226,37 +226,37 @@ export async function submitResponse(formId: string, formData: FormData) {
 
     // Validation for number range
     if (field.type === 'number') {
-        const numValue = Number(value[0]);
-        const { min, max } = field.properties || {};
-        if (min !== undefined && numValue < min) return { error: `${field.label} must be at least ${min}.` };
-        if (max !== undefined && numValue > max) return { error: `${field.label} must be no more than ${max}.` };
+      const numValue = Number(value[0]);
+      const { min, max } = field.properties || {};
+      if (min !== undefined && numValue < min) return { error: `${field.label} must be at least ${min}.` };
+      if (max !== undefined && numValue > max) return { error: `${field.label} must be no more than ${max}.` };
     }
 
     if (field.type === 'file') {
-        const file = formData.get(field.id) as File;
-        if (file && file.size > 0) {
-            const filePath = `form_uploads/${formId}/${crypto.randomUUID()}-${file.name}`;
-            const uploadPromise = supabase.storage
-                .from('form-uploads')
-                .upload(filePath, file)
-                .then(({ data, error }) => {
-                    if (error) throw new Error(`File upload failed for ${field.label}: ${error.message}`);
-                    const { data: { publicUrl } } = supabase.storage.from('form-uploads').getPublicUrl(data!.path);
-                    responseData[field.id] = publicUrl;
-                });
-            fileUploadPromises.push(uploadPromise);
-        }
+      const file = formData.get(field.id) as File;
+      if (file && file.size > 0) {
+        const filePath = `form_uploads/${formId}/${crypto.randomUUID()}-${file.name}`;
+        const uploadPromise = supabase.storage
+          .from('form-uploads')
+          .upload(filePath, file)
+          .then(({ data, error }) => {
+            if (error) throw new Error(`File upload failed for ${field.label}: ${error.message}`);
+            const { data: { publicUrl } } = supabase.storage.from('form-uploads').getPublicUrl(data!.path);
+            responseData[field.id] = publicUrl;
+          });
+        fileUploadPromises.push(uploadPromise);
+      }
     } else {
-        responseData[field.id] = value.length === 1 ? value[0] : value;
+      responseData[field.id] = value.length === 1 ? value[0] : value;
     }
   }
 
   try {
-      await Promise.all(fileUploadPromises);
+    await Promise.all(fileUploadPromises);
   } catch (error: any) {
-      return { error: error.message };
+    return { error: error.message };
   }
-  
+
   const { data: response, error: responseError } = await supabase
     .from('form_responses')
     .insert([{ form_id: formId, data: responseData }])
@@ -267,7 +267,7 @@ export async function submitResponse(formId: string, formData: FormData) {
     console.error('Error creating form response:', responseError);
     return { error: 'There was an error submitting your response.' };
   }
-  
+
   revalidatePath(`/dashboard/forms/${formId}/responses`);
   return { success: true };
 }

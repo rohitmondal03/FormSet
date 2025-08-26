@@ -3,7 +3,6 @@ export type FormFieldType =
   | 'text'
   | 'paragraph'
   | 'number'
-  | 'time'
   | 'textarea'
   | 'radio'
   | 'checkbox'

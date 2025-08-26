@@ -2,39 +2,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  CaseSensitive,
-  CheckSquare,
-  ChevronDownSquare,
-  CircleDot,
-  FileUp,
-  CalendarDays,
-  Hash,
-  Clock,
-  Star,
-  SlidersHorizontal,
-  Heading1,
-} from 'lucide-react';
 import type { FormFieldType } from '@/lib/types';
+import { fieldTypes } from '@/lib/helpers';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface FieldPaletteProps {
   onAddField: (type: FormFieldType) => void;
 }
-
-const fieldTypes: { type: FormFieldType; label: string; icon: React.ReactNode }[] = [
-  { type: 'text', label: 'Text Input', icon: <CaseSensitive className="h-4 w-4" /> },
-  { type: 'textarea', label: 'Paragraph', icon: <Heading1 className="h-4 w-4" /> },
-  { type: 'radio', label: 'Multiple Choice', icon: <CircleDot className="h-4 w-4" /> },
-  { type: 'checkbox', label: 'Checkboxes', icon: <CheckSquare className="h-4 w-4" /> },
-  { type: 'select', label: 'Dropdown', icon: <ChevronDownSquare className="h-4 w-4" /> },
-  { type: 'date', label: 'Date Picker', icon: <CalendarDays className="h-4 w-4" /> },
-  { type: 'file', label: 'File Upload', icon: <FileUp className="h-4 w-4" /> },
-  { type: 'number', label: 'Number', icon: <Hash className="h-4 w-4" /> },
-  { type: 'time', label: 'Time', icon: <Clock className="h-4 w-4" /> },
-  { type: 'rating', label: 'Rating', icon: <Star className="h-4 w-4" /> },
-  { type: 'slider', label: 'Slider', icon: <SlidersHorizontal className="h-4 w-4" /> },
-];
 
 export function FieldPalette({ onAddField }: FieldPaletteProps) {
   return (
@@ -44,14 +18,14 @@ export function FieldPalette({ onAddField }: FieldPaletteProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-2">
-          {fieldTypes.map(({ type, label, icon }) => (
+          {fieldTypes.map(({ type, label, Icon }) => (
             <Button
               key={type}
               variant="outline"
               className="flex flex-col h-20 items-center justify-center text-center p-2"
               onClick={() => onAddField(type)}
             >
-              {icon}
+              {<Icon className="size-4" />}
               <span className="text-xs mt-1">{label}</span>
             </Button>
           ))}

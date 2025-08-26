@@ -41,7 +41,7 @@ export function FormCanvas({ fields, updateField, removeField }: FormCanvasProps
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
       <SortableContext items={fields.map(field => field.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {fields.map((field) => (
             <FormFieldWrapper
               key={field.id}

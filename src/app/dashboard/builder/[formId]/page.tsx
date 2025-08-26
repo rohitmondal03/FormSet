@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { FormBuilderClient } from '@/components/builder/form-builder-client';
 import { createClient } from '@/lib/supabase/client';
-import type { Form, FormField, FormFieldType } from '@/lib/types';
+import type { Form, FormField } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function FormBuilderPage({ params: { formId } }: { params: { formId: string } }) {

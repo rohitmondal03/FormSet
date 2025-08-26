@@ -41,9 +41,9 @@ export function TimePicker({ value, onChange, disabled }: TimePickerProps) {
   return (
     <div className="flex items-center gap-2">
       <div className="grid gap-1 text-center">
-        <Label htmlFor="hours" className="text-xs">
+        {/* <Label htmlFor="hours" className="text-xs">
           Hour
-        </Label>
+        </Label> */}
         <Select
           onValueChange={setHour}
           defaultValue={hour}
@@ -66,9 +66,9 @@ export function TimePicker({ value, onChange, disabled }: TimePickerProps) {
       </div>
       <span className="font-bold">:</span>
       <div className="grid gap-1 text-center">
-        <Label htmlFor="minutes" className="text-xs">
+        {/* <Label htmlFor="minutes" className="text-xs">
           Minute
-        </Label>
+        </Label> */}
         <Select
           onValueChange={setMinute}
           defaultValue={minute}

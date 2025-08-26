@@ -1,11 +1,5 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { MainSidebar } from '@/components/main-sidebar';
-import { Header } from '@/components/header';
 import SupabaseListener from '@/components/supabase-listener';
 import ClientLayout from './client-layout';
 

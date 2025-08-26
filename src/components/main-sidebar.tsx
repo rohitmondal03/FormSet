@@ -30,7 +30,7 @@ export function MainSidebar() {
   };
 
   return (
-    <Sidebar variant='floating'>
+    <Sidebar variant='sidebar'>
       <SidebarHeader className='mb-4'>
         <Logo />
       </SidebarHeader>
@@ -47,7 +47,7 @@ export function MainSidebar() {
         </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild active={isActive('/dashboard')}>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
               <Link href="/dashboard" className='flex items-center justify-center py-4 text-sm font-medium text-gray-900 rounded-lg hover:bg-gray-100'>
                 <Home />
                 <span>My Forms</span>
