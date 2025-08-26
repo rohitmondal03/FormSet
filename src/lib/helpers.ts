@@ -1,3 +1,4 @@
+import type { FormFieldType } from '@/lib/types';
 import {
   CaseSensitive,
   CheckSquare,
@@ -6,13 +7,12 @@ import {
   FileUp,
   CalendarDays,
   Hash,
-  Clock,
   Star,
   SlidersHorizontal,
   Heading1,
   type LucideIcon
 } from 'lucide-react';
-import type { FormFieldType } from '@/lib/types';
+import { toast } from '@/hooks/use-toast';
 
 export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon }[] = [
   { type: 'text', label: 'Text Input', Icon: CaseSensitive },
@@ -26,3 +26,7 @@ export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon 
   { type: 'rating', label: 'Rating', Icon: Star },
   { type: 'slider', label: 'Slider', Icon: SlidersHorizontal },
 ];
+
+export const copyText = (linkToOpen: string) => {
+  navigator.clipboard.writeText(linkToOpen);
+};
