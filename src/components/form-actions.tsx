@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { MoreHorizontal, BarChart, Edit, Share2, Trash2, Link2 } from 'lucide-react';
 import { deleteForm } from '@/app/actions';
-import { copyText } from '@/lib/helpers';
+import { copyText } from '@/lib/form-utils';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,

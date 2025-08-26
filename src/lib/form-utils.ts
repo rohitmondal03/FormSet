@@ -27,6 +27,7 @@ export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon 
   { type: 'slider', label: 'Slider', Icon: SlidersHorizontal },
 ];
 
+
 export const copyText = (linkToOpen: string) => {
   navigator.clipboard.writeText(linkToOpen);
 };

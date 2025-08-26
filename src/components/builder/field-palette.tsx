@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import type { FormFieldType } from '@/lib/types';
-import { fieldTypes } from '@/lib/helpers';
+import { fieldTypes } from '@/lib/form-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface FieldPaletteProps {
