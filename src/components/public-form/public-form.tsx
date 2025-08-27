@@ -81,20 +81,20 @@ export function PublicForm({ formId }: PublicFormProps) {
 
     setSubmitting(false);
 
-    // if (result.error) {
-    //   toast({
-    //     title: 'Error',
-    //     description: result.error,
-    //     variant: 'destructive',
-    //   });
-    // } else {
-    //   toast({
-    //     title: 'Response Submitted',
-    //     description: 'Thank you for filling out the form!',
-    //   });
-    //   setFormValues({});
-    //   setFilePreviews({});
-    // }
+    if (result.error) {
+      toast({
+        title: 'Error',
+        description: result.error,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Response Submitted',
+        description: 'Thank you for filling out the form!',
+      });
+      setFormValues({});
+      setFilePreviews({});
+    }
   };
 
   const handleValueChange = useCallback((fieldId: string, value: any, type: FormField['type']) => {
@@ -118,7 +118,7 @@ export function PublicForm({ formId }: PublicFormProps) {
     } else {
       setFilePreviews(prev => {
         const newPreviews = { ...prev };
-        delete newPreviews[fieldId];
+        delete newPreviews[field.id];
         return newPreviews;
       });
     }
