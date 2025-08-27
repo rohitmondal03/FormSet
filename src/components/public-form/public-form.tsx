@@ -20,27 +20,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { submitResponse } from '@/app/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DatePicker } from '@/components/ui/date-picker';
-import { TimePicker } from '@/components/ui/time-picker';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
+import { useToast } from '@/hooks/use-toast';
 
 interface PublicFormProps {
   formId: string;
 }
 
 export function PublicForm({ formId }: PublicFormProps) {
+  const { toast } = useToast();
+
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
-  const { toast } = useToast();
-  const supabase = createClient();
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
+  
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchForm() {
@@ -81,20 +82,20 @@ export function PublicForm({ formId }: PublicFormProps) {
 
     setSubmitting(false);
 
-    // if (result.error) {
-    //   toast({
-    //     title: 'Error',
-    //     description: result.error,
-    //     variant: 'destructive',
-    //   });
-    // } else {
-    //   toast({
-    //     title: 'Response Submitted',
-    //     description: 'Thank you for filling out the form!',
-    //   });
-    //   setFormValues({});
-    //   setFilePreviews({});
-    // }
+    if (result.error) {
+      toast({
+        title: 'Error',
+        description: result.error,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Response Submitted',
+        description: 'Thank you for filling out the form!',
+      });
+      setFormValues({});
+      setFilePreviews({});
+    }
   };
 
   const handleValueChange = useCallback((fieldId: string, value: any, type: FormField['type']) => {

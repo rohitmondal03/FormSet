@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { FieldPalette } from './field-palette';
 import { FormCanvas } from './form-canvas';
 import { AISuggester } from './ai-suggester';
-import { Save, Eye, Share2 } from 'lucide-react';
+import { Save, Eye, Share2, CopyIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveForm } from '@/app/actions';
 import { Textarea } from '../ui/textarea';
@@ -113,7 +113,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
               <a href={`/f/${existingForm.id}`} target='_blank'><Eye className="mr-2 h-4 w-4" /> Preview</a>
             </Button>
             <Button variant="outline" size="sm" onClick={handleShare}>
-              <Share2 className="mr-2 h-4 w-4" /> Share
+              <CopyIcon className="mr-2 h-4 w-4" /> Copy Link
             </Button>
             <Button size="sm" onClick={handleSave} disabled={isSaving}>
               <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save'}
