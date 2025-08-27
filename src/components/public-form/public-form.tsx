@@ -118,7 +118,7 @@ export function PublicForm({ formId }: PublicFormProps) {
     } else {
       setFilePreviews(prev => {
         const newPreviews = { ...prev };
-        delete newPreviews[field.id];
+        delete newPreviews[fieldId];
         return newPreviews;
       });
     }
