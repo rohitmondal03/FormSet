@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2, PlusCircle, FileUp, Star, Clock } from 'lucide-react';
+import { Trash2, PlusCircle, FileUp, Star } from 'lucide-react';
 import type { FormField } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -81,7 +81,7 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
           </div>
         );
       case 'number':
-        return <Input type="number" placeholder={field.placeholder || ""} disabled />;
+        return <Input type="number" placeholder={field.placeholder || `${field.type.toUpperCase()}`} disabled />;
       case 'rating':
         return (
           <div className="flex items-center gap-1">
@@ -105,8 +105,8 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
             <Input
               value={field.label}
               onChange={(e) => onUpdate(field.id, { label: e.target.value })}
-              className="text-base font-medium border border-zinc-600 shadow-none focus-visible:ring-1 focus-visible:ring-ring p-5"
               placeholder="Your question here"
+              className='text-sm'
             />
 
             {renderFieldPreview()}

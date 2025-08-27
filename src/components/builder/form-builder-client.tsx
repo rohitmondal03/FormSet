@@ -3,11 +3,11 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import type { Form, FormField } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { FieldPalette } from './field-palette';
 import { FormCanvas } from './form-canvas';
 import { AISuggester } from './ai-suggester';
-import type { Form, FormField } from '@/lib/types';
 import { Save, Eye, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveForm } from '@/app/actions';
@@ -21,7 +21,7 @@ interface FormBuilderClientProps {
 
 export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
   const router = useRouter();
-  const { toast } = useToast();
+  const { toast } = useToast();  
   const [title, setTitle] = useState(existingForm.title);
   const [description, setDescription] = useState(existingForm.description);
   const [fields, setFields] = useState<FormField[]>(existingForm.fields);
@@ -58,8 +58,6 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
       description,
       fields: fields.map((f, index) => ({ ...f, order: index })),
     };
-
-    console.log(formToSave);
 
     try {
       const { formId } = await saveForm(formToSave);

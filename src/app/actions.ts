@@ -74,7 +74,6 @@ export async function signup(prevState: any, formData: FormData) {
     };
   }
 
-  revalidatePath('/', 'layout');
   revalidatePath('/dashboard');
   redirect('/dashboard');
 }

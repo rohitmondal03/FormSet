@@ -12,7 +12,6 @@ import {
   Heading1,
   type LucideIcon
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon }[] = [
   { type: 'text', label: 'Text Input', Icon: CaseSensitive },

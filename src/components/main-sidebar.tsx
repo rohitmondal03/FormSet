@@ -1,8 +1,8 @@
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Home, Settings, LifeBuoy, FilePlus } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +13,6 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from './ui/button';
-import { Home, Settings, LifeBuoy, FilePlus } from 'lucide-react';
 
 const Logo = () => (
   <div className="flex items-center gap-2">
@@ -39,7 +38,7 @@ export function MainSidebar() {
           <SidebarMenuItem>
             <Link href="/dashboard/builder/new">
               <Button className="w-full">
-                <FilePlus className="mr-2 h-4 w-4" />
+                <FilePlus className="mr-2 size-4" />
                 Create Form
               </Button>
             </Link>
@@ -47,12 +46,12 @@ export function MainSidebar() {
         </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
-              <Link href="/dashboard" className='flex items-center justify-center py-4 text-sm font-medium text-gray-900 rounded-lg hover:bg-gray-100'>
-                <Home />
-                <span>My Forms</span>
-              </Link>
-            </SidebarMenuButton>
+            <Link href="/dashboard">
+              <Button className="w-full" variant={"secondary"}>
+                <Home className="mr-2 size-4" />
+                My Forms
+              </Button>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
