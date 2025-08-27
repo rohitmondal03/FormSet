@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import React from 'react'
 import { createClient } from "@/lib/supabase/server"
 
-interface FormBuilderLayoutProps {
+interface PublicFormLayoutProps {
   children: React.ReactNode;
 }
 
@@ -28,14 +28,14 @@ export async function generateMetadata({ params }: MetadataProps): Promise<Metad
   }
 
   return {
-    title: `${data?.title} | Create Form`,
+    title: data?.title,
   };
 }
 
-function FormBuilderLayout({ children }: FormBuilderLayoutProps) {
+function PublicFormLayout({ children }: PublicFormLayoutProps) {
   return (
     <>{children}</>
   )
 }
 
-export default FormBuilderLayout;
+export default PublicFormLayout;

@@ -40,7 +40,7 @@ export function PublicForm({ formId }: PublicFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
-  
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export function PublicForm({ formId }: PublicFormProps) {
     return (
       <div key={field.id} className="space-y-2">
         <Label className='text-zinc-400' htmlFor={id}>
-          {field.label}
+          {field.order + 1}. {field.label}
           {field.required && <span className="text-red-600"> *</span>}
         </Label>
         {
@@ -313,7 +313,7 @@ export function PublicForm({ formId }: PublicFormProps) {
           <header className=" pb-4 space-y-5">
             <h1 className="text-3xl font-bold">{form.title}</h1>
             <p className="text-muted-foreground">{form.description}</p>
-            <p className='italic text-zinc-400 text-sm'>&#40;<span className='text-red-500'>*</span> are required'&#41;</p>
+            <p className='italic text-zinc-400 text-sm'>&#40;<span className='text-red-500'>*</span> are required&#41;</p>
           </header>
           <Separator className='bg-zinc-400' />
           <form onSubmit={handleSubmit} className="space-y-12">

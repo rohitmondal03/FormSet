@@ -1,8 +1,13 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { LogOut, Settings, User as UserIcon, Upload, FileUp } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
+import { logout, updateProfile } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
+import type { Profile } from '@/lib/types';
+import { Skeleton } from './ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,15 +27,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { LogOut, Settings, User as UserIcon, Upload, FileUp } from 'lucide-react';
-import { logout, updateProfile } from '@/app/actions';
-import { createClient } from '@/lib/supabase/client';
-import { Skeleton } from './ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import type { Profile } from '@/lib/types';
-import Image from 'next/image';
+import { ProfileDialog } from './user-nav/profile-dialog';
+import { SettingDialog } from './user-nav/setting-dialog';
 
 export function UserNav() {
   const supabase = createClient();
@@ -41,7 +39,7 @@ export function UserNav() {
   const [loading, setLoading] = useState(true);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -103,7 +101,6 @@ export function UserNav() {
     }
   };
 
-
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
@@ -129,7 +126,7 @@ export function UserNav() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => { setProfileOpen(true); setAvatarPreview(null); }}>
+          <DropdownMenuItem onSelect={() => { setProfileOpen(true); setAvatarPreview(undefined); }}>
             <UserIcon className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem>
@@ -147,66 +144,21 @@ export function UserNav() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={isProfileOpen} onOpenChange={setProfileOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <form ref={formRef} onSubmit={handleProfileSave} className="space-y-4 py-4">
-            <div className="flex flex-col items-center gap-4">
-              <Label htmlFor='avatar' className='cursor-pointer'>
-                <div className="size-32 p-1 rounded-full border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors relative">
-                  {avatarPreview || profile?.avatar_url ? (
-                    <Avatar className="size-fit">
-                      <AvatarImage src={profile?.avatar_url || ''} alt={user?.email || '@user'} />
-                      <AvatarFallback>{getInitials(profile?.full_name, user?.email || '')}</AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <div className='text-center'>
-                      <FileUp className="w-8 h-8 mx-auto" />
-                      <span>Upload</span>
-                    </div>
-                  )}
-                </div>
-              </Label>
-              <Input id="avatar" name="avatar" type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" defaultValue={user?.email} readOnly className="bg-muted" disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                name="fullName"
-                defaultValue={profile?.full_name || ''}
-              />
-            </div>
-            <DialogFooter>
-              <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-              <Button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save changes"}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ProfileDialog 
+        isProfileOpen={isProfileOpen}
+        isSaving={isSaving}
+        formRef={formRef}
+        avatarPreview={avatarPreview}
+        profileAvatarURL={profile?.avatar_url}
+        avatarFallback={getInitials(profile?.full_name, user?.email || '')}
+        fullName={profile?.full_name || ''}
+        email={user?.email || ''}
+        setProfileOpen={setProfileOpen}
+        handleProfileSave={handleProfileSave}
+        handleAvatarChange={handleAvatarChange}
+      />
 
-      <Dialog open={isSettingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>
-              Settings page is under construction.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
     </>
   );
 }
