@@ -8,6 +8,7 @@ import { z } from 'zod';
 import type { Form, FormField } from '@/lib/types';
 import { loginSchema, signupSchema } from '@/lib/zod/auth';
 import { generateCsv, generateDocx, generatePdf, generateXlsx } from '@/lib/export-utils';
+import { createClient } from '@supabase/supabase-js';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
@@ -434,12 +435,24 @@ export async function deleteAccount() {
     return { error: 'You must be logged in to delete your account.' };
   }
 
-  // Call the RPC function to delete all user data and the user itself
-  const { error } = await supabase.rpc('delete_user_account');
+  // The service_role key has super admin rights and can be used to disable RLS
+  // We need this to delete the user from the auth.users table
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
 
-  if (error) {
-    console.error('Error deleting account:', error);
-    return { error: 'Failed to delete your account. Please try again.' };
+  const { error: deletionError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+
+  if (deletionError) {
+    console.error('Error deleting user:', deletionError);
+    return { error: 'Failed to delete your account. Please contact support.' };
   }
 
   // Sign out the user locally
@@ -448,3 +461,5 @@ export async function deleteAccount() {
   revalidatePath('/', 'layout');
   redirect('/login');
 }
+
+    
