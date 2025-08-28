@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from './ui/button';
 import { useUserNav } from './user-nav';
-import { SettingDialog } from './user-nav/setting-dialog';
 
 const Logo = () => (
   <div className="flex items-center gap-2">
