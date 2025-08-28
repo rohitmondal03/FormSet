@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { Home, Settings, LifeBuoy, FilePlus } from 'lucide-react';
 import {
   Sidebar,
@@ -13,6 +13,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from './ui/button';
+import { SettingDialog } from './user-nav/setting-dialog';
 
 const Logo = () => (
   <div className="flex items-center gap-2">
@@ -22,59 +23,57 @@ const Logo = () => (
 );
 
 export function MainSidebar() {
-  const pathname = usePathname();
-
-  const isActive = (path: string) => {
-    return pathname === path || (path !== '/dashboard' && pathname.startsWith(path));
-  };
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
 
   return (
-    <Sidebar variant='sidebar'>
-      <SidebarHeader className='mb-4'>
-        <Logo />
-      </SidebarHeader>
-      <SidebarContent className='px-2'>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Link href="/dashboard/builder/new">
-              <Button className="w-full">
-                <FilePlus className="mr-2 size-4" />
-                Create Form
-              </Button>
-            </Link>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <Link href="/dashboard">
-              <Button className="w-full" variant={"secondary"}>
-                <Home className="mr-2 size-4" />
-                My Forms
-              </Button>
-            </Link>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="#">
-                <LifeBuoy />
-                <span>Help</span>
+    <div>
+      <Sidebar variant='sidebar'>
+        <SidebarHeader className='mb-4'>
+          <Logo />
+        </SidebarHeader>
+        <SidebarContent className='px-2'>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="/dashboard/builder/new">
+                <Button className="w-full">
+                  <FilePlus className="mr-2 size-4" />
+                  Create Form
+                </Button>
               </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="#">
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link href="/dashboard">
+                <Button className="w-full" variant={"secondary"}>
+                  <Home className="mr-2 size-4" />
+                  My Forms
+                </Button>
+              </Link>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="#">
+                  <LifeBuoy />
+                  <span>Help</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={() => setIsSettingsDialogOpen(true)}>
                 <Settings />
                 <span>Settings</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+
+      <SettingDialog isSettingsOpen={isSettingsDialogOpen} setSettingsOpen={setIsSettingsDialogOpen} />
+    </div>
   );
 }
