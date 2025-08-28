@@ -1,8 +1,8 @@
 
 import { Parser } from 'json2csv';
 import ExcelJS from 'exceljs';
-import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel } from 'docx';
-const PDFDocument = require('pdfkit-table');
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, WidthType } from 'docx';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { Form, FormResponse } from './types';
 
 function prepareDataForExport(form: Form, responses: FormResponse[]) {
@@ -50,12 +50,20 @@ export async function generateDocx(form: Form, responses: FormResponse[]): Promi
   const tableHeader = new TableRow({
     children: headers.map(header => new TableCell({
       children: [new Paragraph({ children: [new TextRun({ text: header, bold: true })] })],
+      width: {
+        size: 100 / headers.length,
+        type: WidthType.PERCENTAGE,
+      },
     })),
   });
 
   const tableRows = data.map(row => new TableRow({
     children: headers.map(header => new TableCell({
       children: [new Paragraph(String(row[header] ?? ''))],
+      width: {
+        size: 100 / headers.length,
+        type: WidthType.PERCENTAGE,
+      },
     })),
   }));
 
@@ -69,7 +77,7 @@ export async function generateDocx(form: Form, responses: FormResponse[]): Promi
           rows: [tableHeader, ...tableRows],
           width: {
             size: 100,
-            type: 'pct',
+            type: WidthType.PERCENTAGE,
           },
         }),
       ],
@@ -84,33 +92,74 @@ export async function generateDocx(form: Form, responses: FormResponse[]): Promi
 export async function generatePdf(form: Form, responses: FormResponse[]): Promise<string> {
   const { headers, data } = prepareDataForExport(form, responses);
 
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 30, size: 'A4' });
-    const buffers: Buffer[] = [];
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage();
+  const { width, height } = page.getSize();
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {
-      const pdfData = Buffer.concat(buffers).toString('base64');
-      resolve(pdfData);
-    });
-    doc.on('error', (err) => {
-        reject(err)
-    });
+  const fontSize = 10;
+  const margin = 50;
+  let y = height - margin;
 
-    doc.fontSize(20).text(form.title, { align: 'center' });
-    doc.moveDown();
-
-    const table = {
-      title: "Responses",
-      headers: headers,
-      rows: data.map(row => headers.map(header => String(row[header] ?? ''))),
-    };
-
-    doc.table(table, {
-        prepareHeader: () => doc.font('Helvetica-Bold').fontSize(8),
-        prepareRow: () => doc.font('Helvetica').fontSize(8),
-    });
-
-    doc.end();
+  // Title
+  page.drawText(form.title, {
+    x: margin,
+    y,
+    font: boldFont,
+    size: 24,
+    color: rgb(0, 0, 0),
   });
+  y -= 40;
+
+  // Table rendering
+  const tableTop = y;
+  const tableLeft = margin;
+  const rowHeight = 20;
+  const colWidth = (width - 2 * margin) / headers.length;
+
+  // Draw header
+  headers.forEach((header, i) => {
+    page.drawText(header, {
+      x: tableLeft + i * colWidth + 5,
+      y: y - 15,
+      font: boldFont,
+      size: fontSize,
+    });
+  });
+  y -= rowHeight;
+  page.drawLine({
+    start: { x: margin, y: y + 5 },
+    end: { x: width - margin, y: y + 5 },
+    thickness: 1,
+  });
+
+  // Draw rows
+  data.forEach((row, rowIndex) => {
+    if (y < margin + rowHeight) {
+        // Add new page if content overflows
+        const newPage = pdfDoc.addPage();
+        y = newPage.getSize().height - margin;
+    }
+    y -= rowHeight;
+    headers.forEach((header, colIndex) => {
+      const cellText = String(row[header] ?? '');
+      newPage.drawText(cellText, {
+        x: tableLeft + colIndex * colWidth + 5,
+        y: y,
+        font: font,
+        size: fontSize,
+        maxWidth: colWidth - 10,
+      });
+    });
+    newPage.drawLine({
+        start: { x: margin, y: y - 5 },
+        end: { x: width - margin, y: y - 5 },
+        thickness: 0.5,
+        color: rgb(0.8, 0.8, 0.8)
+    });
+  });
+
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes).toString('base64');
 }
