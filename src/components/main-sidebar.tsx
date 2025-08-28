@@ -6,12 +6,15 @@ import { Home, Settings, LifeBuoy, FilePlus } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Button } from './ui/button';
 import { useUserNav } from './user-nav';
+import { SettingDialog } from './user-nav/setting-dialog';
 
 const Logo = () => (
   <div className="flex items-center gap-2">
@@ -53,18 +56,18 @@ export function MainSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-             <Link href="#">
-               <Button variant="ghost" className='w-full justify-start'>
+            <Link href="#">
+              <SidebarMenuButton className='w-full justify-start'>
                 <LifeBuoy className="mr-2 size-4" />
                 Help
-              </Button>
-             </Link>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <Button variant="ghost" className='w-full justify-start' onClick={() => setSettingsOpen(true)}>
+            <SidebarMenuButton className='w-full justify-start' onClick={() => setSettingsOpen(true)}>
               <Settings className="mr-2 size-4" />
               Settings
-            </Button>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

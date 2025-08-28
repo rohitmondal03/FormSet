@@ -25,6 +25,7 @@ import { SettingDialog } from './user-nav/setting-dialog';
 
 interface UserNavContextType {
   setSettingsOpen: (open: boolean) => void;
+  isSettingsOpen: boolean;
 }
 
 const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
@@ -37,11 +38,11 @@ export const useUserNav = () => {
   return context;
 };
 
-const UserNavProvider = ({ children }: { children: React.ReactNode }) => {
+export const UserNavProvider = ({ children }: { children: React.ReactNode }) => {
   const [isSettingsOpen, setSettingsOpen] = useState(false);
-  
+
   return (
-    <UserNavContext.Provider value={{ setSettingsOpen }}>
+    <UserNavContext.Provider value={{ setSettingsOpen, isSettingsOpen }}>
       {children}
       <ActualUserNav />
     </UserNavContext.Provider>
@@ -122,7 +123,7 @@ function ActualUserNav() {
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
-  
+
   return (
     <>
       <DropdownMenu>
@@ -162,7 +163,7 @@ function ActualUserNav() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ProfileDialog 
+      <ProfileDialog
         isProfileOpen={isProfileOpen}
         isSaving={isSaving}
         formRef={formRef}
@@ -179,13 +180,12 @@ function ActualUserNav() {
   );
 }
 
-
 export function UserNav() {
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   return (
-    <UserNavContext.Provider value={{setSettingsOpen}}>
-        <ActualUserNav/>
-        <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
+    <UserNavContext.Provider value={{ setSettingsOpen, isSettingsOpen }}>
+      <ActualUserNav />
+      <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
     </UserNavContext.Provider>
   )
 }

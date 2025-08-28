@@ -1,4 +1,0 @@
--- This migration is now empty as the RPC function is no longer needed.
--- The user deletion logic is handled by the `deleteAccount` server action
--- which calls the Supabase admin API to delete the user, and the database
--- schema's "ON DELETE CASCADE" handles cleaning up related data.
