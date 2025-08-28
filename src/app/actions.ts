@@ -461,5 +461,3 @@ export async function deleteAccount() {
   revalidatePath('/', 'layout');
   redirect('/login');
 }
-
-    
