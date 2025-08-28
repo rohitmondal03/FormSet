@@ -282,6 +282,18 @@ export async function deleteForm(formId: string) {
     throw new Error('You must be logged in to delete a form.');
   }
 
+  // First, delete all responses associated with the form.
+  const { error: responseError } = await supabase
+    .from('form_responses')
+    .delete()
+    .eq('form_id', formId);
+
+  if (responseError) {
+    console.error('Error deleting form responses:', responseError);
+    return { error: 'Failed to delete form responses.' };
+  }
+
+
   const { error } = await supabase
     .from('forms')
     .delete()
