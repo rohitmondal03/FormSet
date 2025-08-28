@@ -73,34 +73,31 @@ export function FormActions({ formId }: { formId: string }) {
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>
             <DropdownMenuItem
-              className="w-full text-destructive focus:bg-destructive/10 focus:text-destructive"
+              className="w-full text-destructive focus:bg-destructive"
               onSelect={(e) => e.preventDefault()} // Prevent DropdownMenu from closing
             >
               <Trash2 className="mr-2 size-4" />
               <span>Delete</span>
             </DropdownMenuItem>
           </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this form and all of its associated responses.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <form action={async () => { await deleteForm(formId) }}>
+                <Button type="submit" variant="destructive">
+                  Delete Form
+                </Button>
+              </form>
+            </AlertDialogFooter>
+          </AlertDialogContent>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this form and all of its associated responses.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <form action={deleteForm.bind(null, formId)}>
-            <AlertDialogAction asChild>
-              <Button type="submit" variant="destructive">
-                Delete
-              </Button>
-            </AlertDialogAction>
-          </form>
-        </AlertDialogFooter>
-      </AlertDialogContent>
     </AlertDialog>
   );
 }

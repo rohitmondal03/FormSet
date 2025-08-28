@@ -393,7 +393,7 @@ export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | '
     title: formData.title,
     description: formData.description ?? '',
     createdAt: new Date(formData.created_at),
-    fields: formData.form_fields.sort((a, b) => a.order - b.order),
+    fields: formData.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
     responseCount: responsesData.length,
     url: `/f/${formData.id}`
   };
