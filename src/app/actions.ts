@@ -8,6 +8,7 @@ import { suggestFormContent } from '@/ai/flows/suggest-form-content';
 import { z } from 'zod';
 import type { Form, FormField, Profile } from '@/lib/types';
 import { loginSchema, signupSchema } from '@/lib/zod/auth';
+import { generateCsv, generateDocx, generatePdf, generateXlsx } from '@/lib/export-utils';
 
 const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
@@ -343,4 +344,73 @@ export async function updateProfile(formData: FormData) {
 
   revalidatePath('/', 'layout');
   return { success: true };
+}
+
+export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | 'pdf' | 'docx') {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('You must be logged in to export responses.');
+  }
+
+  const { data: formData, error: formError } = await supabase
+    .from('forms')
+    .select('*, form_fields(*)')
+    .eq('id', formId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (formError || !formData) {
+    console.error("Error fetching form:", formError);
+    throw new Error("Form not found or you don't have permission to access it.");
+  }
+
+  const { data: responsesData, error: responsesError } = await supabase
+    .from('form_responses')
+    .select('*')
+    .eq('form_id', formId)
+    .order('created_at', { ascending: false });
+
+  if (responsesError) {
+    console.error("Error fetching responses:", responsesError);
+    throw new Error("Could not fetch responses.");
+  }
+
+  const form: Form = {
+    id: formData.id,
+    title: formData.title,
+    description: formData.description ?? '',
+    createdAt: new Date(formData.created_at),
+    fields: formData.form_fields.sort((a, b) => a.order - b.order),
+    responseCount: responsesData.length,
+    url: `/f/${formData.id}`
+  };
+
+  const responses = responsesData.map(r => ({
+    id: r.id,
+    submittedAt: new Date(r.created_at),
+    data: r.data,
+  }));
+
+  try {
+    switch (format) {
+      case 'csv':
+        const csv = generateCsv(form, responses);
+        return { data: Buffer.from(csv).toString('base64'), contentType: 'text/csv', filename: `${form.title}.csv` };
+      case 'xlsx':
+        const xlsx = await generateXlsx(form, responses);
+        return { data: xlsx, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: `${form.title}.xlsx` };
+      case 'pdf':
+        const pdf = await generatePdf(form, responses);
+        return { data: pdf, contentType: 'application/pdf', filename: `${form.title}.pdf` };
+      case 'docx':
+        const docx = await generateDocx(form, responses);
+        return { data: docx, contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', filename: `${form.title}.docx` };
+      default:
+        throw new Error('Invalid format');
+    }
+  } catch (error) {
+    console.error(`Error generating ${format} file:`, error);
+    throw new Error(`Failed to export responses as ${format}.`);
+  }
 }
