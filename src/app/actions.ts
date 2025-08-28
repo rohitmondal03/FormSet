@@ -1,4 +1,3 @@
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -6,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { createActionClient } from '@/lib/supabase/server';
 import { suggestFormContent } from '@/ai/flows/suggest-form-content';
 import { z } from 'zod';
-import type { Form, FormField, Profile } from '@/lib/types';
+import type { Form, FormField } from '@/lib/types';
 import { loginSchema, signupSchema } from '@/lib/zod/auth';
 import { generateCsv, generateDocx, generatePdf, generateXlsx } from '@/lib/export-utils';
 

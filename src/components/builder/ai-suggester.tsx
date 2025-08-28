@@ -15,9 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Bot, Plus, Sparkles } from 'lucide-react';
 import { getSuggestions } from '@/app/actions';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import type { FormField } from '@/lib/types';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useActionState } from 'react';
 
 interface AISuggesterProps {
@@ -47,7 +46,6 @@ export function AISuggester({ fields, setFields }: AISuggesterProps) {
     };
     setFields([...fields, newField]);
   };
-
   return (
     <Dialog>
       <DialogTrigger asChild>

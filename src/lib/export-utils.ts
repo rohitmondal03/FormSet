@@ -135,16 +135,17 @@ export async function generatePdf(form: Form, responses: FormResponse[]): Promis
   });
 
   // Draw rows
+  let currentPage = page;
   data.forEach((row, rowIndex) => {
     if (y < margin + rowHeight) {
         // Add new page if content overflows
-        const newPage = pdfDoc.addPage();
-        y = newPage.getSize().height - margin;
+        currentPage = pdfDoc.addPage();
+        y = currentPage.getSize().height - margin;
     }
     y -= rowHeight;
     headers.forEach((header, colIndex) => {
       const cellText = String(row[header] ?? '');
-      newPage.drawText(cellText, {
+      currentPage.drawText(cellText, {
         x: tableLeft + colIndex * colWidth + 5,
         y: y,
         font: font,
@@ -152,7 +153,7 @@ export async function generatePdf(form: Form, responses: FormResponse[]): Promis
         maxWidth: colWidth - 10,
       });
     });
-    newPage.drawLine({
+    currentPage.drawLine({
         start: { x: margin, y: y - 5 },
         end: { x: width - margin, y: y - 5 },
         thickness: 0.5,
