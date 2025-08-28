@@ -2,7 +2,7 @@
 import { Parser } from 'json2csv';
 import ExcelJS from 'exceljs';
 import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel } from 'docx';
-import PDFDocument from 'pdfkit-table';
+const PDFDocument = require('pdfkit-table');
 import type { Form, FormResponse } from './types';
 
 function prepareDataForExport(form: Form, responses: FormResponse[]) {
