@@ -25,7 +25,6 @@ import { SettingDialog } from './user-nav/setting-dialog';
 
 interface UserNavContextType {
   setSettingsOpen: (open: boolean) => void;
-  isSettingsOpen: boolean;
 }
 
 const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
@@ -33,7 +32,7 @@ const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
 export const useUserNav = () => {
   const context = useContext(UserNavContext);
   if (!context) {
-    throw new Error('useUserNav must be used within a UserNav provider');
+    throw new Error('useUserNav must be used within a UserNavProvider');
   }
   return context;
 };
@@ -42,14 +41,14 @@ export const UserNavProvider = ({ children }: { children: React.ReactNode }) => 
   const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <UserNavContext.Provider value={{ setSettingsOpen, isSettingsOpen }}>
+    <UserNavContext.Provider value={{ setSettingsOpen }}>
       {children}
-      <ActualUserNav />
+      <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
     </UserNavContext.Provider>
   )
 }
 
-function ActualUserNav() {
+export function UserNav() {
   const supabase = createClient();
   const { toast } = useToast();
 
@@ -80,6 +79,21 @@ function ActualUserNav() {
       setLoading(false);
     }
     getUserAndProfile();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setUser(session.user);
+        getUserAndProfile();
+      }
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, [supabase]);
 
   const getInitials = (name: string | null | undefined, email: string) => {
@@ -122,6 +136,10 @@ function ActualUserNav() {
 
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
+  }
+  
+  if (!user) {
+    return null;
   }
 
   return (
@@ -179,14 +197,3 @@ function ActualUserNav() {
     </>
   );
 }
-
-export function UserNav() {
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
-  return (
-    <UserNavContext.Provider value={{ setSettingsOpen, isSettingsOpen }}>
-      <ActualUserNav />
-      <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
-    </UserNavContext.Provider>
-  )
-}
-
