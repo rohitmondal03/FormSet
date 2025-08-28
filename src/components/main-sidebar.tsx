@@ -28,7 +28,7 @@ export function MainSidebar() {
   return (
     <div>
       <Sidebar variant='sidebar'>
-        <SidebarHeader className='mb-4'>
+        <SidebarHeader className='my-4'>
           <Logo />
         </SidebarHeader>
         <SidebarContent className='px-2'>

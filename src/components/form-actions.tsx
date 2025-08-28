@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MoreHorizontal, BarChart, Edit, Share2, Trash2, Link2 } from 'lucide-react';
+import { MoreHorizontal, BarChart, Edit, Trash2, Link2, CopyIcon } from 'lucide-react';
 import { deleteForm } from '@/app/actions';
 import { copyText } from '@/lib/form-utils';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 export function FormActions({ formId }: { formId: string }) {
   const { toast } = useToast();
 
-  const shareLink = (linkToOpen: string) => {
+  const copyFormLink = (linkToOpen: string) => {
     copyText(linkToOpen);
     toast({
       title: 'Copied to clipboard!',
@@ -51,9 +51,9 @@ export function FormActions({ formId }: { formId: string }) {
             <span>Open Form</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => shareLink(`${window.location.origin}/f/${formId}`)}>
-          <Share2 className="mr-2 size-4" />
-          <span>Share</span>
+        <DropdownMenuItem onClick={() => copyFormLink(`${window.location.origin}/f/${formId}`)}>
+          <CopyIcon className="mr-2 size-4" />
+          <span>Copy Form Link</span>
         </DropdownMenuItem>
         <form action={deleteForm.bind(null, formId)}>
           <button
