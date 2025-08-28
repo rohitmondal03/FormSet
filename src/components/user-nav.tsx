@@ -1,7 +1,8 @@
+
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { LogOut, Settings, User as UserIcon, Upload, FileUp } from 'lucide-react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { LogOut, Settings, User as UserIcon } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { logout, updateProfile } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -16,21 +17,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ProfileDialog } from './user-nav/profile-dialog';
 import { SettingDialog } from './user-nav/setting-dialog';
 
-export function UserNav() {
+
+interface UserNavContextType {
+  setSettingsOpen: (open: boolean) => void;
+}
+
+const UserNavContext = createContext<UserNavContextType | undefined>(undefined);
+
+export const useUserNav = () => {
+  const context = useContext(UserNavContext);
+  if (!context) {
+    throw new Error('useUserNav must be used within a UserNav provider');
+  }
+  return context;
+};
+
+const UserNavProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  
+  return (
+    <UserNavContext.Provider value={{ setSettingsOpen }}>
+      {children}
+      <ActualUserNav />
+    </UserNavContext.Provider>
+  )
+}
+
+function ActualUserNav() {
   const supabase = createClient();
   const { toast } = useToast();
 
@@ -38,7 +56,7 @@ export function UserNav() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProfileOpen, setProfileOpen] = useState(false);
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const { setSettingsOpen } = useUserNav();
   const [avatarPreview, setAvatarPreview] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -104,7 +122,7 @@ export function UserNav() {
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
-
+  
   return (
     <>
       <DropdownMenu>
@@ -157,8 +175,18 @@ export function UserNav() {
         handleProfileSave={handleProfileSave}
         handleAvatarChange={handleAvatarChange}
       />
-
-      <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
     </>
   );
 }
+
+
+export function UserNav() {
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  return (
+    <UserNavContext.Provider value={{setSettingsOpen}}>
+        <ActualUserNav/>
+        <SettingDialog isSettingsOpen={isSettingsOpen} setSettingsOpen={setSettingsOpen} />
+    </UserNavContext.Provider>
+  )
+}
+

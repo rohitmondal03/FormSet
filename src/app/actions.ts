@@ -425,3 +425,26 @@ export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | '
     throw new Error(`Failed to export responses as ${format}.`);
   }
 }
+
+export async function deleteAccount() {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'You must be logged in to delete your account.' };
+  }
+
+  // Call the RPC function to delete all user data and the user itself
+  const { error } = await supabase.rpc('delete_user_account');
+
+  if (error) {
+    console.error('Error deleting account:', error);
+    return { error: 'Failed to delete your account. Please try again.' };
+  }
+
+  // Sign out the user locally
+  await supabase.auth.signOut();
+  
+  revalidatePath('/', 'layout');
+  redirect('/login');
+}
