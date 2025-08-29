@@ -129,7 +129,7 @@ export function PublicForm({ formId }: PublicFormProps) {
     const id = `field-${field.id}`;
     return (
       <div key={field.id} className="space-y-2">
-        <Label className='text-zinc-400' htmlFor={id}>
+        <Label className='' htmlFor={id}>
           {field.order + 1}. {field.label}
           {field.required && <span className="text-red-600"> *</span>}
         </Label>

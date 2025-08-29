@@ -64,26 +64,26 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" disabled={isExporting}>
-              <Download className="mr-2 h-4 w-4" />
+            <Button variant="outline" disabled={isExporting || responses.length === 0}>
+              <Download className="mr-2 size-4" />
               {isExporting ? 'Exporting...' : 'Export Responses'}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => handleExport('csv')}>
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className="mr-2 size-4" />
               <span>Download as CSV</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('xlsx')}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              <FileSpreadsheet className="mr-2 size-4" />
               <span>Download as XLSX</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('pdf')}>
-              <FileType className="mr-2 h-4 w-4" />
+              <FileType className="mr-2 size-4" />
               <span>Download as PDF</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('docx')}>
-              <FileUp className="mr-2 h-4 w-4" />
+              <FileUp className="mr-2 size-4" />
               <span>Download as DOCX</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -93,7 +93,7 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
       <Tabs defaultValue="responses">
         <TabsList>
           <TabsTrigger value="summary">
-            <BarChart2 className="mr-2 h-4 w-4" />
+            <BarChart2 className="mr-2 size-4" />
             Summary
           </TabsTrigger>
           <TabsTrigger value="responses">Responses</TabsTrigger>

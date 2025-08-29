@@ -9,9 +9,5 @@ interface PublicFormPageProps {
 export default async function PublicFormPage({ params }: PublicFormPageProps) {
   const formId = (await params).formId;
 
-  return (
-    <>
-      <PublicForm formId={formId} />
-    </>
-  );
+  return (<PublicForm formId={formId} />);
 }
