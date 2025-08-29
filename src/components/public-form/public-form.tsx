@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useCallback } from 'react'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { Star, FileUp } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { Form, FormField } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { submitResponse } from '@/app/actions';
-import { Skeleton } from '@/components/ui/skeleton';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
@@ -29,68 +27,32 @@ import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '../theme-toggle';
 
 interface PublicFormProps {
-  formId: string;
+  form: Form;
 }
 
-export function PublicForm({ formId }: PublicFormProps) {
+export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
-
-  const [form, setForm] = useState<Form | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
-
-  const supabase = createClient();
-
-  useEffect(() => {
-    async function fetchForm() {
-      const { data: formData, error: formError } = await supabase
-        .from('forms')
-        .select('*, form_fields(*)')
-        .eq('id', formId)
-        .single();
-
-      if (formError || !formData) {
-        console.error('Error fetching form:', formError);
-        setError('This form could not be found or is no longer available.');
-        setLoading(false);
-        return;
-      }
-
-      const fetchedForm: Form = {
-        id: formData.id,
-        title: formData.title,
-        description: formData.description ?? '',
-        fields: formData.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
-        createdAt: new Date(formData.created_at),
-        responseCount: 0,
-        url: '',
-      };
-      setForm(fetchedForm);
-      setLoading(false);
-    }
-    fetchForm();
-  }, [formId, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form) return;
     setSubmitting(true);
     const formData = new FormData(e.currentTarget);
-  
+
     // Add hidden field values to FormData
     for (const field of form.fields) {
       if (field.type === 'rating' || field.type === 'slider') {
         formData.append(field.id, formValues[field.id] || '');
       }
     }
-  
-    const result = await submitResponse(formId, formData);
-  
+
+    const result = await submitResponse(form.id, formData);
+
     setSubmitting(false);
-  
+
     if (result.error) {
       toast({
         title: 'Error',
@@ -164,9 +126,11 @@ export function PublicForm({ formId }: PublicFormProps) {
               />
             ),
             date: (
-              <DatePicker
-                onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
-              />
+              <div>
+                <DatePicker
+                  onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
+                />
+              </div>
             ),
             file: (
               <Label htmlFor={id} className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", filePreviews[field.id] && "border-primary")}>
@@ -272,46 +236,10 @@ export function PublicForm({ formId }: PublicFormProps) {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl space-y-8">
-          <Skeleton className="h-10 w-3/4" />
-          <Skeleton className="h-6 w-full" />
-          <Separator />
-          <div className="space-y-8">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-20 w-full" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !form) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="bg-card p-8 rounded-lg border shadow-lg text-center">
-          <h2 className="text-2xl font-bold text-destructive">Form Not Found</h2>
-          <p className="text-muted-foreground mt-2">{error}</p>
-          <Button asChild className="mt-6">
-            <a href="/">Go Home</a>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-muted/20 dark:bg-background">
       <div className="container mx-auto max-w-2xl py-12 px-4">
-        <main className="bg-card p-8 sm:p-12 rounded-2xl border shadow-lg space-y-8">
+        <main className="bg-card p-8 sm:p-12 rounded-2xl border-2 dark:border-zinc-500 shadow-lg space-y-8">
           <header className="space-y-4">
             <div className="flex justify-between items-start">
               <h1 className="text-4xl font-bold tracking-tight text-foreground">{form.title}</h1>
@@ -322,7 +250,7 @@ export function PublicForm({ formId }: PublicFormProps) {
               Fields marked with <span className='text-destructive'>*</span> are required.
             </p>
           </header>
-          <Separator />
+          <Separator className='bg-black dark:bg-zinc-200' />
           <form onSubmit={handleSubmit} className="space-y-8">
             {form.fields.map(renderField)}
             <Button type="submit" size="lg" className="w-full text-lg" disabled={submitting}>
