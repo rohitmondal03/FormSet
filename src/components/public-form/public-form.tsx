@@ -142,7 +142,7 @@ export function PublicForm({ form }: PublicFormProps) {
                     <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                   )}
                 </div>
-                <Input id={id} name={field.id} type="file" required={field.required} className="hidden" accept={field.properties?.accept} onChange={(e) => handleFileChange(e, field.id)} />
+                <Input id={id} name={field.id} type="file" required={field.required} className="hidden" accept=".pdf,image/*" onChange={(e) => handleFileChange(e, field.id)} />
               </Label>
             ),
             radio: (
@@ -253,7 +253,8 @@ export function PublicForm({ form }: PublicFormProps) {
           <Separator className='bg-black dark:bg-zinc-200' />
           <form onSubmit={handleSubmit} className="space-y-8">
             {form.fields.map(renderField)}
-            <Button type="submit" size="lg" className="w-full text-lg" disabled={submitting}>
+            <Separator className='bg-black dark:bg-zinc-200' />
+            <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit Response'}
             </Button>
           </form>

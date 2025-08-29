@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -23,6 +22,8 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PDFViewer } from './pdf-viewer';
+import Image from 'next/image';
 
 interface ResponseTableProps {
   form: Form | null;
@@ -31,6 +32,7 @@ interface ResponseTableProps {
 
 export function ResponseTable({ form, responses }: ResponseTableProps) {
   const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
+  const [selectedFileType, setSelectedFileType] = useState<'pdf' | 'image' | 'docx' | null>(null);
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
   const headers = ['Submitted At', ...form?.fields.map((f) => f.label) || []];
@@ -39,25 +41,43 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     return text.trim().replace(/\s+/g, ' ').replaceAll("-", " ").toUpperCase();
   }
 
-  const handleViewFile = (url: string) => {
+  const handleViewFile = (url: string, type: 'pdf' | 'image' | 'docx') => {
     setSelectedFileUrl(url);
+    setSelectedFileType(type);
     setIsFileDialogOpen(true);
   };
 
   const renderCell = (data: any) => {
     if (typeof data === 'string' && (data.startsWith('http') || data.startsWith('https:'))) {
-      if (data.toLowerCase().endsWith('.pdf')) {
+      const lower = data.toLowerCase();
+      if (lower.endsWith('.pdf')) {
         return (
-          <Button variant="outline" size="sm" onClick={() => handleViewFile(data)}>
-            <FileSearch className='mr-2 h-4 w-4' />
+          <Button variant="outline" size="sm" onClick={() => handleViewFile(data, 'pdf')}>
+            <FileSearch className='mr-2 size-4' />
             View PDF
+          </Button>
+        );
+      }
+      if (lower.endsWith('.docx')) {
+        return (
+          <Button variant="outline" size="sm" onClick={() => handleViewFile(data, 'docx')}>
+            <FileSearch className='mr-2 size-4' />
+            View DOCX
+          </Button>
+        );
+      }
+      if (lower.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) {
+        return (
+          <Button variant="outline" size="sm" onClick={() => handleViewFile(data, 'image')}>
+            <FileSearch className='mr-2 size-4' />
+            View Image
           </Button>
         );
       }
       return (
         <Button asChild variant="link" className='p-0 h-auto'>
           <Link href={data} target='_blank' rel='noopener noreferrer'>
-            View File <ExternalLink className='ml-2 h-4 w-4' />
+            View File <ExternalLink className='ml-2 size-4' />
           </Link>
         </Button>
       )
@@ -117,16 +137,33 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
       <Dialog open={isFileDialogOpen} onOpenChange={setIsFileDialogOpen}>
         <DialogContent className="max-w-4xl h-[90vh]">
           <DialogHeader>
-            <DialogTitle>PDF Document Viewer</DialogTitle>
+            <DialogTitle>
+              {selectedFileType === 'pdf' && 'PDF Document Viewer'}
+              {selectedFileType === 'image' && 'Image Viewer'}
+              {selectedFileType === 'docx' && 'DOCX Document'}
+            </DialogTitle>
           </DialogHeader>
           <div className="h-full w-full">
-            {selectedFileUrl && (
-              <iframe
-                src={selectedFileUrl}
-                className="w-full h-full border-0"
-                title="PDF Viewer"
-                allowFullScreen
-              />
+            {selectedFileUrl && selectedFileType === 'pdf' && (
+              <div className='overflow-y-scroll'>
+                <PDFViewer filePath={selectedFileUrl} />
+              </div>
+            )}
+            {selectedFileUrl && selectedFileType === 'image' && (
+              <div className="flex justify-center">
+                <Image src={selectedFileUrl} alt="Selected" className="max-h-[80vh] max-w-full object-contain" width={1200} height={1200} />
+              </div>
+            )}
+            {selectedFileUrl && selectedFileType === 'docx' && (
+              <div className="flex flex-col items-center justify-center h-full gap-4">
+                <p className="text-muted-foreground">DOCX preview is not supported. You can download and view the file using Microsoft Word or Google Docs.</p>
+                <a href={selectedFileUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline">
+                    <FileSearch className='mr-2 size-4' />
+                    Download DOCX
+                  </Button>
+                </a>
+              </div>
             )}
           </div>
         </DialogContent>
