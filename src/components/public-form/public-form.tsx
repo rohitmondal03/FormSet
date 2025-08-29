@@ -26,6 +26,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
+import { ThemeToggle } from '../theme-toggle';
 
 interface PublicFormProps {
   formId: string;
@@ -75,13 +76,21 @@ export function PublicForm({ formId }: PublicFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!form) return;
     setSubmitting(true);
     const formData = new FormData(e.currentTarget);
-
+  
+    // Add hidden field values to FormData
+    for (const field of form.fields) {
+      if (field.type === 'rating' || field.type === 'slider') {
+        formData.append(field.id, formValues[field.id] || '');
+      }
+    }
+  
     const result = await submitResponse(formId, formData);
-
+  
     setSubmitting(false);
-
+  
     if (result.error) {
       toast({
         title: 'Error',
@@ -93,8 +102,10 @@ export function PublicForm({ formId }: PublicFormProps) {
         title: 'Response Submitted',
         description: 'Thank you for filling out the form!',
       });
+      // Reset form state
       setFormValues({});
       setFilePreviews({});
+      e.currentTarget.reset();
     }
   };
 
@@ -139,29 +150,23 @@ export function PublicForm({ formId }: PublicFormProps) {
               <Input
                 id={id}
                 name={field.id}
-                placeholder={!field.placeholder ? undefined : field.placeholder}
+                placeholder={field.placeholder || ''}
                 required={field.required}
-                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
-                value={formValues[field.id] || ''}
               />
             ),
             textarea: (
               <Textarea
                 id={id}
                 name={field.id}
-                placeholder={!field.placeholder ? undefined : field.placeholder}
+                placeholder={field.placeholder || ''}
                 required={field.required}
-                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
-                value={formValues[field.id] || ''}
+                rows={4}
               />
             ),
             date: (
-              <div>
-                <DatePicker
-                  value={formValues[field.id] ? new Date(formValues[field.id]) : undefined}
-                  onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
-                />
-              </div>
+              <DatePicker
+                onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
+              />
             ),
             file: (
               <Label htmlFor={id} className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", filePreviews[field.id] && "border-primary")}>
@@ -177,41 +182,40 @@ export function PublicForm({ formId }: PublicFormProps) {
               </Label>
             ),
             radio: (
-              <RadioGroup id={id} name={field.id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value, field.type)} value={formValues[field.id]} className='space-y-1 mt-5'>
+              <RadioGroup name={field.id} required={field.required} className='space-y-2 pt-1'>
                 {field.options?.map(opt => (
-                  <div key={opt.value} className="flex items-center space-x-2 mt-2">
+                  <div key={opt.value} className="flex items-center space-x-3">
                     <RadioGroupItem
                       value={opt.value}
                       id={`${id}-${opt.value}`}
                     />
-                    <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
+                    <Label htmlFor={`${id}-${opt.value}`} className="font-normal">{opt.label}</Label>
                   </div>
                 ))}
               </RadioGroup>
             ),
             checkbox: (
-              <div id={id} className="space-y-3 text-xs">
+              <div className="space-y-2 pt-1">
                 {field.options?.map(opt => (
-                  <div key={opt.value} className="flex items-center space-x-2 mt-4">
+                  <div key={opt.value} className="flex items-center space-x-3">
                     <Checkbox
                       id={`${id}-${opt.value}`}
                       name={field.id}
                       value={opt.value}
-                      onCheckedChange={(checked) => handleValueChange(field.id, { value: opt.value, checked: checked }, field.type)} checked={(formValues[field.id] || []).includes(opt.value)}
                     />
-                    <Label htmlFor={`${id}-${opt.value}`}>{opt.label}</Label>
+                    <Label htmlFor={`${id}-${opt.value}`} className="font-normal">{opt.label}</Label>
                   </div>
                 ))}
               </div>
             ),
             select: (
-              <Select name={field.id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value, field.type)} value={formValues[field.id]}>
+              <Select name={field.id} required={field.required}>
                 <SelectTrigger id={id}>
                   <SelectValue placeholder={field.placeholder || 'Select an option'} />
                 </SelectTrigger>
-                <SelectContent className='space-y-2'>
+                <SelectContent>
                   {field.options?.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value || "hhh"}>
+                    <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
                   ))}
@@ -223,41 +227,39 @@ export function PublicForm({ formId }: PublicFormProps) {
                 id={id}
                 name={field.id}
                 type="number"
-                placeholder={!field.placeholder ? undefined : field.placeholder}
+                placeholder={field.placeholder || ''}
                 required={field.required}
                 min={field.properties?.min}
                 max={field.properties?.max}
-                onChange={(e) => handleValueChange(field.id, e.target.value, field.type)}
-                value={formValues[field.id] || ''}
               />
             ),
             rating: (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 pt-1">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <Star
                     key={value}
                     className={cn(
-                      "h-6 w-6 cursor-pointer mt-1",
-                      (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"
+                      "h-8 w-8 cursor-pointer transition-colors",
+                      (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/50 hover:text-muted-foreground"
                     )}
                     onClick={() => handleValueChange(field.id, value, field.type)}
                   />
                 ))}
-                <Input type="hidden" name={field.id} value={formValues[field.id] || 0} />
               </div>
             ),
             slider: (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 pt-2">
                 <Slider
                   id={id}
-                  name={field.id}
                   min={field.properties?.min || 0}
                   max={field.properties?.max || 100}
                   step={field.properties?.step || 1}
-                  value={[formValues[field.id] || 50]}
+                  value={[formValues[field.id] || field.properties?.min || 0]}
                   onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
                 />
-                <span className="text-sm font-medium w-12 text-center">{formValues[field.id] || 50}</span>
+                <span className="text-sm font-semibold w-14 text-center py-1.5 px-2 rounded-md bg-muted text-muted-foreground">
+                  {formValues[field.id] || field.properties?.min || 0}
+                </span>
               </div>
             ),
             paragraph: (
@@ -265,32 +267,26 @@ export function PublicForm({ formId }: PublicFormProps) {
             )
           }[field.type]
         }
-        {field.properties?.description && <p className="text-sm text-muted-foreground">{field.properties.description}</p>}
+        {field.properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{field.properties.description}</p>}
       </div>
     );
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-4xl py-12 px-4">
-          <div className="bg-card p-8 rounded-lg border shadow-lg space-y-6">
-            <Skeleton className="h-10 w-[]" />
-            <Skeleton className="h-6 w-full" />
-            <hr />
-            <div className="space-y-8">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-10 w-full" />
-              </div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl space-y-8">
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-6 w-full" />
+          <Separator />
+          <div className="space-y-8">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-20 w-full" />
             </div>
           </div>
         </div>
@@ -300,29 +296,40 @@ export function PublicForm({ formId }: PublicFormProps) {
 
   if (error || !form) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-destructive text-lg">{error}</p>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="bg-card p-8 rounded-lg border shadow-lg text-center">
+          <h2 className="text-2xl font-bold text-destructive">Form Not Found</h2>
+          <p className="text-muted-foreground mt-2">{error}</p>
+          <Button asChild className="mt-6">
+            <a href="/">Go Home</a>
+          </Button>
+        </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-4xl py-12 px-4">
-        <div className="bg-card p-8 rounded-lg border border-zinc-500 shadow-lg space-y-8">
-          <header className=" pb-4 space-y-5">
-            <h1 className="text-3xl font-bold">{form.title}</h1>
-            <p className="text-muted-foreground">{form.description}</p>
-            <p className='italic text-zinc-400 text-sm'>&#40;<span className='text-red-500'>*</span> are required&#41;</p>
+    <div className="min-h-screen bg-muted/20 dark:bg-background">
+      <div className="container mx-auto max-w-2xl py-12 px-4">
+        <main className="bg-card p-8 sm:p-12 rounded-2xl border shadow-lg space-y-8">
+          <header className="space-y-4">
+            <div className="flex justify-between items-start">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground">{form.title}</h1>
+              <ThemeToggle />
+            </div>
+            {form.description && <p className="text-lg text-muted-foreground">{form.description}</p>}
+            <p className='text-sm text-muted-foreground/80 pt-2'>
+              Fields marked with <span className='text-destructive'>*</span> are required.
+            </p>
           </header>
-          <Separator className='bg-zinc-400' />
-          <form onSubmit={handleSubmit} className="space-y-12">
+          <Separator />
+          <form onSubmit={handleSubmit} className="space-y-8">
             {form.fields.map(renderField)}
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit'}
+            <Button type="submit" size="lg" className="w-full text-lg" disabled={submitting}>
+              {submitting ? 'Submitting...' : 'Submit Response'}
             </Button>
           </form>
-        </div>
+        </main>
         <footer className="text-center mt-8">
           <p className="text-muted-foreground text-sm">
             Powered by{' '}
