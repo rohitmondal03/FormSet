@@ -37,7 +37,7 @@ export function FormCanvas({ fields, updateField, removeField }: FormCanvasProps
     <div ref={setNodeRef} className={cn("h-full", isOver && "bg-primary/5 rounded-lg")}>
       <SortableContext items={fields.map(field => field.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-4">
-          {fields.map((field) => (
+          {fields.map((field, index) => (
             <FormFieldWrapper
               key={field.id}
               field={field}

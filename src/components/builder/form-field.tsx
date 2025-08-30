@@ -14,6 +14,8 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import FieldSettingsPanel from './field-settings-panel';
+import { useState } from 'react';
 
 interface FormFieldWrapperProps {
   field: FormField;
@@ -30,6 +32,8 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
     transition,
     isDragging,
   } = useSortable({ id: field.id });
+  
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -59,7 +63,7 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
   const renderFieldPreview = () => {
     switch (field.type) {
       case 'textarea':
-        return <Textarea placeholder={field.placeholder || `${field.type.toUpperCase()}`} />;
+        return <Textarea placeholder={field.placeholder || `${field.type.toUpperCase()}`} disabled />;
       case 'radio':
       case 'checkbox':
       case 'select':
@@ -118,41 +122,31 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
 
   return (
     <div ref={setNodeRef} style={style}>
-        <Card className={cn("transition-all duration-300", isDragging ? "shadow-2xl ring-2 ring-primary" : "shadow-md")}>
-        <CardContent className="p-4">
+        <Card className={cn("transition-all duration-300 relative", isDragging ? "shadow-2xl ring-2 ring-primary" : "shadow-md")}>
+          <div {...attributes} {...listeners} className="absolute top-1/2 -translate-y-1/2 left-2 cursor-grab p-1">
+              <GripVertical className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <CardContent className="p-4 pl-10" onClick={() => setIsSettingsOpen(true)}>
             <div className="flex gap-2">
-            <div className="flex-grow space-y-4">
-                <Input
-                value={field.label}
-                onChange={(e) => onUpdate(field.id, { label: e.target.value })}
-                placeholder="Your question here"
-                className='text-sm'
-                />
+              <div className="flex-grow space-y-4">
+                  <Input
+                  value={field.label}
+                  onChange={(e) => onUpdate(field.id, { label: e.target.value })}
+                  placeholder="Your question here"
+                  className='text-sm'
+                  />
 
-                {renderFieldPreview()}
+                  {renderFieldPreview()}
+              </div>
             </div>
-            <div className="flex flex-col justify-between items-center h-full">
-                <div {...attributes} {...listeners} className="cursor-grab p-1">
-                    <GripVertical className="h-5 w-5 text-muted-foreground" />
-                </div>
-            </div>
-            </div>
-            <div className="pt-4 mt-4 flex items-center justify-end gap-4">
-                <div className="flex items-center space-x-2">
-                    <Switch
-                    id={`required-${field.id}`}
-                    checked={field.required}
-                    onCheckedChange={(checked) => onUpdate(field.id, { required: checked })}
-                    />
-                    <Label htmlFor={`required-${field.id}`}>Required</Label>
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => onRemove(field.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                    <span className="sr-only">Delete field</span>
-                </Button>
-                </div>
-        </CardContent>
+          </CardContent>
         </Card>
+        <FieldSettingsPanel
+          field={field}
+          onClose={() => setIsSettingsOpen(false)}
+          updateField={onUpdate}
+          removeField={onRemove}
+        />
     </div>
   );
 }

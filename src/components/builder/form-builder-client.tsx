@@ -20,6 +20,9 @@ import { Switch } from '../ui/switch';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Link from 'next/link';
 import { copyText } from '@/lib/form-utils';
+import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragOverEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { fieldTypes } from '@/lib/form-utils';
 
 interface FormBuilderClientProps {
   form: Form;
@@ -30,24 +33,38 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const { toast } = useToast();
   const [title, setTitle] = useState(form.title);
   const [description, setDescription] = useState(form.description);
-  const [fields, setFields] = useState<FormField[]>(form.fields);
+  const [fields, setFields] = useState<FormField[]>(form.fields.sort((a,b) => a.order - b.order));
   const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(form.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
 
-  const addField = (type: FormField['type']) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      }
+    }),
+    useSensor(KeyboardSensor)
+  )
+
+  const addField = (type: FormField['type'], index: number = fields.length) => {
     const newField: FormField = {
       id: crypto.randomUUID(),
       type,
       label: `New ${type} field`,
       required: false,
-      order: fields.length,
+      order: index,
       options: [],
     };
+
     if (type === 'radio' || type === 'select' || type === 'checkbox') {
-      newField.options = [{ value: 'option1', label: 'Option 1' }];
+      newField.options = [{ value: 'option-1', label: 'Option 1' }];
     }
-    setFields([...fields, newField]);
+    
+    const newFields = [...fields];
+    newFields.splice(index, 0, newField);
+    setFields(newFields);
   };
+
 
   const updateField = (id: string, updatedField: Partial<FormField>) => {
     setFields(fields.map(f => (f.id === id ? { ...f, ...updatedField } : f)));
@@ -56,6 +73,27 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const removeField = (id: string) => {
     setFields(fields.filter(f => f.id !== id));
   };
+  
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id === over.id) return;
+    
+    const isPaletteItem = active.data.current?.isPaletteItem;
+
+    if (isPaletteItem) {
+        // Find the index of the field being hovered over
+        const overIndex = fields.findIndex(f => f.id === over.id);
+        const newIndex = overIndex !== -1 ? overIndex : fields.length;
+        addField(active.data.current?.type, newIndex);
+    } else {
+      setFields((prevFields) => {
+        const oldIndex = prevFields.findIndex((f) => f.id === active.id);
+        const newIndex = prevFields.findIndex((f) => f.id === over.id);
+        return arrayMove(prevFields, oldIndex, newIndex);
+      });
+    }
+  }
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -172,60 +210,62 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
-      <header className="p-4 space-y-4 bg-card rounded-t-lg">
-        <div className='flex flex-col gap-2 lg:flex-row
-       items-center justify-around'>
-          <Input
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="font-bold border border-zinc-600 w-full"
-            placeholder="Form Title"
-          />
-          <div className="flex items-center gap-2 w-full">
-            <AISuggester fields={fields} setFields={setFields} />
-            <PreviewButton />
-            <Button variant="outline" size="sm" onClick={handleShare}>
-              <CopyIcon className="mr-2 h-4 w-4" /> Copy Link
-            </Button>
-            <SaveButton />
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
+        <header className="p-4 space-y-4 bg-card rounded-t-lg">
+          <div className='flex flex-col gap-2 lg:flex-row
+        items-center justify-around'>
+            <Input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="font-bold border border-zinc-600 w-full"
+              placeholder="Form Title"
+            />
+            <div className="flex items-center gap-2 w-full">
+              <AISuggester fields={fields} setFields={setFields} />
+              <PreviewButton />
+              <Button variant="outline" size="sm" onClick={handleShare}>
+                <CopyIcon className="mr-2 h-4 w-4" /> Copy Link
+              </Button>
+              <SaveButton />
+            </div>
           </div>
-        </div>
-        <div className='w-full mt-2 lg:mt-0'>
-          <Textarea id="form-description" value={description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
-        </div>
-        <div className="flex items-center space-x-2 pt-2">
-          <Switch id="limit-one-response" checked={limitOneResponsePerEmail || true} onCheckedChange={setLimitOneResponsePerEmail} />
-          <Label htmlFor="limit-one-response">Limit to one response per email</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <BadgeInfo className="h-4 w-4 text-zinc-500" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Limiting to one response per email helps prevent spam and abuse.</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </header>
-      <Separator />
-      <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-6 p-4">
-        <main className="lg:col-span-3 h-full">
-          <div className="bg-card p-4 rounded-lg border border-zinc-600 h-full overflow-y-auto">
-            <ScrollArea className="h-screen pr-4">
-              <FormCanvas
-                fields={fields}
-                updateField={updateField}
-                removeField={removeField}
-              />
-            </ScrollArea>
+          <div className='w-full mt-2 lg:mt-0'>
+            <Textarea id="form-description" value={description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
           </div>
-        </main>
-        <aside className="lg:col-span-1 h-full">
-          <FieldPalette onAddField={addField} />
-        </aside>
+          <div className="flex items-center space-x-2 pt-2">
+            <Switch id="limit-one-response" checked={limitOneResponsePerEmail || false} onCheckedChange={setLimitOneResponsePerEmail} />
+            <Label htmlFor="limit-one-response">Limit to one response per email</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type='button'><BadgeInfo className="h-4 w-4 text-zinc-500" /></button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Limiting to one response per email helps prevent spam and abuse.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </header>
+        <Separator />
+        <div className="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-6 p-4">
+          <main className="lg:col-span-3 h-full">
+            <div className="bg-card p-4 rounded-lg border border-zinc-600 h-full overflow-y-auto">
+              <ScrollArea className="h-full pr-4">
+                <FormCanvas
+                  fields={fields}
+                  updateField={updateField}
+                  removeField={removeField}
+                />
+              </ScrollArea>
+            </div>
+          </main>
+          <aside className="lg:col-span-1 h-full">
+            <FieldPalette onAddField={addField} />
+          </aside>
+        </div>
       </div>
-    </div>
+    </DndContext>
   );
 }
-
-

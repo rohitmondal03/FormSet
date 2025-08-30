@@ -12,14 +12,13 @@ interface DraggablePaletteItemProps {
   type: FormFieldType;
   label: string;
   Icon: React.ElementType;
-  onAddField: (type: FormFieldType) => void;
 }
 
 interface FieldPaletteProps {
   onAddField: (type: FormFieldType) => void;
 }
 
-function DraggablePaletteItem({ type, label, Icon, onAddField }: DraggablePaletteItemProps) {
+function DraggablePaletteItem({ type, label, Icon }: DraggablePaletteItemProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `palette-${type}`,
     data: {
@@ -36,7 +35,6 @@ function DraggablePaletteItem({ type, label, Icon, onAddField }: DraggablePalett
         "flex flex-col h-20 items-center justify-center text-center p-2 cursor-grab",
         isDragging && "opacity-50 ring-2 ring-primary"
       )}
-      onClick={() => onAddField(type)}
       {...listeners}
       {...attributes}
     >
@@ -60,7 +58,6 @@ export function FieldPalette({ onAddField }: FieldPaletteProps) {
               type={type}
               label={label}
               Icon={Icon}
-              onAddField={onAddField}
             />
           ))}
         </div>
