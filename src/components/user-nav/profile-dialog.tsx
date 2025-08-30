@@ -56,7 +56,7 @@ export function ProfileDialog({
               <div className="size-32 p-1 rounded-full border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors relative">
                 {avatarPreview || profileAvatarURL ? (
                   <Avatar className="size-fit">
-                    <AvatarImage src={!profileAvatarURL ? avatarPreview : profileAvatarURL} alt={avatarFallback} />
+                    <AvatarImage src={avatarPreview || profileAvatarURL || ''} alt={avatarFallback} />
                     <AvatarFallback>{avatarFallback}</AvatarFallback>
                   </Avatar>
                 ) : (
