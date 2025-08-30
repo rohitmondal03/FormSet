@@ -1,10 +1,9 @@
 
 'use client';
 
-import React, { useCallback, useEffect } from 'react'
-import { useState } from 'react';
+import React, { useCallback, useEffect, useState, useTransition } from 'react'
 import { format } from 'date-fns';
-import { Star, FileUp, Mail } from 'lucide-react';
+import { Star, FileUp, Mail, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Form, FormField } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -20,12 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { submitResponse } from '@/app/actions';
+import { submitResponse, checkExistingResponse } from '@/app/actions';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '../theme-toggle';
+
+type EmailStatus = 'idle' | 'checking' | 'exists' | 'does_not_exist' | 'error';
 
 interface PublicFormProps {
   form: Form;
@@ -37,11 +38,45 @@ export function PublicForm({ form }: PublicFormProps) {
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const handleEmailBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const email = e.target.value;
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setEmailStatus('idle');
+      return;
+    }
+    
+    if (form.limit_one_response_per_email) {
+      startTransition(async () => {
+        setEmailStatus('checking');
+        const result = await checkExistingResponse(form.id, email);
+        if (result.exists) {
+          setEmailStatus('exists');
+        } else if (result.error) {
+          setEmailStatus('error');
+          setEmailError(result.error);
+        } else {
+          setEmailStatus('does_not_exist');
+        }
+      });
+    } else {
+        setEmailStatus('does_not_exist');
+    }
+  };
+
 
   const validateForm = useCallback(() => {
     // Check for submitter email
     if (!formValues.submitter_email || !/\S+@\S+\.\S+/.test(formValues.submitter_email)) {
       return false;
+    }
+
+    if (form.limit_one_response_per_email && emailStatus !== 'does_not_exist') {
+        return false;
     }
 
     // Check all required fields
@@ -55,7 +90,7 @@ export function PublicForm({ form }: PublicFormProps) {
     }
 
     return true;
-  }, [form.fields, formValues]);
+  }, [form.fields, form.limit_one_response_per_email, formValues, emailStatus]);
 
 
   useEffect(() => {
@@ -96,6 +131,7 @@ export function PublicForm({ form }: PublicFormProps) {
       // Reset form state
       setFormValues({});
       setFilePreviews({});
+      setEmailStatus('idle');
       e.currentTarget.reset();
     }
   };
@@ -271,6 +307,21 @@ export function PublicForm({ form }: PublicFormProps) {
     );
   };
 
+  const renderEmailStatus = () => {
+    switch (emailStatus) {
+      case 'checking':
+        return <p className="text-sm text-muted-foreground flex items-center mt-2"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Checking...</p>;
+      case 'exists':
+        return <p className="text-sm text-destructive flex items-center mt-2"><AlertCircle className="mr-2 h-4 w-4" />This email has already submitted a response.</p>;
+      case 'does_not_exist':
+        return <p className="text-sm text-green-600 flex items-center mt-2"><CheckCircle className="mr-2 h-4 w-4" />You're good to go!</p>;
+      case 'error':
+        return <p className="text-sm text-destructive mt-2">{emailError}</p>;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/20 dark:bg-background">
       <div className="container mx-auto max-w-2xl py-12 px-4">
@@ -300,11 +351,13 @@ export function PublicForm({ form }: PublicFormProps) {
                     placeholder="your.email@example.com"
                     required
                     onChange={(e) => handleValueChange('submitter_email', e.target.value)}
+                    onBlur={handleEmailBlur}
                 />
+                {renderEmailStatus()}
             </div>
             {form.fields.map(renderField)}
             <Separator className='bg-black dark:bg-zinc-200' />
-            <Button type="submit" className="w-full" disabled={submitting || !isFormValid}>
+            <Button type="submit" className="w-full" disabled={submitting || !isFormValid || isPending}>
               {submitting ? 'Submitting...' : 'Submit Response'}
             </Button>
           </form>
@@ -321,5 +374,3 @@ export function PublicForm({ form }: PublicFormProps) {
     </div>
   )
 }
-
-    

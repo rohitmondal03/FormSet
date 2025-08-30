@@ -207,6 +207,24 @@ export async function saveForm(form: Form) {
   }
 }
 
+export async function checkExistingResponse(formId: string, email: string) {
+  const supabase = await createActionClient();
+  const { data, error } = await supabase
+    .from('form_responses')
+    .select('id')
+    .eq('form_id', formId)
+    .eq('submitter_email', email)
+    .maybeSingle();
+
+  if (error) {
+    // Don't expose database errors to the client
+    console.error('Error checking existing response:', error);
+    return { exists: false, error: 'Could not verify email.' };
+  }
+
+  return { exists: !!data };
+}
+
 export async function submitResponse(formId: string, formData: FormData) {
   const supabase = await createActionClient();
 
