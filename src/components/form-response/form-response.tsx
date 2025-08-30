@@ -47,7 +47,7 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      toast({ title: 'Success!', description: `Your responses have been exported as ${filename}.` });
+      toast({ title: 'Success!', description: <>Your responses have been exported as <span className='font-semibold'>{filename}</span>.</> });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { ExternalLink, FileSearch } from 'lucide-react';
 import Link from 'next/link';
@@ -18,12 +19,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
-import Image from 'next/image';
 
 interface ResponseTableProps {
   form: Form | null;
@@ -143,29 +142,27 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
               {selectedFileType === 'docx' && 'DOCX Document'}
             </DialogTitle>
           </DialogHeader>
-          <div className="h-full w-full">
-            {selectedFileUrl && selectedFileType === 'pdf' && (
-              <div className='overflow-y-scroll'>
-                <PDFViewer filePath={selectedFileUrl} />
-              </div>
-            )}
-            {selectedFileUrl && selectedFileType === 'image' && (
-              <div className="flex justify-center">
-                <Image src={selectedFileUrl} alt="Selected" className="max-h-[80vh] max-w-full object-contain" width={1200} height={1200} />
-              </div>
-            )}
-            {selectedFileUrl && selectedFileType === 'docx' && (
-              <div className="flex flex-col items-center justify-center h-full gap-4">
-                <p className="text-muted-foreground">DOCX preview is not supported. You can download and view the file using Microsoft Word or Google Docs.</p>
-                <a href={selectedFileUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline">
-                    <FileSearch className='mr-2 size-4' />
-                    Download DOCX
-                  </Button>
-                </a>
-              </div>
-            )}
-          </div>
+          {selectedFileUrl && selectedFileType === 'pdf' && (
+            <div className='overflow-y-scroll size-full'>
+              <PDFViewer filePath={selectedFileUrl} />
+            </div>
+          )}
+          {selectedFileUrl && selectedFileType === 'image' && (
+            <div className="flex justify-center">
+              <Image src={selectedFileUrl} alt="Selected" className="max-h-[80vh] max-w-full object-contain" width={1200} height={1200} />
+            </div>
+          )}
+          {selectedFileUrl && selectedFileType === 'docx' && (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <p className="text-muted-foreground">DOCX preview is not supported. You can download and view the file using Microsoft Word or Google Docs.</p>
+              <a href={selectedFileUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline">
+                  <FileSearch className='mr-2 size-4' />
+                  Download DOCX
+                </Button>
+              </a>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
