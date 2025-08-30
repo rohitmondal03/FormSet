@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -23,6 +24,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PDFViewer } from './pdf-viewer';
+import { ScrollArea } from './ui/scroll-area';
 
 interface ResponseTableProps {
   form: Form | null;
@@ -99,39 +101,41 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
 
   return (
     <>
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {headers.map((header) => (
-                <TableHead key={header}>
-                  {header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {responses.length > 0 ? (
-              responses.map((response) => (
-                <TableRow key={response.id}>
-                  <TableCell>{format(new Date(response.submittedAt), 'MMM d, yyyy, h:mm a')}</TableCell>
-                  {form?.fields.map((field) => (
-                    <TableCell key={field.id}>
-                      {response.data[field.id] ? renderCell(response.data[field.id]) : '-'}
-                    </TableCell>
+      <ScrollArea className="w-full">
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {headers.map((header) => (
+                    <TableHead key={header}>
+                      {header}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={headers.length} className="h-24 text-center">
-                  No responses yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {responses.length > 0 ? (
+                  responses.map((response) => (
+                    <TableRow key={response.id}>
+                      <TableCell>{format(new Date(response.submittedAt), 'MMM d, yyyy, h:mm a')}</TableCell>
+                      {form?.fields.map((field) => (
+                        <TableCell key={field.id}>
+                          {response.data[field.id] ? renderCell(response.data[field.id]) : '-'}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={headers.length} className="h-24 text-center">
+                      No responses yet.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+        </div>
+      </ScrollArea>
 
       <Dialog open={isFileDialogOpen} onOpenChange={setIsFileDialogOpen}>
         <DialogContent className="max-w-4xl h-[90vh]">
@@ -168,3 +172,5 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     </>
   );
 }
+
+    

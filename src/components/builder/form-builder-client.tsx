@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCallback, useState } from 'react';
@@ -14,6 +15,9 @@ import { saveForm } from '@/app/actions';
 import { Textarea } from '../ui/textarea';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
+import { Label } from '../ui/label';
+import { Switch } from '../ui/switch';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 interface FormBuilderClientProps {
   existingForm: Form;
@@ -21,10 +25,11 @@ interface FormBuilderClientProps {
 
 export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
   const router = useRouter();
-  const { toast } = useToast();  
+  const { toast } = useToast();
   const [title, setTitle] = useState(existingForm.title);
   const [description, setDescription] = useState(existingForm.description);
   const [fields, setFields] = useState<FormField[]>(existingForm.fields);
+  const [limitOneResponse, setLimitOneResponse] = useState(existingForm.limit_one_response);
   const [isSaving, setIsSaving] = useState(false);
 
   const addField = (type: FormField['type']) => {
@@ -57,6 +62,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
       title,
       description,
       fields: fields.map((f, index) => ({ ...f, order: index })),
+      limit_one_response: limitOneResponse,
     };
 
     try {
@@ -96,6 +102,36 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
     });
   }, [existingForm.id, toast]);
 
+  const PreviewButton = () => {
+    const isNewForm = existingForm.id === 'new';
+
+    const button = (
+      <Button variant="outline" size="sm" asChild={!isNewForm} disabled={isNewForm}>
+        <a href={isNewForm ? '#' : `/f/${existingForm.id}`} target={isNewForm ? '_self' : '_blank'}>
+          <Eye className="mr-2 h-4 w-4" /> Preview
+        </a>
+      </Button>
+    );
+
+    if (isNewForm) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>{button}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Save the form to enable preview.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return button;
+  };
+
+
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
       <header className="p-4 space-y-4 bg-card rounded-t-lg">
@@ -109,9 +145,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
           />
           <div className="flex items-center gap-2 w-full">
             <AISuggester fields={fields} setFields={setFields} />
-            <Button variant="outline" size="sm" asChild disabled={existingForm.id === 'new'}>
-              <a href={`/f/${existingForm.id}`} target='_blank'><Eye className="mr-2 h-4 w-4" /> Preview</a>
-            </Button>
+            <PreviewButton />
             <Button variant="outline" size="sm" onClick={handleShare}>
               <CopyIcon className="mr-2 h-4 w-4" /> Copy Link
             </Button>
@@ -122,6 +156,10 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
         </div>
         <div className='w-full mt-2 lg:mt-0'>
           <Textarea id="form-description" value={description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
+        </div>
+        <div className="flex items-center space-x-2 pt-2">
+            <Switch id="limit-one-response" checked={limitOneResponse} onCheckedChange={setLimitOneResponse} />
+            <Label htmlFor="limit-one-response">Limit to one response per email</Label>
         </div>
       </header>
       <Separator />
@@ -144,3 +182,5 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
     </div>
   );
 }
+
+    

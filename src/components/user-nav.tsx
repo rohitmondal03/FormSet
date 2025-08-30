@@ -106,6 +106,7 @@ export function UserNav() {
   const handleProfileSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSaving(true);
+    toast({ title: 'Uploading...', description: 'Your new profile picture is being uploaded.' });
     const formData = new FormData(event.currentTarget);
     const result = await updateProfile(formData);
 
@@ -197,3 +198,5 @@ export function UserNav() {
     </>
   );
 }
+
+    

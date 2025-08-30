@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -118,7 +119,7 @@ export async function saveForm(form: Form) {
     throw new Error('You must be logged in to save a form.');
   }
 
-  const { id, title, description, fields } = form;
+  const { id, title, description, fields, limit_one_response } = form;
 
   if (id === 'new') {
     // Create new form
@@ -128,6 +129,7 @@ export async function saveForm(form: Form) {
         user_id: user.id,
         title,
         description,
+        limit_one_response: limit_one_response || false,
       })
       .select('id')
       .single();
@@ -162,7 +164,7 @@ export async function saveForm(form: Form) {
     // Update existing form
     const { error: formError } = await supabase
       .from('forms')
-      .update({ title, description })
+      .update({ title, description, limit_one_response: limit_one_response || false })
       .eq('id', id)
       .eq('user_id', user.id);
 
@@ -208,6 +210,34 @@ export async function saveForm(form: Form) {
 export async function submitResponse(formId: string, formData: FormData) {
   const supabase = await createActionClient();
 
+  const { data: form, error: formError } = await supabase.from('forms').select('limit_one_response').eq('id', formId).single();
+
+  if (formError) {
+    console.error("Error fetching form details:", formError);
+    return { error: 'Could not load form details for submission.' };
+  }
+  
+  const submitterEmail = formData.get('submitter_email') as string;
+
+  if (form.limit_one_response) {
+      const { data: existingResponse, error: existingResponseError } = await supabase
+        .from('form_responses')
+        .select('id')
+        .eq('form_id', formId)
+        .eq('submitter_email', submitterEmail)
+        .maybeSingle();
+
+      if (existingResponseError) {
+          console.error("Error checking for existing response:", existingResponseError);
+          return { error: 'An error occurred while validating your submission.' };
+      }
+
+      if (existingResponse) {
+          return { error: 'This email address has already submitted a response to this form.' };
+      }
+  }
+
+
   const { data: formFields, error: fieldsError } = await supabase
     .from('form_fields')
     .select('*')
@@ -223,6 +253,11 @@ export async function submitResponse(formId: string, formData: FormData) {
 
   for (const field of formFields) {
     const value = formData.getAll(field.id);
+    
+    if (field.required && (!value || value.length === 0 || value[0] === '')) {
+       return { error: `${field.label} is a required field.` };
+    }
+
 
     // Validation for number range
     if (field.type === 'number') {
@@ -259,7 +294,7 @@ export async function submitResponse(formId: string, formData: FormData) {
 
   const { data: response, error: responseError } = await supabase
     .from('form_responses')
-    .insert([{ form_id: formId, data: responseData }])
+    .insert([{ form_id: formId, data: responseData, submitter_email: submitterEmail }])
     .select('id')
     .single();
 
@@ -395,7 +430,8 @@ export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | '
     createdAt: new Date(formData.created_at),
     fields: formData.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
     responseCount: responsesData.length,
-    url: `/f/${formData.id}`
+    url: `/f/${formData.id}`,
+    limit_one_response: formData.limit_one_response,
   };
 
   const responses = responsesData.map(r => ({
@@ -448,6 +484,8 @@ export async function deleteAccount() {
     }
   );
 
+  // Deleting the user will cascade and delete all their related data
+  // due to the foreign key constraints with ON DELETE CASCADE
   const { error: deletionError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
   if (deletionError) {
@@ -461,3 +499,5 @@ export async function deleteAccount() {
   revalidatePath('/', 'layout');
   redirect('/login');
 }
+
+    

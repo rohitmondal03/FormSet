@@ -1,9 +1,10 @@
+
 'use client';
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Star, FileUp } from 'lucide-react';
+import { Star, FileUp, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Form, FormField } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,32 @@ export function PublicForm({ form }: PublicFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  const validateForm = useCallback(() => {
+    // Check for submitter email
+    if (!formValues.submitter_email || !/\S+@\S+\.\S+/.test(formValues.submitter_email)) {
+      return false;
+    }
+
+    // Check all required fields
+    for (const field of form.fields) {
+      if (field.required) {
+        const value = formValues[field.id];
+        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }, [form.fields, formValues]);
+
+
+  useEffect(() => {
+    setIsFormValid(validateForm());
+  }, [formValues, validateForm]);
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,6 +75,8 @@ export function PublicForm({ form }: PublicFormProps) {
         formData.append(field.id, formValues[field.id] || '');
       }
     }
+    
+    formData.append('submitter_email', formValues.submitter_email || '');
 
     const result = await submitResponse(form.id, formData);
 
@@ -71,7 +100,7 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-  const handleValueChange = useCallback((fieldId: string, value: any, type: FormField['type']) => {
+  const handleValueChange = useCallback((fieldId: string, value: any, type?: FormField['type']) => {
     setFormValues(prev => {
       if (type === 'checkbox') {
         const existing: any[] = prev[fieldId] || [];
@@ -89,12 +118,14 @@ export function PublicForm({ form }: PublicFormProps) {
     const file = e.target.files?.[0];
     if (file) {
       setFilePreviews(prev => ({ ...prev, [fieldId]: file.name }));
+      handleValueChange(fieldId, file);
     } else {
       setFilePreviews(prev => {
         const newPreviews = { ...prev };
         delete newPreviews[fieldId];
         return newPreviews;
       });
+      handleValueChange(fieldId, null);
     }
   };
 
@@ -114,6 +145,7 @@ export function PublicForm({ form }: PublicFormProps) {
                 name={field.id}
                 placeholder={field.placeholder || ''}
                 required={field.required}
+                onChange={(e) => handleValueChange(field.id, e.target.value)}
               />
             ),
             textarea: (
@@ -123,6 +155,7 @@ export function PublicForm({ form }: PublicFormProps) {
                 placeholder={field.placeholder || ''}
                 required={field.required}
                 rows={4}
+                onChange={(e) => handleValueChange(field.id, e.target.value)}
               />
             ),
             date: (
@@ -146,7 +179,7 @@ export function PublicForm({ form }: PublicFormProps) {
               </Label>
             ),
             radio: (
-              <RadioGroup name={field.id} required={field.required} className='space-y-2 pt-1'>
+              <RadioGroup name={field.id} required={field.required} className='space-y-2 pt-1' onValueChange={(value) => handleValueChange(field.id, value)}>
                 {field.options?.map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <RadioGroupItem
@@ -166,6 +199,7 @@ export function PublicForm({ form }: PublicFormProps) {
                       id={`${id}-${opt.value}`}
                       name={field.id}
                       value={opt.value}
+                      onCheckedChange={(checked) => handleValueChange(field.id, { value: opt.value, checked }, 'checkbox')}
                     />
                     <Label htmlFor={`${id}-${opt.value}`} className="font-normal">{opt.label}</Label>
                   </div>
@@ -173,7 +207,7 @@ export function PublicForm({ form }: PublicFormProps) {
               </div>
             ),
             select: (
-              <Select name={field.id} required={field.required}>
+              <Select name={field.id} required={field.required} onValueChange={(value) => handleValueChange(field.id, value)}>
                 <SelectTrigger id={id}>
                   <SelectValue placeholder={field.placeholder || 'Select an option'} />
                 </SelectTrigger>
@@ -195,6 +229,7 @@ export function PublicForm({ form }: PublicFormProps) {
                 required={field.required}
                 min={field.properties?.min}
                 max={field.properties?.max}
+                onChange={(e) => handleValueChange(field.id, e.target.value)}
               />
             ),
             rating: (
@@ -252,9 +287,24 @@ export function PublicForm({ form }: PublicFormProps) {
           </header>
           <Separator className='bg-black dark:bg-zinc-200' />
           <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-2">
+                <Label htmlFor="submitter-email" className="flex items-center">
+                    <Mail className="mr-2 h-4 w-4" />
+                    Your Email Address
+                    <span className="text-red-600 ml-1">*</span>
+                </Label>
+                <Input
+                    id="submitter-email"
+                    name="submitter_email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    required
+                    onChange={(e) => handleValueChange('submitter_email', e.target.value)}
+                />
+            </div>
             {form.fields.map(renderField)}
             <Separator className='bg-black dark:bg-zinc-200' />
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <Button type="submit" className="w-full" disabled={submitting || !isFormValid}>
               {submitting ? 'Submitting...' : 'Submit Response'}
             </Button>
           </form>
@@ -271,3 +321,5 @@ export function PublicForm({ form }: PublicFormProps) {
     </div>
   )
 }
+
+    

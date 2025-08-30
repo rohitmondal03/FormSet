@@ -54,6 +54,7 @@ export interface Form {
   createdAt: Date;
   responseCount: number;
   url: string;
+  limit_one_response: boolean;
 }
 
 // This corresponds to the form_responses table
@@ -61,6 +62,7 @@ export interface FormResponse {
   id: string;
   submittedAt: Date;
   data: Record<string, any>;
+  submitter_email?: string;
 }
 
 // This corresponds to the profiles table
@@ -70,3 +72,5 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
 }
+
+    
