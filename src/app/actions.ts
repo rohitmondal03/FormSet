@@ -355,6 +355,20 @@ export async function updateProfile(formData: FormData) {
   const fullName = formData.get('fullName') as string;
   const avatarFile = formData.get('avatar') as File;
 
+  // First, fetch the current profile to get the old avatar URL
+  const { data: currentProfile, error: profileError } = await supabase
+    .from('profiles')
+    .select('avatar_url')
+    .eq('user_id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('Error fetching current profile:', profileError);
+    return { error: 'Could not retrieve your profile to update.' };
+  }
+
+  const oldAvatarUrl = currentProfile?.avatar_url;
+
   const profileData: { full_name: string; avatar_url?: string } = {
     full_name: fullName,
   };
@@ -379,14 +393,28 @@ export async function updateProfile(formData: FormData) {
     profileData.avatar_url = publicUrl;
   }
 
-  const { error } = await supabase
+  const { error: updateError } = await supabase
     .from('profiles')
     .update(profileData)
     .eq('user_id', user.id);
 
-  if (error) {
-    console.error('Profile update error:', error);
-    return { error: error.message };
+  if (updateError) {
+    console.error('Profile update error:', updateError);
+    return { error: updateError.message };
+  }
+
+  // If a new avatar was uploaded and there was an old one, delete the old one.
+  if (profileData.avatar_url && oldAvatarUrl) {
+    try {
+      const oldAvatarPath = new URL(oldAvatarUrl).pathname.split('/avatars/')[1];
+      if (oldAvatarPath) {
+        await supabase.storage.from('avatars').remove([oldAvatarPath]);
+      }
+    } catch (e) {
+      console.error("Failed to parse or delete old avatar URL", e);
+      // We don't return an error to the user here, as the main profile update succeeded.
+      // We can log this for monitoring purposes.
+    }
   }
 
   revalidatePath('/', 'layout');
@@ -499,5 +527,3 @@ export async function deleteAccount() {
   revalidatePath('/', 'layout');
   redirect('/login');
 }
-
-    
