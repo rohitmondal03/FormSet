@@ -23,7 +23,7 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       createdAt: new Date(),
       responseCount: 0,
       url: '',
-      limit_one_response: false,
+      limit_one_response_per_email: false,
     }
   }
   else {
@@ -46,7 +46,7 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       createdAt: new Date(form_data.created_at),
       responseCount: form_data.form_responses[0]?.count || 0,
       url: `/f/${form_data.id}`,
-      limit_one_response: form_data.limit_one_response,
+      limit_one_response_per_email: form_data.limit_one_response_per_email,
     }
   }
 

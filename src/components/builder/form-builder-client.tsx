@@ -18,6 +18,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import Link from 'next/link';
 
 interface FormBuilderClientProps {
   existingForm: Form;
@@ -29,7 +30,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
   const [title, setTitle] = useState(existingForm.title);
   const [description, setDescription] = useState(existingForm.description);
   const [fields, setFields] = useState<FormField[]>(existingForm.fields);
-  const [limitOneResponse, setLimitOneResponse] = useState(existingForm.limit_one_response);
+  const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(existingForm.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
 
   const addField = (type: FormField['type']) => {
@@ -62,7 +63,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
       title,
       description,
       fields: fields.map((f, index) => ({ ...f, order: index })),
-      limit_one_response: limitOneResponse,
+      limit_one_response_per_email: limitOneResponsePerEmail,
     };
 
     try {
@@ -106,11 +107,11 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
     const isNewForm = existingForm.id === 'new';
 
     const button = (
-      <Button variant="outline" size="sm" asChild={!isNewForm} disabled={isNewForm}>
-        <a href={isNewForm ? '#' : `/f/${existingForm.id}`} target={isNewForm ? '_self' : '_blank'}>
+      <Link href={isNewForm ? '#' : `/f/${existingForm.id}`} target={isNewForm ? '_self' : '_blank'}>
+        <Button variant="outline" size="sm" asChild={!isNewForm} disabled={isNewForm}>
           <Eye className="mr-2 h-4 w-4" /> Preview
-        </a>
-      </Button>
+        </Button>
+      </Link>
     );
 
     if (isNewForm) {
@@ -127,8 +128,6 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
         </TooltipProvider>
       );
     }
-
-    return button;
   };
 
 
@@ -158,8 +157,8 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
           <Textarea id="form-description" value={description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
         </div>
         <div className="flex items-center space-x-2 pt-2">
-            <Switch id="limit-one-response" checked={limitOneResponse} onCheckedChange={setLimitOneResponse} />
-            <Label htmlFor="limit-one-response">Limit to one response per email</Label>
+          <Switch id="limit-one-response" checked={limitOneResponsePerEmail} onCheckedChange={setLimitOneResponsePerEmail} />
+          <Label htmlFor="limit-one-response">Limit to one response per email</Label>
         </div>
       </header>
       <Separator />
@@ -183,4 +182,3 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
   );
 }
 
-    

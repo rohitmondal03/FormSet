@@ -119,7 +119,7 @@ export async function saveForm(form: Form) {
     throw new Error('You must be logged in to save a form.');
   }
 
-  const { id, title, description, fields, limit_one_response } = form;
+  const { id, title, description, fields, limit_one_response_per_email } = form;
 
   if (id === 'new') {
     // Create new form
@@ -129,7 +129,7 @@ export async function saveForm(form: Form) {
         user_id: user.id,
         title,
         description,
-        limit_one_response: limit_one_response || false,
+        limit_one_response_per_email: limit_one_response_per_email || false,
       })
       .select('id')
       .single();
@@ -164,7 +164,7 @@ export async function saveForm(form: Form) {
     // Update existing form
     const { error: formError } = await supabase
       .from('forms')
-      .update({ title, description, limit_one_response: limit_one_response || false })
+      .update({ title, description, limit_one_response_per_email: limit_one_response_per_email || false })
       .eq('id', id)
       .eq('user_id', user.id);
 
@@ -210,7 +210,7 @@ export async function saveForm(form: Form) {
 export async function submitResponse(formId: string, formData: FormData) {
   const supabase = await createActionClient();
 
-  const { data: form, error: formError } = await supabase.from('forms').select('limit_one_response').eq('id', formId).single();
+  const { data: form, error: formError } = await supabase.from('forms').select('limit_one_response_per_email').eq('id', formId).single();
 
   if (formError) {
     console.error("Error fetching form details:", formError);
@@ -219,7 +219,7 @@ export async function submitResponse(formId: string, formData: FormData) {
   
   const submitterEmail = formData.get('submitter_email') as string;
 
-  if (form.limit_one_response) {
+  if (form.limit_one_response_per_email) {
       const { data: existingResponse, error: existingResponseError } = await supabase
         .from('form_responses')
         .select('id')
@@ -431,7 +431,7 @@ export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | '
     fields: formData.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
     responseCount: responsesData.length,
     url: `/f/${formData.id}`,
-    limit_one_response: formData.limit_one_response,
+    limit_one_response_per_email: formData.limit_one_response_per_email,
   };
 
   const responses = responsesData.map(r => ({

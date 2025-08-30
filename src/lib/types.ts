@@ -54,7 +54,7 @@ export interface Form {
   createdAt: Date;
   responseCount: number;
   url: string;
-  limit_one_response: boolean;
+  limit_one_response_per_email: boolean;
 }
 
 // This corresponds to the form_responses table
