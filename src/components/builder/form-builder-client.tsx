@@ -106,21 +106,24 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
   const PreviewButton = () => {
     const isNewForm = form.id === 'new';
-
-    const button = (
-      <Link href={isNewForm ? '#' : `/f/${form.id}`} target={isNewForm ? '_self' : '_blank'}>
-        <Button variant="outline" size="sm" asChild={!isNewForm} disabled={isNewForm}>
-          <Eye className="mr-2 h-4 w-4" /> Preview
-        </Button>
-      </Link>
+  
+    const buttonContent = (
+      <>
+        <Eye className="mr-2 h-4 w-4" /> Preview
+      </>
     );
-
+  
     if (isNewForm) {
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span tabIndex={0}>{button}</span>
+              {/* The disabled button is wrapped in a span for the tooltip to work */}
+              <span tabIndex={0}>
+                <Button variant="outline" size="sm" disabled>
+                  {buttonContent}
+                </Button>
+              </span>
             </TooltipTrigger>
             <TooltipContent>
               <p>Save the form to enable preview.</p>
@@ -129,8 +132,14 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
         </TooltipProvider>
       );
     }
-
-    return button;
+  
+    return (
+      <Button variant="outline" size="sm" asChild>
+        <Link href={`/f/${form.id}`} target="_blank">
+          {buttonContent}
+        </Link>
+      </Button>
+    );
   };
 
   const SaveButton = () => {
@@ -210,4 +219,5 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     </div>
   );
 }
+
 
