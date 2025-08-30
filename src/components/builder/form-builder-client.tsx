@@ -19,18 +19,19 @@ import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Link from 'next/link';
+import { copyText } from '@/lib/form-utils';
 
 interface FormBuilderClientProps {
-  existingForm: Form;
+  form: Form;
 }
 
-export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
+export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [title, setTitle] = useState(existingForm.title);
-  const [description, setDescription] = useState(existingForm.description);
-  const [fields, setFields] = useState<FormField[]>(existingForm.fields);
-  const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(existingForm.limit_one_response_per_email);
+  const [title, setTitle] = useState(form.title);
+  const [description, setDescription] = useState(form.description);
+  const [fields, setFields] = useState<FormField[]>(form.fields);
+  const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(form.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
 
   const addField = (type: FormField['type']) => {
@@ -59,7 +60,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
   const handleSave = async () => {
     setIsSaving(true);
     const formToSave: Form = {
-      ...existingForm,
+      ...form,
       title,
       description,
       fields: fields.map((f, index) => ({ ...f, order: index })),
@@ -72,7 +73,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
         title: 'Success!',
         description: 'Your form has been saved.',
       });
-      if (existingForm.id === 'new' && formId) {
+      if (form.id === 'new' && formId) {
         router.push(`/dashboard/builder/${formId}`);
       }
     } catch (error) {
@@ -86,8 +87,8 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
     }
   };
 
-  const handleShare = useCallback(() => {
-    if (existingForm.id === 'new') {
+  const handleShare = useCallback(async () => {
+    if (form.id === 'new') {
       toast({
         title: 'Save your form first',
         description: 'You must save your form before you can share it.',
@@ -95,19 +96,19 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
       });
       return;
     }
-    const formUrl = `${window.location.origin}/f/${existingForm.id}`;
-    navigator.clipboard.writeText(formUrl);
+    const formUrl = `${window.location.origin}/f/${form.id}`;
+    await copyText(formUrl);
     toast({
       title: 'Copied to clipboard!',
       description: 'The form link has been copied to your clipboard.',
     });
-  }, [existingForm.id, toast]);
+  }, [form.id, toast]);
 
   const PreviewButton = () => {
-    const isNewForm = existingForm.id === 'new';
+    const isNewForm = form.id === 'new';
 
     const button = (
-      <Link href={isNewForm ? '#' : `/f/${existingForm.id}`} target={isNewForm ? '_self' : '_blank'}>
+      <Link href={isNewForm ? '#' : `/f/${form.id}`} target={isNewForm ? '_self' : '_blank'}>
         <Button variant="outline" size="sm" asChild={!isNewForm} disabled={isNewForm}>
           <Eye className="mr-2 h-4 w-4" /> Preview
         </Button>
@@ -128,12 +129,14 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
         </TooltipProvider>
       );
     }
+
+    return button;
   };
 
   const SaveButton = () => {
     const noFields = fields.length === 0;
     const button = (
-       <Button size="sm" onClick={handleSave} disabled={isSaving || noFields}>
+      <Button size="sm" onClick={handleSave} disabled={isSaving || noFields}>
         <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save'}
       </Button>
     )

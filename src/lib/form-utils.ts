@@ -27,6 +27,6 @@ export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon 
 ];
 
 
-export const copyText = (linkToOpen: string) => {
-  navigator.clipboard.writeText(linkToOpen);
+export const copyText = async (linkToOpen: string) => {
+  await navigator.clipboard.writeText(linkToOpen);
 };

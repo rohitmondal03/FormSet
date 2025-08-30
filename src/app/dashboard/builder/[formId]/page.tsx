@@ -58,7 +58,7 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
     return null; // Should be handled by loading/error state
   }
 
-  return <FormBuilderClient existingForm={form} />;
+  return <FormBuilderClient form={form} />;
 }
 
     
