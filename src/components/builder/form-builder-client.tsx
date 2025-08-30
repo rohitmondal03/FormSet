@@ -23,7 +23,6 @@ import { copyText } from '@/lib/form-utils';
 import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import FieldSettingsPanel from './field-settings-panel';
-import { FormFieldWrapper } from './form-field';
 
 interface FormBuilderClientProps {
   form: Form;

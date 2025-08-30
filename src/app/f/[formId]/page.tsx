@@ -39,6 +39,7 @@ export default async function PublicFormPage({ params }: PublicFormPageProps) {
     createdAt: new Date(formData.created_at),
     responseCount: 0,
     url: '',
+    limit_one_response_per_email: formData.limit_one_response_per_email,
   };
 
   return <PublicForm form={fetchedForm} />;
