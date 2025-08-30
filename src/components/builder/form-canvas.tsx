@@ -3,17 +3,16 @@
 
 import type { FormField } from '@/lib/types';
 import { FormFieldWrapper } from './form-field';
-import { DndContext, closestCorners, useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { cn } from '@/lib/utils';
 
 interface FormCanvasProps {
   fields: FormField[];
-  updateField: (id: string, updatedField: Partial<FormField>) => void;
-  removeField: (id: string) => void;
+  setSelectedField: (field: FormField | null) => void;
 }
 
-export function FormCanvas({ fields, updateField, removeField }: FormCanvasProps) {
+export function FormCanvas({ fields, setSelectedField }: FormCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: 'form-canvas-droppable',
   });
@@ -34,18 +33,15 @@ export function FormCanvas({ fields, updateField, removeField }: FormCanvasProps
   }
 
   return (
-    <div ref={setNodeRef} className={cn("h-full", isOver && "bg-primary/5 rounded-lg")}>
+    <div ref={setNodeRef} className={cn("h-full space-y-4", isOver && "bg-primary/5 rounded-lg")}>
       <SortableContext items={fields.map(field => field.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-4">
-          {fields.map((field, index) => (
+          {fields.map((field) => (
             <FormFieldWrapper
               key={field.id}
               field={field}
-              onUpdate={updateField}
-              onRemove={removeField}
+              onSelect={setSelectedField}
             />
           ))}
-        </div>
       </SortableContext>
     </div>
   );

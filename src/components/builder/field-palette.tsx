@@ -14,9 +14,7 @@ interface DraggablePaletteItemProps {
   Icon: React.ElementType;
 }
 
-interface FieldPaletteProps {
-  onAddField: (type: FormFieldType) => void;
-}
+interface FieldPaletteProps {}
 
 function DraggablePaletteItem({ type, label, Icon }: DraggablePaletteItemProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -44,7 +42,7 @@ function DraggablePaletteItem({ type, label, Icon }: DraggablePaletteItemProps) 
   );
 }
 
-export function FieldPalette({ onAddField }: FieldPaletteProps) {
+export function FieldPalette({}: FieldPaletteProps) {
   return (
     <Card className="sticky top-24">
       <CardHeader>

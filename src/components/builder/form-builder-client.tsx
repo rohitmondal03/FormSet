@@ -4,7 +4,7 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import type { Form, FormField } from '@/lib/types';
+import type { Form, FormField, FormFieldType } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { FieldPalette } from './field-palette';
 import { FormCanvas } from './form-canvas';
@@ -20,9 +20,10 @@ import { Switch } from '../ui/switch';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Link from 'next/link';
 import { copyText } from '@/lib/form-utils';
-import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragOverEvent } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
-import { fieldTypes } from '@/lib/form-utils';
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext } from '@dnd-kit/sortable';
+import FieldSettingsPanel from './field-settings-panel';
+import { FormFieldWrapper } from './form-field';
 
 interface FormBuilderClientProps {
   form: Form;
@@ -36,6 +37,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const [fields, setFields] = useState<FormField[]>(form.fields.sort((a,b) => a.order - b.order));
   const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(form.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedField, setSelectedField] = useState<FormField | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -46,7 +48,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     useSensor(KeyboardSensor)
   )
 
-  const addField = (type: FormField['type'], index: number = fields.length) => {
+  const addField = (type: FormFieldType, index: number = fields.length) => {
     const newField: FormField = {
       id: crypto.randomUUID(),
       type,
@@ -55,19 +57,24 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
       order: index,
       options: [],
     };
-
+    
     if (type === 'radio' || type === 'select' || type === 'checkbox') {
       newField.options = [{ value: 'option-1', label: 'Option 1' }];
     }
-    
+
     const newFields = [...fields];
     newFields.splice(index, 0, newField);
-    setFields(newFields);
+    // Re-order
+    const orderedFields = newFields.map((f, i) => ({ ...f, order: i }));
+    setFields(orderedFields);
   };
 
-
   const updateField = (id: string, updatedField: Partial<FormField>) => {
-    setFields(fields.map(f => (f.id === id ? { ...f, ...updatedField } : f)));
+    const newFields = fields.map(f => (f.id === id ? { ...f, ...updatedField } : f));
+    setFields(newFields);
+    if (selectedField && selectedField.id === id) {
+      setSelectedField({ ...selectedField, ...updatedField });
+    }
   };
 
   const removeField = (id: string) => {
@@ -77,23 +84,29 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
-    if (active.id === over.id) return;
-    
-    const isPaletteItem = active.data.current?.isPaletteItem;
 
+    const isPaletteItem = active.data.current?.isPaletteItem;
+    
     if (isPaletteItem) {
-        // Find the index of the field being hovered over
-        const overIndex = fields.findIndex(f => f.id === over.id);
-        const newIndex = overIndex !== -1 ? overIndex : fields.length;
-        addField(active.data.current?.type, newIndex);
+      const overId = over.id === 'form-canvas-droppable' ? null : over.id;
+      const overIndex = overId ? fields.findIndex(f => f.id === overId) : fields.length;
+      addField(active.data.current?.type, overIndex);
     } else {
-      setFields((prevFields) => {
-        const oldIndex = prevFields.findIndex((f) => f.id === active.id);
-        const newIndex = prevFields.findIndex((f) => f.id === over.id);
-        return arrayMove(prevFields, oldIndex, newIndex);
-      });
+      // Reordering existing fields
+      const activeId = active.id;
+      const overId = over.id;
+
+      if (activeId !== overId) {
+        setFields((items) => {
+          const oldIndex = items.findIndex((item) => item.id === activeId);
+          const newIndex = items.findIndex((item) => item.id === overId);
+          const reorderedItems = arrayMove(items, oldIndex, newIndex);
+          return reorderedItems.map((item, index) => ({...item, order: index}));
+        });
+      }
     }
   }
+
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -145,22 +158,15 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const PreviewButton = () => {
     const isNewForm = form.id === 'new';
 
-    const buttonContent = (
-      <>
-        <Eye className="mr-2 h-4 w-4" /> Preview
-      </>
-    );
-
     if (isNewForm) {
       return (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              {/* The disabled button is wrapped in a span for the tooltip to work */}
               <span tabIndex={0}>
-                <Button variant="outline" size="sm" disabled>
-                  {buttonContent}
-                </Button>
+                 <Button variant="outline" size="sm" disabled>
+                    <Eye className="mr-2 h-4 w-4" /> Preview
+                 </Button>
               </span>
             </TooltipTrigger>
             <TooltipContent>
@@ -172,9 +178,9 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     }
 
     return (
-      <Button variant="outline" size="sm" asChild>
+       <Button variant="outline" size="sm" asChild>
         <Link href={`/f/${form.id}`} target="_blank">
-          {buttonContent}
+          <Eye className="mr-2 h-4 w-4" /> Preview
         </Link>
       </Button>
     );
@@ -210,7 +216,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
       <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
         <header className="p-4 space-y-4 bg-card rounded-t-lg">
           <div className='flex flex-col gap-2 lg:flex-row
@@ -255,17 +261,24 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
               <ScrollArea className="h-full pr-4">
                 <FormCanvas
                   fields={fields}
-                  updateField={updateField}
-                  removeField={removeField}
+                  setSelectedField={setSelectedField}
                 />
               </ScrollArea>
             </div>
           </main>
           <aside className="lg:col-span-1 h-full">
-            <FieldPalette onAddField={addField} />
+            <FieldPalette />
           </aside>
         </div>
       </div>
+      {selectedField && (
+        <FieldSettingsPanel
+          field={selectedField}
+          onClose={() => setSelectedField(null)}
+          updateField={updateField}
+          removeField={removeField}
+        />
+      )}
     </DndContext>
   );
 }
