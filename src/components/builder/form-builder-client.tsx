@@ -130,6 +130,34 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
     }
   };
 
+  const SaveButton = () => {
+    const noFields = fields.length === 0;
+    const button = (
+       <Button size="sm" onClick={handleSave} disabled={isSaving || noFields}>
+        <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save'}
+      </Button>
+    )
+
+    if (noFields) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>
+                {button}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add at least one field to save the form.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return button;
+  }
+
 
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
@@ -148,9 +176,7 @@ export function FormBuilderClient({ existingForm }: FormBuilderClientProps) {
             <Button variant="outline" size="sm" onClick={handleShare}>
               <CopyIcon className="mr-2 h-4 w-4" /> Copy Link
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={isSaving}>
-              <Save className="mr-2 h-4 w-4" /> {isSaving ? 'Saving...' : 'Save'}
-            </Button>
+            <SaveButton />
           </div>
         </div>
         <div className='w-full mt-2 lg:mt-0'>
