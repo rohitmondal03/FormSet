@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { FieldPalette } from './field-palette';
 import { FormCanvas } from './form-canvas';
 import { AISuggester } from './ai-suggester';
-import { Save, Eye, Share2, CopyIcon } from 'lucide-react';
+import { Save, Eye, CopyIcon, BadgeInfo } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { saveForm } from '@/app/actions';
 import { Textarea } from '../ui/textarea';
@@ -106,13 +106,13 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
   const PreviewButton = () => {
     const isNewForm = form.id === 'new';
-  
+
     const buttonContent = (
       <>
         <Eye className="mr-2 h-4 w-4" /> Preview
       </>
     );
-  
+
     if (isNewForm) {
       return (
         <TooltipProvider>
@@ -132,7 +132,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
         </TooltipProvider>
       );
     }
-  
+
     return (
       <Button variant="outline" size="sm" asChild>
         <Link href={`/f/${form.id}`} target="_blank">
@@ -195,8 +195,16 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
           <Textarea id="form-description" value={description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
         </div>
         <div className="flex items-center space-x-2 pt-2">
-          <Switch id="limit-one-response" checked={limitOneResponsePerEmail} onCheckedChange={setLimitOneResponsePerEmail} />
+          <Switch id="limit-one-response" checked={limitOneResponsePerEmail || true} onCheckedChange={setLimitOneResponsePerEmail} />
           <Label htmlFor="limit-one-response">Limit to one response per email</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <BadgeInfo className="h-4 w-4 text-zinc-500" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Limiting to one response per email helps prevent spam and abuse.</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </header>
       <Separator />
