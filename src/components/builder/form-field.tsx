@@ -3,7 +3,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2, PlusCircle, FileUp, Star } from 'lucide-react';
+import { GripVertical, Trash2, PlusCircle, FileUp, Star, Settings } from 'lucide-react';
 import type { FormField } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -122,11 +122,16 @@ export function FormFieldWrapper({ field, onUpdate, onRemove }: FormFieldWrapper
 
   return (
     <div ref={setNodeRef} style={style}>
-        <Card className={cn("transition-all duration-300 relative", isDragging ? "shadow-2xl ring-2 ring-primary" : "shadow-md")}>
-          <div {...attributes} {...listeners} className="absolute top-1/2 -translate-y-1/2 left-2 cursor-grab p-1">
-              <GripVertical className="h-5 w-5 text-muted-foreground" />
+        <Card className={cn("transition-all duration-300 relative group/field", isDragging ? "shadow-2xl ring-2 ring-primary" : "shadow-md")}>
+          <div {...attributes} {...listeners} className="absolute top-1/2 -translate-y-1/2 left-2 cursor-grab p-1 text-muted-foreground">
+              <GripVertical className="h-5 w-5" />
           </div>
-          <CardContent className="p-4 pl-10" onClick={() => setIsSettingsOpen(true)}>
+          <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/field:opacity-100 transition-opacity">
+            <Button variant="ghost" size="icon" className="size-7" onClick={() => setIsSettingsOpen(true)}>
+              <Settings className="size-4" />
+            </Button>
+          </div>
+          <CardContent className="p-4 pl-10">
             <div className="flex gap-2">
               <div className="flex-grow space-y-4">
                   <Input
