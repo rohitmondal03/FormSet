@@ -33,7 +33,7 @@ export function FormFieldWrapper({ field, onSelect }: FormFieldWrapperProps) {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 10 : 'auto',
-    opacity: isDragging ? 0.75 : 1,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   const { Icon } = fieldTypes.find(ft => ft.type === field.type) || {};

@@ -20,9 +20,10 @@ import { Switch } from '../ui/switch';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Link from 'next/link';
 import { copyText } from '@/lib/form-utils';
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import FieldSettingsPanel from './field-settings-panel';
+import { FormFieldWrapper } from './form-field';
 
 interface FormBuilderClientProps {
   form: Form;
@@ -37,6 +38,8 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(form.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedField, setSelectedField] = useState<FormField | null>(null);
+  const [activeField, setActiveField] = useState<FormField | null>(null);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -79,10 +82,32 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const removeField = (id: string) => {
     setFields(fields.filter(f => f.id !== id));
   };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const isPaletteItem = active.data.current?.isPaletteItem;
+    if (isPaletteItem) {
+      setActiveField({
+        id: `palette-${active.data.current?.type}`,
+        type: active.data.current?.type,
+        label: `New ${active.data.current?.type} field`,
+        required: false,
+        order: -1
+      });
+    } else {
+      const field = fields.find(f => f.id === active.id);
+      if (field) {
+        setActiveField(field);
+      }
+    }
+  };
   
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over) {
+      setActiveField(null);
+      return;
+    };
 
     const isPaletteItem = active.data.current?.isPaletteItem;
     
@@ -104,6 +129,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
         });
       }
     }
+    setActiveField(null);
   }
 
 
@@ -215,7 +241,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
       <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
         <header className="p-4 space-y-4 bg-card rounded-t-lg">
           <div className='flex flex-col gap-2 lg:flex-row
@@ -270,6 +296,14 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
           </aside>
         </div>
       </div>
+      <DragOverlay>
+        {activeField && (
+          <FormFieldWrapper
+            field={activeField}
+            onSelect={() => {}}
+          />
+        )}
+      </DragOverlay>
       {selectedField && (
         <FieldSettingsPanel
           field={selectedField}
