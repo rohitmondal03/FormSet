@@ -2,10 +2,11 @@
 'use client';
 
 import Link from 'next/link';
-import { MoreHorizontal, BarChart, Edit, Trash2, Link2, CopyIcon } from 'lucide-react';
-import { deleteForm } from '@/app/actions';
+import { MoreHorizontal, BarChart, Edit, Trash2, Link2, CopyIcon, Undo } from 'lucide-react';
+import { deleteForm, undoDeleteForm } from '@/app/actions';
 import { copyText } from '@/lib/form-utils';
 import { useToast } from '@/hooks/use-toast';
+import { Form, FormField } from '@/lib/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,46 @@ export function FormActions({ formId }: { formId: string }) {
       description: 'The form link has been copied to your clipboard.',
     });
   }
+
+  const handleDelete = async () => {
+    const result = await deleteForm(formId);
+    if (result.error) {
+      toast({
+        title: 'Error',
+        description: result.error,
+        variant: 'destructive',
+      });
+    } else if (result.success && result.deletedForm) {
+      const deletedForm = result.deletedForm;
+      toast({
+        title: 'Form Deleted',
+        description: `The form "${deletedForm.title}" has been deleted.`,
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const undoResult = await undoDeleteForm(deletedForm as Form & { form_fields: FormField[] });
+              if (undoResult.success) {
+                toast({
+                  title: 'Form Restored',
+                  description: `The form "${deletedForm.title}" has been restored.`,
+                });
+              } else {
+                toast({
+                  title: 'Error',
+                  description: undoResult.error,
+                  variant: 'destructive',
+                });
+              }
+            }}
+          >
+            <Undo className="mr-2 h-4 w-4" /> Undo
+          </Button>
+        ),
+      });
+    }
+  };
 
   return (
     <AlertDialog>
@@ -73,14 +114,17 @@ export function FormActions({ formId }: { formId: string }) {
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>
             <DropdownMenuItem
-              className="w-full text-destructive focus:bg-destructive"
+              className="w-full text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
               onSelect={(e) => e.preventDefault()} // Prevent DropdownMenu from closing
             >
               <Trash2 className="mr-2 size-4" />
               <span>Delete</span>
             </DropdownMenuItem>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          
+        </DropdownMenuContent>
+      </DropdownMenu>
+       <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -89,15 +133,14 @@ export function FormActions({ formId }: { formId: string }) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <form action={async () => { await deleteForm(formId) }}>
-                <Button type="submit" variant="destructive">
-                  Delete Form
-                </Button>
-              </form>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                Delete Form
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </AlertDialog>
   );
 }

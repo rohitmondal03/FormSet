@@ -20,10 +20,11 @@ import { Switch } from '../ui/switch';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Link from 'next/link';
 import { copyText } from '@/lib/form-utils';
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import FieldSettingsPanel from './field-settings-panel';
 import { FormFieldWrapper } from './form-field';
+import { fieldTypes } from '@/lib/form-utils';
 
 interface FormBuilderClientProps {
   form: Form;
@@ -71,6 +72,12 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     setFields(orderedFields);
   };
 
+  const undoRemoveField = (fieldToRestore: FormField) => {
+    const newFields = [...fields];
+    newFields.splice(fieldToRestore.order, 0, fieldToRestore);
+    setFields(newFields.map((f, i) => ({ ...f, order: i })));
+  };
+
   const updateField = (id: string, updatedField: Partial<FormField>) => {
     const newFields = fields.map(f => (f.id === id ? { ...f, ...updatedField } : f));
     setFields(newFields);
@@ -87,27 +94,27 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     const { active } = event;
     const isPaletteItem = active.data.current?.isPaletteItem;
     if (isPaletteItem) {
-      setActiveField({
-        id: `palette-${active.data.current?.type}`,
-        type: active.data.current?.type,
-        label: `New ${active.data.current?.type} field`,
-        required: false,
-        order: -1
-      });
+        const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
+        if (!fieldTypeData) return;
+        setActiveField({
+            id: `palette-${active.data.current?.type}`,
+            type: active.data.current?.type,
+            label: fieldTypeData.label,
+            required: false,
+            order: -1
+        });
     } else {
-      const field = fields.find(f => f.id === active.id);
-      if (field) {
-        setActiveField(field);
-      }
+        const field = fields.find(f => f.id === active.id);
+        if (field) {
+            setActiveField(field);
+        }
     }
   };
   
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) {
-      setActiveField(null);
-      return;
-    };
+    setActiveField(null);
+    if (!over) return;
 
     const isPaletteItem = active.data.current?.isPaletteItem;
     
@@ -129,7 +136,6 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
         });
       }
     }
-    setActiveField(null);
   }
 
 
@@ -310,6 +316,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
           onClose={() => setSelectedField(null)}
           updateField={updateField}
           removeField={removeField}
+          onUndo={undoRemoveField}
         />
       )}
     </DndContext>

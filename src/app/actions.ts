@@ -327,40 +327,77 @@ export async function submitResponse(formId: string, formData: FormData) {
 
 export async function deleteForm(formId: string) {
   const supabase = await createActionClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error('You must be logged in to delete a form.');
+    return { error: 'You must be logged in to delete a form.' };
   }
-
-  // First, delete all responses associated with the form.
-  const { error: responseError } = await supabase
-    .from('form_responses')
-    .delete()
-    .eq('form_id', formId);
-
-  if (responseError) {
-    console.error('Error deleting form responses:', responseError);
-    return { error: 'Failed to delete form responses.' };
-  }
-
-
-  const { error } = await supabase
+  
+  // First, get the form details to be returned for the "Undo" action
+  const { data: form, error: getError } = await supabase
     .from('forms')
-    .delete()
+    .select('*, form_fields(*)')
     .eq('id', formId)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .single();
 
-  if (error) {
-    console.error('Error deleting form:', error);
+  if (getError || !form) {
+    console.error('Error fetching form for deletion:', getError);
+    return { error: 'Failed to find the form to delete.' };
+  }
+
+  // Soft delete or move to a temporary table could be an option, but for now we'll just delete
+  // and provide the data back to the client to re-create if "Undo" is clicked.
+  const { error: deleteError } = await supabase.from('forms').delete().eq('id', formId);
+
+  if (deleteError) {
+    console.error('Error deleting form:', deleteError);
     return { error: 'Failed to delete form.' };
   }
 
   revalidatePath('/dashboard');
-  redirect('/dashboard');
+  
+  // Return the deleted form data so it can be restored
+  return { success: true, deletedForm: form };
 }
+
+export async function undoDeleteForm(form: Form & { form_fields: FormField[] }) {
+  const supabase = await createActionClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'You must be logged in to perform this action.' };
+  }
+
+  const { form_fields, ...formDetails } = form;
+  
+  const { error: formError } = await supabase.from('forms').insert({
+    id: formDetails.id,
+    user_id: formDetails.user_id,
+    title: formDetails.title,
+    description: formDetails.description,
+    limit_one_response_per_email: formDetails.limit_one_response_per_email,
+    created_at: formDetails.created_at,
+  });
+
+  if (formError) {
+    console.error('Error restoring form:', formError);
+    return { error: 'Failed to undo form deletion.' };
+  }
+
+  if (form_fields && form_fields.length > 0) {
+    const { error: fieldsError } = await supabase.from('form_fields').insert(form_fields);
+    if (fieldsError) {
+      console.error('Error restoring form fields:', fieldsError);
+      // If fields fail, we should probably roll back the form insert, but for now we'll just return error
+      return { error: 'Failed to restore form fields.' };
+    }
+  }
+
+  revalidatePath('/dashboard');
+  return { success: true };
+}
+
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createActionClient();

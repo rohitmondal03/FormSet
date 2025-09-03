@@ -3,14 +3,10 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Settings, Trash2 } from 'lucide-react';
+import { GripVertical, Settings } from 'lucide-react';
 import type { FormField } from '@/lib/types';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { DatePicker } from '@/components/ui/date-picker';
 import { Card, CardContent } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { fieldTypes } from '@/lib/form-utils';
 
@@ -39,8 +35,11 @@ export function FormFieldWrapper({ field, onSelect }: FormFieldWrapperProps) {
   const { Icon } = fieldTypes.find(ft => ft.type === field.type) || {};
 
   return (
-    <div ref={setNodeRef} style={style}>
-        <Card className={cn("transition-all duration-300 relative group/field", isDragging ? "shadow-2xl ring-2 ring-primary" : "shadow-md")}>
+    <div ref={setNodeRef} style={style} className={isDragging ? 'relative' : ''}>
+      <Card className={cn(
+          "transition-all duration-300 relative group/field min-w-64", // min-w added here
+          isDragging ? "shadow-2xl ring-2 ring-primary" : "shadow-md"
+      )}>
           <div {...attributes} {...listeners} className="absolute top-1/2 -translate-y-1/2 left-2 cursor-grab p-1 text-muted-foreground hover:bg-accent rounded-md">
               <GripVertical className="h-5 w-5" />
           </div>
@@ -53,7 +52,7 @@ export function FormFieldWrapper({ field, onSelect }: FormFieldWrapperProps) {
              <div className="flex items-center gap-4">
                 {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
                 <div className="flex-grow">
-                    <p className="font-semibold">{field.label}</p>
+                    <p className="font-semibold whitespace-nowrap">{field.label}</p>
                     {field.required && <span className="text-xs text-destructive">Required</span>}
                 </div>
             </div>

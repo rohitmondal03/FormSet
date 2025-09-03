@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormField } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,14 +13,19 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetFooter,
+  SheetClose,
 } from '@/components/ui/sheet';
-import { Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Undo } from 'lucide-react';
 
 interface FieldSettingsPanelProps {
   field: FormField;
   updateField: (id: string, updatedField: Partial<FormField>) => void;
   removeField: (id: string) => void;
   onClose: () => void;
+  onUndo: (field: FormField) => void;
 }
 
 const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
@@ -28,7 +33,11 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
   updateField,
   removeField,
   onClose,
+  onUndo,
 }) => {
+  const { toast } = useToast();
+  const [deletedField, setDeletedField] = useState<FormField | null>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     updateField(field.id, { [e.target.name]: e.target.value });
   };
@@ -38,8 +47,30 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
   };
 
   const handleDeleteField = () => {
+    const fieldToDelete = { ...field };
+    setDeletedField(fieldToDelete);
     removeField(field.id);
-    onClose(); // Close the panel after deleting
+    onClose();
+
+    toast({
+      title: "Field Deleted",
+      description: `The field "${fieldToDelete.label}" has been deleted.`,
+      action: (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            onUndo(fieldToDelete);
+            toast({
+              title: "Field Restored",
+              description: `The field "${fieldToDelete.label}" has been restored.`,
+            });
+          }}
+        >
+          <Undo className="mr-2 h-4 w-4" /> Undo
+        </Button>
+      ),
+    });
   };
 
   const renderTypeSpecificSettings = (field: FormField) => {
@@ -166,12 +197,12 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
 
   return (
     <Sheet open={!!field} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-80 sm:w-96">
+      <SheetContent side="right" className="w-80 sm:w-96 flex flex-col">
         <SheetHeader>
           <SheetTitle>Field Settings</SheetTitle>
           <SheetDescription>Configure the properties and validation for this field.</SheetDescription>
         </SheetHeader>
-        <div className="py-4 space-y-6">
+        <div className="py-4 space-y-6 flex-grow overflow-y-auto pr-6">
           <div className="space-y-2">
             <Label htmlFor="label">Label</Label>
             <Input
@@ -207,16 +238,16 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
             />
             <Label htmlFor="required">Required</Label>
           </div>
-
           {renderTypeSpecificSettings(field)}
-
-          <Button variant="destructive" onClick={handleDeleteField} className="w-full">
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Field
-          </Button>
         </div>
-        <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={onClose}>
-            <X className="h-4 w-4" />
-        </Button>
+        <SheetFooter className="mt-auto">
+            <Button variant="destructive" onClick={handleDeleteField}>
+              <Trash2 className="mr-2 h-4 w-4" /> Delete
+            </Button>
+             <SheetClose asChild>
+                <Button variant="outline">Done</Button>
+            </SheetClose>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
