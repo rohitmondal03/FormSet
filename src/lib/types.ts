@@ -29,8 +29,8 @@ export interface FormField {
   options?: FormFieldOption[] | null; // Make options optional and nullable
   order: number;
   // New fields based on schema update
-  validation?: any; // JSONB for Zod validation rules (can be more specific later)
-  properties?: any; // JSONB for type-specific properties (e.g., min/max, steps)
+  validation?: JSON; // JSONB for Zod validation rules (can be more specific later)
+  properties?: object; // JSONB for type-specific properties (e.g., min/max, steps)
 }
 
 // This corresponds to the form_answers table
@@ -38,10 +38,9 @@ export interface FormAnswer {
   id: string; // UUID from the database
   response_id: string; // References form_responses(id)
   field_id: string; // References form_fields(id)
-  value: any; // JSONB to accommodate different answer data types
+  value: JSON; // JSONB to accommodate different answer data types
   created_at: string; // TIMESTAMPTZ from the database
   updated_at: string; // TIMESTAMPTZ from the database
-
 }
 
 // This corresponds to the forms table
@@ -61,7 +60,7 @@ export interface Form {
 export interface FormResponse {
   id: string;
   submittedAt: Date;
-  data: Record<string, any>;
+  data: Record<string, Array<string> | string | number | boolean | null>;
   submitter_email?: string;
 }
 

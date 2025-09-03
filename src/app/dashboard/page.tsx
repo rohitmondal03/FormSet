@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
   const { data, error } = await supabase
     .from('forms')
-    .select(`id, title, created_at, form_responses(count)`)
+    .select(`id, title, created_at, form_responses(count), limit_one_response_per_email`)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -32,16 +32,16 @@ export default async function DashboardPage() {
     console.error('Error fetching forms:', error);
   }
 
-  const forms: Form[] =
-    data?.map(form => ({
-      id: form.id,
-      title: form.title,
-      createdAt: new Date(form.created_at),
-      responseCount: form.form_responses[0]?.count ?? 0,
-      description: '', 
-      fields: [], 
-      url: `/f/${form.id}`,
-    })) ?? [];
+  const forms: Form[] = data?.map(form => ({
+    id: form.id as string,
+    title: form.title as string,
+    createdAt: new Date(form.created_at),
+    responseCount: form.form_responses[0]?.count ?? 0,
+    description: '', 
+    fields: [], 
+    url: `/f/${form.id}`,
+    limit_one_response_per_email: form.limit_one_response_per_email,
+  })) ?? [];
 
   return (
     <div className="container mx-auto">

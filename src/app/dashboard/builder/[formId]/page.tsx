@@ -11,7 +11,7 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
   const { formId } = (await params);
 
   let form: Form | null = null;
-  let error: Error | null = null;
+  const error: Error | null = null;
   const supabase = await createClient();
 
   if (formId === "new") {

@@ -377,7 +377,6 @@ export async function undoDeleteForm(form: Form & { form_fields: FormField[] }) 
     title: formDetails.title,
     description: formDetails.description,
     limit_one_response_per_email: formDetails.limit_one_response_per_email,
-    created_at: formDetails.created_at,
   });
 
   if (formError) {

@@ -48,7 +48,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     setIsFileDialogOpen(true);
   };
 
-  const renderCell = (data: any) => {
+  const renderCell = (data: string | number | boolean | null | Array<string>) => {
     if (typeof data === 'string' && (data.startsWith('http') || data.startsWith('https:'))) {
       const lower = data.toLowerCase();
       if (lower.endsWith('.pdf')) {
@@ -86,10 +86,11 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     if (Array.isArray(data)) {
       return (
         <div className="grid grid-rows-2 gap-1">
-          {data.map((item, index) =>
+          {data.map((item, index) => (
             <Badge key={index} variant="secondary">
               {refineText(String(item))}
-            </Badge>)}
+            </Badge>
+          ))}
         </div>
       );
     }

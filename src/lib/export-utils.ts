@@ -8,7 +8,7 @@ import type { Form, FormResponse } from './types';
 function prepareDataForExport(form: Form, responses: FormResponse[]) {
   const headers = form.fields.map(field => field.label);
   const data = responses.map(response => {
-    const row: Record<string, any> = {};
+    const row: Record<string, [] | string | number | boolean | null> = {};
     form.fields.forEach(field => {
       const value = response.data[field.id];
       if (Array.isArray(value)) {
@@ -113,7 +113,7 @@ export async function generatePdf(form: Form, responses: FormResponse[]): Promis
   y -= 40;
 
   // Table rendering
-  const tableTop = y;
+  // const tableTop = y;
   const tableLeft = margin;
   const rowHeight = 20;
   const colWidth = (width - 2 * margin) / headers.length;
@@ -136,7 +136,7 @@ export async function generatePdf(form: Form, responses: FormResponse[]): Promis
 
   // Draw rows
   let currentPage = page;
-  data.forEach((row, rowIndex) => {
+  data.forEach((row, _) => {
     if (y < margin + rowHeight) {
         // Add new page if content overflows
         currentPage = pdfDoc.addPage();
