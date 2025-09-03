@@ -245,7 +245,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               <Trash2 className="mr-2 h-4 w-4" /> Delete
             </Button>
              <SheetClose asChild>
-                <Button variant="outline">Done</Button>
+                <Button variant="default">Save</Button>
             </SheetClose>
         </SheetFooter>
       </SheetContent>
