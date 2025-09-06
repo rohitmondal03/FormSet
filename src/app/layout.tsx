@@ -16,11 +16,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Boldonse&display=swap" rel="stylesheet" />
-      </head>
+      <head />
       <body className="font-body antialiased">
         <SupabaseListener serverAccessToken={undefined} />
         <ClientLayout>{children}</ClientLayout>
