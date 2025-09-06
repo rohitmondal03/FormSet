@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Montserrat } from "next/font/google";
 import SupabaseListener from '@/components/supabase-listener';
 import ClientLayout from './client-layout';
 import './globals.css';
@@ -10,11 +9,6 @@ export const metadata: Metadata = {
   creator: 'Rohit Mondal',
 };
 
-const montserrat = Montserrat({
-  subsets: ['latin'],
-  weight: ['400', '500', '300', '700'],
-});
-
 interface RootLayoutProps {
   children: React.ReactNode;
 }
@@ -22,7 +16,12 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`boldonse antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Boldonse&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-body antialiased">
         <SupabaseListener serverAccessToken={undefined} />
         <ClientLayout>{children}</ClientLayout>
       </body>
