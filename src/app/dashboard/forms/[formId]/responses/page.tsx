@@ -26,6 +26,7 @@ export default async function FormResponsesPage({ params }: FormResponsePageProp
     url: `/f/${formData.id}`,
     fields: formData.form_fields,
     responseCount: 0, // This will be updated by response count
+    limit_one_response_per_email: formData.limit_one_response_per_email,
   };
 
   // Fetch responses

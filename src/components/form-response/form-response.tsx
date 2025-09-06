@@ -2,15 +2,23 @@
 "use client"
 
 import { useEffect, useState } from 'react';
+import {
+  Download,
+  BarChart2,
+  FileText,
+  FileSpreadsheet,
+  FileType,
+  FileUp,
+  FileSpreadsheetIcon
+} from 'lucide-react';
 import type { Form, FormResponse as FormResponseType } from '@/lib/types';
 import { exportResponses } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, BarChart2, FileText, FileSpreadsheet, FileType, FileUp } from 'lucide-react';
 import { ResponseTable } from '@/components/response-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface FormResponseProps {
   responses: FormResponseType[];
@@ -29,9 +37,9 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
   const handleExport = async (format: 'csv' | 'xlsx' | 'pdf' | 'docx') => {
     if (!form) return;
     setIsExporting(true);
-    toast({ 
-      title: 'Exporting...', 
-      description: `Your ${format.toUpperCase()} file is being generated.` 
+    toast({
+      title: 'Exporting...',
+      description: `Your ${format.toUpperCase()} file is being generated.`
     });
 
     try {
@@ -92,11 +100,14 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
 
       <Tabs defaultValue="responses">
         <TabsList>
+          <TabsTrigger value="responses">
+            <FileSpreadsheetIcon className="mr-2 size-4" />
+            Responses
+          </TabsTrigger>
           <TabsTrigger value="summary">
             <BarChart2 className="mr-2 size-4" />
             Summary
           </TabsTrigger>
-          <TabsTrigger value="responses">Responses</TabsTrigger>
         </TabsList>
         <TabsContent value="summary" className="mt-4">
           <Card>
