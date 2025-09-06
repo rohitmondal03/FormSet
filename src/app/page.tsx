@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { CheckCircle, Bot, Rows, Share2, BarChart, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserNav } from '@/components/user-nav';
+import { cn } from '@/lib/utils';
 
 export default async function Home() {
   const features = [
@@ -43,7 +44,7 @@ export default async function Home() {
 
   const supabase = await createClient();
 
-  const isUser = !!(await supabase.auth.getUser()).data
+  const user = (await supabase.auth.getUser()).data.user;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -54,15 +55,11 @@ export default async function Home() {
         </Link>
         <nav className="flex items-center gap-4">
           <ThemeToggle />
-          {!isUser ? (
-            <>
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Sign Up Free</Link>
-              </Button>
-            </>
+          {!user ? (
+            <div className='space-x-4'>
+              <Link href="/login" className={cn(buttonVariants({ variant: "secondary" }))}>Log In</Link>
+              <Link href="/signup" className={cn(buttonVariants({ variant: "default" }))}>Sign Up Free</Link>
+            </div>
           ) : (
             <>
               <Button variant={"default"}>
@@ -95,6 +92,7 @@ export default async function Home() {
           <div className="relative rounded-xl shadow-2xl overflow-hidden border">
             <Image
               src="https://placehold.co/1200x675.png"
+              priority
               width={1200}
               height={675}
               alt="FormSet App Screenshot"
