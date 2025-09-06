@@ -11,6 +11,7 @@ import { Download, BarChart2, FileText, FileSpreadsheet, FileType, FileUp } from
 import { ResponseTable } from '@/components/response-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { ResponseSummary } from './response-summary';
 
 interface FormResponseProps {
   responses: FormResponseType[];
@@ -55,6 +56,10 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
     }
   };
 
+  if (!form) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto">
       <div className="flex items-center justify-between mb-4">
@@ -90,7 +95,7 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
         </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="responses">
+      <Tabs defaultValue="summary">
         <TabsList>
           <TabsTrigger value="summary">
             <BarChart2 className="mr-2 size-4" />
@@ -99,14 +104,7 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
           <TabsTrigger value="responses">Responses</TabsTrigger>
         </TabsList>
         <TabsContent value="summary" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Summary view coming soon!</p>
-            </CardContent>
-          </Card>
+          <ResponseSummary form={form} responses={responses} />
         </TabsContent>
         <TabsContent value="responses" className="mt-4">
           <ResponseTable form={form} responses={responses} />
