@@ -22,7 +22,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${montserrat.className} antialiased`}>
+      <body className={`boldonse antialiased`}>
         <SupabaseListener serverAccessToken={undefined} />
         <ClientLayout>{children}</ClientLayout>
       </body>
