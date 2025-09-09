@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { ExternalLink, FileSearch } from 'lucide-react';
+import { FileSearch } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import type { Form, FormResponse } from '@/lib/types';
@@ -78,7 +78,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
       return (
         <Button asChild variant="link" className='p-0 h-auto'>
           <Link href={data} target='_blank' rel='noopener noreferrer'>
-            View File <ExternalLink className='ml-2 size-4' />
+            View File
           </Link>
         </Button>
       )
@@ -173,5 +173,3 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     </>
   );
 }
-
-    

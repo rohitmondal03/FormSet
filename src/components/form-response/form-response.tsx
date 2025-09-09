@@ -105,13 +105,13 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
 
       <Tabs defaultValue="summary">
         <TabsList>
-          <TabsTrigger value="responses">
-            <FileSpreadsheetIcon className="mr-2 size-4" />
-            Responses
-          </TabsTrigger>
           <TabsTrigger value="summary">
             <BarChart2 className="mr-2 size-4" />
             Summary
+          </TabsTrigger>
+          <TabsTrigger value="responses">
+            <FileSpreadsheetIcon className="mr-2 size-4" />
+            Responses
           </TabsTrigger>
         </TabsList>
         <TabsContent value="summary" className="mt-4">
