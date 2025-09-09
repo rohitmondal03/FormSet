@@ -17,7 +17,7 @@ const ParagraphInput: React.FC<ParagraphInputProps> = ({ field, onValueChange })
     onValueChange(e.target.value);
   };
 
-  const properties = field.properties as Record<string, any> | null;
+  const properties = field.properties as Record<string, unknown> | null;
 
   return (
     <div className="space-y-2">
@@ -29,7 +29,7 @@ const ParagraphInput: React.FC<ParagraphInputProps> = ({ field, onValueChange })
         onChange={handleChange}
       />
       {properties?.helpText && (
-        <p className="text-sm text-muted-foreground">{properties.helpText}</p>
+        <p className="text-sm text-muted-foreground">{properties.helpText as string}</p>
       )}
     </div>
   );

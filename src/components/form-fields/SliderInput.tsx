@@ -11,10 +11,10 @@ interface SliderInputProps {
 
 const SliderInput: React.FC<SliderInputProps> = ({ field }) => {
   // You'll need to parse and use field.properties for min, max, and step
-  const properties = field.properties as Record<string, any> | null;
-  const min = properties?.min || 0;
-  const max = properties?.max || 100;
-  const step = properties?.step || 1;
+  const properties = field.properties as Record<string, unknown> | null;
+  const min = (properties?.min as number) || 0;
+  const max = (properties?.max as number) || 100;
+  const step = (properties?.step as number) || 1;
 
   // You'll need to manage the slider's value state
   // const [sliderValue, setSliderValue] = useState([min]);

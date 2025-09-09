@@ -10,7 +10,7 @@ interface FormBuilderPageProps {
 export default async function FormBuilderPage({ params }: FormBuilderPageProps) {
   const formId = (await params).formId;
 
-  let form: Form & { fields: FormField[], responseCount: number, url: string };
+  let form: Form;
   const supabase = await createClient();
 
   if (formId === "new") {
@@ -29,6 +29,7 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       url: '',
       limit_one_response_per_email: false,
       user_id: user.id,
+      updated_at: "",
     }
   }
   else {
@@ -54,7 +55,8 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       responseCount: form_data.form_responses[0]?.count || 0,
       url: `/f/${form_data.id}`,
       limit_one_response_per_email: form_data.limit_one_response_per_email ?? false,
-      user_id: form_data.user_id
+      user_id: form_data.user_id,
+      updated_at: form_data.updated_at,
     }
   }
 

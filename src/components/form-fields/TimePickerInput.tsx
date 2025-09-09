@@ -10,7 +10,7 @@ interface TimePickerInputProps {
 }
 
 const TimePickerInput: React.FC<TimePickerInputProps> = ({ field /* onInputChange */ }) => {
-  const properties = field.properties as Record<string, any> | null;
+  const properties = field.properties as Record<string, unknown> | null;
   return (
     <div className="space-y-2">
       <Label htmlFor={`field-${field.id}`}>
@@ -27,7 +27,7 @@ const TimePickerInput: React.FC<TimePickerInputProps> = ({ field /* onInputChang
         // onChange={(e) => onInputChange(e.target.value)}
       />
       {properties?.description && (
-        <p className="text-sm text-muted-foreground">{properties.description}</p>
+        <p className="text-sm text-muted-foreground">{properties.description as string}</p>
       )}
     </div>
   );

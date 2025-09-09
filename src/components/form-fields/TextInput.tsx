@@ -14,7 +14,7 @@ const TextInput: React.FC<TextInputProps> = ({ field }) => {
   //   const value = event.target.value;
   //   onInputChange(value);
   // };
-  const properties = field.properties as Record<string, any> | null;
+  const properties = field.properties as Record<string, unknown> | null;
 
   return (
     <div className="space-y-2">
@@ -32,7 +32,7 @@ const TextInput: React.FC<TextInputProps> = ({ field }) => {
       />
       {/* Optional: Display help text if available */}
       {properties?.helpText && (
-        <p className="text-sm text-muted-foreground">{properties.helpText}</p>
+        <p className="text-sm text-muted-foreground">{properties.helpText as string}</p>
       )}
     </div>
   );

@@ -71,7 +71,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
   };
 
   const renderTypeSpecificSettings = (field: FormField) => {
-    const properties = field.properties as Record<string, any> || {};
+    const properties = field.properties as Record<string, unknown> || {};
     const options = field.options as { value: string; label: string }[] | null || [];
 
     switch (field.type) {
@@ -126,7 +126,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   id={`${field.id}-min`}
                   type="number"
                   placeholder='Min'
-                  value={properties?.min ?? ''}
+                  value={(properties?.min as number) ?? ''}
                   onChange={(e) =>
                     updateField(field.id, { properties: { ...properties, min: e.target.value ? parseFloat(e.target.value) : undefined } })
                   }
@@ -136,7 +136,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   id={`${field.id}-max`}
                   type="number"
                   placeholder='Max'
-                  value={properties?.max ?? ''}
+                  value={(properties?.max as number) ?? ''}
                   onChange={(e) =>
                     updateField(field.id, { properties: { ...properties, max: e.target.value ? parseFloat(e.target.value) : undefined } })
                   }
@@ -153,19 +153,19 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   <Input
                     type="number"
                     placeholder='Min'
-                    value={properties?.min ?? 0}
+                    value={(properties?.min as number) ?? 0}
                     onChange={(e) => updateField(field.id, { properties: { ...properties, min: parseFloat(e.target.value) } })}
                   />
                   <Input
                     type="number"
                     placeholder='Max'
-                    value={properties?.max ?? 100}
+                    value={(properties?.max as number) ?? 100}
                     onChange={(e) => updateField(field.id, { properties: { ...properties, max: parseFloat(e.target.value) } })}
                   />
                   <Input
                     type="number"
                     placeholder='Step'
-                    value={properties?.step ?? 1}
+                    value={(properties?.step as number) ?? 1}
                     onChange={(e) => updateField(field.id, { properties: { ...properties, step: parseFloat(e.target.value) } })}
                   />
               </div>
@@ -179,7 +179,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               id={`${field.id}-file-types`}
               name="accept"
               placeholder="e.g., image/*, .pdf, .docx"
-              value={properties?.accept || ''}
+              value={(properties?.accept as string) || ''}
               onChange={(e) =>
                 updateField(field.id, { properties: { ...properties, accept: e.target.value } })
               }
@@ -225,8 +225,8 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
             <Textarea
               id="description"
               name="description"
-              value={(field.properties as Record<string, any>)?.description || ''}
-              onChange={(e) => updateField(field.id, { properties: { ...(field.properties as Record<string, any> || {}), description: e.target.value } })}
+              value={((field.properties as Record<string, unknown>)?.description as string) || ''}
+              onChange={(e) => updateField(field.id, { properties: { ...(field.properties as Record<string, unknown> || {}), description: e.target.value } })}
             />
           </div>
           <div className="flex items-center space-x-2">

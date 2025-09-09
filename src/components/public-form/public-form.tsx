@@ -137,7 +137,7 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-  const handleValueChange = useCallback((fieldId: string | undefined, value: string | number | boolean | { value: string, checked: boolean } | Date | File | null, type?: FormField['type']) => {
+  const handleValueChange = useCallback((fieldId: string | undefined, value: string | number | boolean | { value: string; checked: boolean } | Date | File | null, type?: FormField['type']) => {
     if (!fieldId) return;
 
     setFormValues(prev => {
@@ -172,7 +172,7 @@ export function PublicForm({ form }: PublicFormProps) {
 
   const renderField = (field: FormField) => {
     const id = `field-${field.id}`;
-    const properties = field.properties as Record<string, any> | null;
+    const properties = field.properties as Record<string, unknown> | null;
 
     return (
       <div key={field.id} className="space-y-2">
@@ -270,8 +270,8 @@ export function PublicForm({ form }: PublicFormProps) {
                 type="number"
                 placeholder={field.placeholder || ''}
                 required={field.required}
-                min={properties?.min}
-                max={properties?.max}
+                min={properties?.min as number}
+                max={properties?.max as number}
                 onChange={(e) => handleValueChange(field.id, e.target.value)}
               />
             ),
@@ -293,23 +293,23 @@ export function PublicForm({ form }: PublicFormProps) {
               <div className="flex items-center gap-4 pt-2">
                 <Slider
                   id={id}
-                  min={properties?.min || 0}
-                  max={properties?.max || 100}
-                  step={properties?.step || 1}
-                  value={[(formValues[field.id] as number) || properties?.min || 0]}
+                  min={(properties?.min as number) || 0}
+                  max={(properties?.max as number) || 100}
+                  step={(properties?.step as number) || 1}
+                  value={[(formValues[field.id] as number) || (properties?.min as number) || 0]}
                   onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
                 />
                 <span className="text-sm font-semibold w-14 text-center py-1.5 px-2 rounded-md bg-muted text-muted-foreground">
-                  {formValues[field.id] || properties?.min || 0}
+                  {formValues[field.id] || (properties?.min as number) || 0}
                 </span>
               </div>
             ),
             paragraph: (
-              <p className="text-muted-foreground">{properties?.description || ''}</p>
+              <p className="text-muted-foreground">{properties?.description as string || ''}</p>
             )
           }[field.type]
         }
-        {properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{properties.description}</p>}
+        {properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{properties.description as string}</p>}
       </div>
     );
   };

@@ -272,7 +272,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
               placeholder="Form Title"
             />
             <div className="flex items-center gap-2 w-fit">
-              {/* <AISuggester fields={fields} setFields={setFields} /> */}
+              <AISuggester fields={fields} setFields={setFields} />
               <PreviewButton />
               <Button variant="secondary" size="sm" onClick={handleShare}>
                 <CopyIcon className="mr-2 h-4 w-4" /> Copy Link

@@ -15,10 +15,10 @@ const RatingInput: React.FC<RatingInputProps> = ({ field }) => {
 
   // Assuming properties might look like:
   // { type: 'stars', max: 5 } or { type: 'number', min: 1, max: 10 }
-  const typedProperties = properties as Record<string, any> | null;
-  const ratingType = typedProperties?.type || 'stars'; // Default to stars
-  const maxRating = typedProperties?.max || 5; // Default max stars to 5
-  const minRating = typedProperties?.min || 1; // Default min number rating to 1
+  const typedProperties = properties as Record<string, unknown> | null;
+  const ratingType = (typedProperties?.type as string) || 'stars'; // Default to stars
+  const maxRating = (typedProperties?.max as number) || 5; // Default max stars to 5
+  const minRating = (typedProperties?.min as number) || 1; // Default min number rating to 1
 
   const renderRatingSystem = () => {
     if (ratingType === 'stars') {

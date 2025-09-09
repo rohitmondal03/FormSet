@@ -27,7 +27,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange 
     }
   };
 
-  const properties = field.properties as Record<string, any> || {};
+  const properties = field.properties as Record<string, unknown> || {};
 
   return (
     <div className="space-y-2">
@@ -58,7 +58,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange 
         </PopoverContent>
       </Popover>
       {properties?.description && (
-        <p className="text-sm text-muted-foreground">{properties.description}</p>
+        <p className="text-sm text-muted-foreground">{properties.description as string}</p>
       )}
     </div>
   );

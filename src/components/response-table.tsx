@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { FileSearch } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import type { Form, FormResponse as FormResponseType } from '@/lib/types';
+import type { Form, FormResponse as FormResponseType, Json } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -48,7 +48,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     setIsFileDialogOpen(true);
   };
 
-  const renderCell = (data: any) => {
+  const renderCell = (data: Json | Json[]) => {
     if (typeof data === 'string' && (data.startsWith('http') || data.startsWith('https:'))) {
       const lower = data.toLowerCase();
       if (lower.endsWith('.pdf')) {
@@ -121,7 +121,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
                       <TableCell>{format(new Date(response.created_at), 'MMM d, yyyy, h:mm a')}</TableCell>
                       {form?.fields?.map((field) => (
                         <TableCell key={field.id}>
-                          {response.data && (response.data as any)[field.id] ? renderCell((response.data as any)[field.id]) : '-'}
+                          {response.data && (response.data as Record<string, Json | Json[]>)[field.id] ? renderCell((response.data as Record<string, Json | Json[]>)[field.id]) : '-'}
                         </TableCell>
                       ))}
                     </TableRow>

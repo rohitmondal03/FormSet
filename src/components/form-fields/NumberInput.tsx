@@ -11,7 +11,7 @@ interface NumberInputProps {
 
 const NumberInput: React.FC<NumberInputProps> = ({ field }) => {
   // Access min/max from field.properties
-  const properties = field.properties as Record<string, any> | null;
+  const properties = field.properties as Record<string, unknown> | null;
   const minValue = properties?.min as number | undefined;
   const maxValue = properties?.max as number | undefined;
 
