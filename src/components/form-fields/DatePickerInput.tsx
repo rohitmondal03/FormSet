@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
-import type { FormField } from '@/lib/types'; // Assuming FormField type is in '@/lib/types'
+import type { FormField } from '@/lib/types';
 
 interface DatePickerInputProps {
   field: FormField;
@@ -18,10 +19,8 @@ interface DatePickerInputProps {
 const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange }) => {
   const [date, setDate] = React.useState<Date>();
 
-  // Placeholder for handling date selection
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
-    // Call the onChange prop with the selected date
     if (onValueChange) {
       onValueChange(selectedDate);
     }

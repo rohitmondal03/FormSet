@@ -29,7 +29,7 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       url: '',
       limit_one_response_per_email: false,
       user_id: user.id,
-      updated_at: "",
+      updated_at: new Date().toISOString(),
     }
   }
   else {
