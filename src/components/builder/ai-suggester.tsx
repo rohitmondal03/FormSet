@@ -1,5 +1,8 @@
 'use client';
 
+import { useActionState } from 'react';
+import { Bot, Plus, Sparkles } from 'lucide-react';
+import { useFormStatus } from 'react-dom';
 import {
   Dialog,
   DialogContent,
@@ -13,11 +16,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Bot, Plus, Sparkles } from 'lucide-react';
-import { getSuggestions } from '@/app/actions';
-import { useFormStatus } from 'react-dom';
+import { getSuggestions } from '@/lib/actions';
 import type { FormField } from '@/lib/types';
-import { useActionState } from 'react';
 
 interface AISuggesterProps {
   fields: FormField[];
@@ -57,7 +57,7 @@ export function AISuggester({ fields, setFields }: AISuggesterProps) {
         <DialogHeader>
           <DialogTitle>AI Form Content Suggester</DialogTitle>
           <DialogDescription>
-            Describe what kind of information you want to collect, and we'll suggest some questions.
+            Describe what kind of information you want to collect, and we&apos;ll suggest some questions.
           </DialogDescription>
         </DialogHeader>
         <form action={formAction} className="space-y-4">

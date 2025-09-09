@@ -12,18 +12,13 @@ import {
   FileSpreadsheetIcon
 } from 'lucide-react';
 import type { Form, FormResponse as FormResponseType } from '@/lib/types';
-import { exportResponses } from '@/app/actions';
+import { exportResponses } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ResponseTable } from '@/components/response-table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-<<<<<<< HEAD
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-=======
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { ResponseSummary } from './response-summary';
->>>>>>> edee64f077a68e1860ac58b09a60edc3abd1476a
 
 interface FormResponseProps {
   responses: FormResponseType[];
@@ -61,8 +56,9 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
       window.URL.revokeObjectURL(url);
 
       toast({ title: 'Success!', description: <>Your responses have been exported as <span className='font-semibold'>{filename}</span>.</> });
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setIsExporting(false);
     }

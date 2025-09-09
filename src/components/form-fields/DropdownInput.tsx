@@ -22,11 +22,6 @@ export default function DropdownInput({ field }: DropdownInputProps) {
   const options = field.properties?.options || [];
 
   // Placeholder for handling selection
-  const handleValueChange = (value: string) => {
-    console.log(`Dropdown value changed for ${field.label}:`, value);
-    // Call a prop function to update the form state, e.g., onValueChange(value);
-  };
-
   return (
     <div className="space-y-2">
       <Label htmlFor={field.id}>
@@ -36,13 +31,16 @@ export default function DropdownInput({ field }: DropdownInputProps) {
       {field.placeholder && (
         <p className="text-sm text-muted-foreground">{field.placeholder}</p>
       )}
-      <Select onValueChange={handleValueChange}>
+      <Select>
         <SelectTrigger id={field.id}>
           <SelectValue placeholder={`Select ${field.label}`} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((option: any, index: number) => (
-            <SelectItem key={index} value={option.value || option}>
+          {options.map((option, index: number) => (
+            <SelectItem
+              key={index}
+              value={typeof option === 'string' ? option : option.value}
+            >
               {option.label || option}
             </SelectItem>
           ))}

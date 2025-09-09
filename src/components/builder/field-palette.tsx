@@ -2,19 +2,17 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import { Button } from '@/components/ui/button';
 import type { FormFieldType } from '@/lib/types';
 import { fieldTypes } from '@/lib/form-utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DraggablePaletteItemProps {
   type: FormFieldType;
   label: string;
   Icon: React.ElementType;
 }
-
-interface FieldPaletteProps {}
 
 function DraggablePaletteItem({ type, label, Icon }: DraggablePaletteItemProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -42,11 +40,12 @@ function DraggablePaletteItem({ type, label, Icon }: DraggablePaletteItemProps) 
   );
 }
 
-export function FieldPalette({}: FieldPaletteProps) {
+export function FieldPalette() {
   return (
     <Card className="sticky top-24">
       <CardHeader>
         <CardTitle>Form Fields</CardTitle>
+        <CardDescription>Drag fields from here and drop in the form canvas.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-2">

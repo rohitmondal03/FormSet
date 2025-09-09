@@ -136,7 +136,7 @@ export async function generatePdf(form: Form, responses: FormResponse[]): Promis
 
   // Draw rows
   let currentPage = page;
-  data.forEach((row, _) => {
+  data.forEach((row) => {
     if (y < margin + rowHeight) {
         // Add new page if content overflows
         currentPage = pdfDoc.addPage();

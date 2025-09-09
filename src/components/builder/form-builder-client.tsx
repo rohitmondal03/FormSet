@@ -1,30 +1,30 @@
 
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { Save, Eye, CopyIcon, BadgeInfo } from 'lucide-react';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, } from '@dnd-kit/sortable';
 import type { Form, FormField, FormFieldType } from '@/lib/types';
+import { fieldTypes } from '@/lib/form-utils';
+import { copyText } from '@/lib/form-utils';
+import { useToast } from '@/hooks/use-toast';
+import { saveForm } from '@/lib/actions';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import FieldSettingsPanel from './field-settings-panel';
+import { FormFieldWrapper } from './form-field';
 import { FieldPalette } from './field-palette';
 import { FormCanvas } from './form-canvas';
 import { AISuggester } from './ai-suggester';
-import { Save, Eye, CopyIcon, BadgeInfo } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { saveForm } from '@/app/actions';
-import { Textarea } from '../ui/textarea';
-import { Separator } from '../ui/separator';
-import { ScrollArea } from '../ui/scroll-area';
-import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
-import Link from 'next/link';
-import { copyText } from '@/lib/form-utils';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext } from '@dnd-kit/sortable';
-import FieldSettingsPanel from './field-settings-panel';
-import { FormFieldWrapper } from './form-field';
-import { fieldTypes } from '@/lib/form-utils';
 
 interface FormBuilderClientProps {
   form: Form;
@@ -40,7 +40,6 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedField, setSelectedField] = useState<FormField | null>(null);
   const [activeField, setActiveField] = useState<FormField | null>(null);
-
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -158,10 +157,11 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
       if (form.id === 'new' && formId) {
         router.push(`/dashboard/builder/${formId}`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as Error;
       toast({
         title: 'Error',
-        description: 'Failed to save form. Please try again.',
+        description: `Error: ${err.message}`,
         variant: 'destructive',
       });
     } finally {
@@ -209,7 +209,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     }
 
     return (
-       <Button variant="outline" size="sm" asChild>
+       <Button variant="secondary" size="sm" asChild>
         <Link href={`/f/${form.id}`} target="_blank">
           <Eye className="mr-2 h-4 w-4" /> Preview
         </Link>
@@ -250,18 +250,17 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
       <div className="flex flex-col gap-4 h-[calc(100vh-10rem)]">
         <header className="p-4 space-y-4 bg-card rounded-t-lg">
-          <div className='flex flex-col gap-2 lg:flex-row
-        items-center justify-around'>
+          <div className='flex flex-col gap-2 lg:flex-row items-center justify-between w-full'>
             <Input
               value={title}
               onChange={e => setTitle(e.target.value)}
               className="font-bold border border-zinc-600 w-full"
               placeholder="Form Title"
             />
-            <div className="flex items-center gap-2 w-full">
-              <AISuggester fields={fields} setFields={setFields} />
+            <div className="flex items-center gap-2 w-fit">
+              {/* <AISuggester fields={fields} setFields={setFields} /> */}
               <PreviewButton />
-              <Button variant="outline" size="sm" onClick={handleShare}>
+              <Button variant="secondary" size="sm" onClick={handleShare}>
                 <CopyIcon className="mr-2 h-4 w-4" /> Copy Link
               </Button>
               <SaveButton />
@@ -293,6 +292,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
                 <FormCanvas
                   fields={fields}
                   setSelectedField={setSelectedField}
+                  removeField={removeField}
                 />
               </ScrollArea>
             </div>
@@ -307,6 +307,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
           <FormFieldWrapper
             field={activeField}
             onSelect={() => {}}
+            removeField={() => {}}
           />
         )}
       </DragOverlay>

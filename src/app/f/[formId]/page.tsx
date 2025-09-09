@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Form, FormField } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { PublicForm } from "@/components/public-form/public-form";
@@ -24,7 +25,7 @@ export default async function PublicFormPage({ params }: PublicFormPageProps) {
           <h2 className="text-2xl font-bold text-destructive">Form Not Found</h2>
           <p className="text-muted-foreground mt-2">{formError?.details}</p>
           <Button asChild className="mt-6">
-            <a href="/">Go Home</a>
+            <Link href="/">Go Home</Link>
           </Button>
         </div>
       </div>

@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { LogOut, Settings, User as UserIcon } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
-import { logout, updateProfile } from '@/app/actions';
+import { logout, updateProfile } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import type { Profile } from '@/lib/types';

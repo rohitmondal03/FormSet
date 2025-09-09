@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { deleteAccount } from '@/app/actions';
+import { deleteAccount } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,

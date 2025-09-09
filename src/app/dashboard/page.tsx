@@ -87,7 +87,7 @@ export default async function DashboardPage() {
                   colSpan={4}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  You haven't created any forms yet.
+                  You haven&apos;t created any forms yet.
                 </TableCell>
               </TableRow>
             )}

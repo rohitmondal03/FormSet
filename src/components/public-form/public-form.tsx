@@ -1,17 +1,23 @@
 
 'use client';
 
-import React, { useCallback, useEffect, useState, useTransition } from 'react'
+import Link from 'next/link';
+import { useCallback, useEffect, useState, useTransition } from 'react'
 import { format } from 'date-fns';
 import { Star, FileUp, Mail, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { submitResponse, checkExistingResponse } from '@/lib/actions';
 import type { Form, FormField } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -19,29 +25,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { submitResponse, checkExistingResponse } from '@/app/actions';
-import { DatePicker } from '@/components/ui/date-picker';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '../theme-toggle';
 
 type EmailStatus = 'idle' | 'checking' | 'exists' | 'does_not_exist' | 'error';
 
 interface PublicFormProps {
-  form: Form;
+  form: Form & { fields: FormField[] };
 }
-
 export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [formValues, setFormValues] = useState<Record<string, any>>({});
+  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | null>[]>([]);
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
   const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleEmailBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const email = e.target.value;
@@ -68,7 +67,6 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-
   const validateForm = useCallback(() => {
     // Check for submitter email
     if (!formValues.submitter_email || !/\S+@\S+\.\S+/.test(formValues.submitter_email)) {
@@ -92,11 +90,9 @@ export function PublicForm({ form }: PublicFormProps) {
     return true;
   }, [form.fields, form.limit_one_response_per_email, formValues, emailStatus]);
 
-
   useEffect(() => {
     setIsFormValid(validateForm());
   }, [formValues, validateForm]);
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,10 +132,12 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-  const handleValueChange = useCallback((fieldId: string, value: any, type?: FormField['type']) => {
+  const handleValueChange = useCallback((fieldId?: string, value: any, type?: FormField['type']) => {
     setFormValues(prev => {
       if (type === 'checkbox') {
-        const existing: any[] = prev[fieldId] || [];
+
+        const existing = prev[fieldId];
+
         if (value.checked) {
           return { ...prev, [fieldId]: [...existing, value.value] };
         } else {
@@ -191,7 +189,7 @@ export function PublicForm({ form }: PublicFormProps) {
                 placeholder={field.placeholder || ''}
                 required={field.required}
                 rows={4}
-                onChange={(e) => handleValueChange(field.id, e.target.value)}
+                onChange={(e) => handleValueChange(field?.id, e.target.value)}
               />
             ),
             date: (
@@ -314,7 +312,7 @@ export function PublicForm({ form }: PublicFormProps) {
       case 'exists':
         return <p className="text-sm text-destructive flex items-center mt-2"><AlertCircle className="mr-2 h-4 w-4" />This email has already submitted a response.</p>;
       case 'does_not_exist':
-        return <p className="text-sm text-green-600 flex items-center mt-2"><CheckCircle className="mr-2 h-4 w-4" />You're good to go!</p>;
+        return <p className="text-sm text-green-600 flex items-center mt-2"><CheckCircle className="mr-2 h-4 w-4" />You&apos;re good to go!</p>;
       case 'error':
         return <p className="text-sm text-destructive mt-2">{emailError}</p>;
       default:
@@ -365,9 +363,9 @@ export function PublicForm({ form }: PublicFormProps) {
         <footer className="text-center mt-8">
           <p className="text-muted-foreground text-sm">
             Powered by{' '}
-            <a href="/" className="font-semibold text-primary hover:underline">
+            <Link href="/" className="font-semibold text-primary hover:underline">
               FormSet
-            </a>
+            </Link>
           </p>
         </footer>
       </div>

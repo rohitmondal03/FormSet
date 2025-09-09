@@ -18,11 +18,11 @@ const SliderInput: React.FC<SliderInputProps> = ({ field }) => {
   // You'll need to manage the slider's value state
   // const [sliderValue, setSliderValue] = useState([min]);
 
-  const handleValueChange = (value: number[]) => {
-    // Handle the slider value change, e.g., update local state and call onValueChange
-    // setSliderValue(value);
-    // onValueChange(value);
-  };
+  // const handleValueChange = (value: number[]) => {
+  //   // Handle the slider value change, e.g., update local state and call onValueChange
+  //   setSliderValue(value);
+  //   onValueChange(value);
+  // };
 
   return (
     <div className="space-y-2">
@@ -38,7 +38,7 @@ const SliderInput: React.FC<SliderInputProps> = ({ field }) => {
         max={max}
         step={step}
         // value={sliderValue}
-        onValueChange={handleValueChange}
+        // onValueChange={handleValueChange}
         // Add disabled={field.disabled} or readOnly if needed
       />
       {/* Display current value if desired */}

@@ -2,23 +2,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useFormStatus } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+import { Bot, Edit, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { signup } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
-import { signup } from '@/app/actions';
-import { useFormStatus } from 'react-dom';
-import { useToast } from '@/hooks/use-toast';
-import { useEffect, useActionState } from 'react';
-import { Bot, Edit, Share2 } from 'lucide-react';
 
 const SubmitButton = () => {
   const { pending } = useFormStatus();

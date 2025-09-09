@@ -15,7 +15,7 @@ const suggestionSchema = z.object({
   description: z.string().min(10, 'Please provide a more detailed description.'),
 });
 
-export async function getSuggestions(prevState: any, formData: FormData) {
+export async function getSuggestions(prevState: unknown, formData: FormData) {
   const supabase = await createActionClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -49,7 +49,7 @@ export async function getSuggestions(prevState: any, formData: FormData) {
   }
 }
 
-export async function signup(prevState: any, formData: FormData) {
+export async function signup(prevState: unknown, formData: FormData) {
   const supabase = await createActionClient();
   const validatedFields = signupSchema.safeParse(Object.fromEntries(formData));
 
@@ -80,7 +80,7 @@ export async function signup(prevState: any, formData: FormData) {
   redirect('/dashboard');
 }
 
-export async function login(prevState: any, formData: FormData) {
+export async function login(prevState: unknown, formData: FormData) {
   const supabase = await createActionClient();
 
   const validatedFields = loginSchema.safeParse(Object.fromEntries(formData));
@@ -266,8 +266,8 @@ export async function submitResponse(formId: string, formData: FormData) {
     return { error: 'Could not load form details for submission.' };
   }
 
-  const responseData: Record<string, any> = {};
-  const fileUploadPromises: Promise<any>[] = [];
+  const responseData: Record<string, FormDataEntryValue | FormDataEntryValue[]> = {};
+  const fileUploadPromises: Promise<void>[] = [];
 
   for (const field of formFields) {
     const value = formData.getAll(field.id);
@@ -306,8 +306,9 @@ export async function submitResponse(formId: string, formData: FormData) {
 
   try {
     await Promise.all(fileUploadPromises);
-  } catch (error: any) {
-    return { error: error.message };
+  } catch (error: unknown) {
+    const err = error as Error;
+    return { error: err.message };
   }
 
   const { data: response, error: responseError } = await supabase

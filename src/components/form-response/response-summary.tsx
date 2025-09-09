@@ -2,16 +2,14 @@
 'use client';
 
 import React from 'react';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import type { Form, FormField, FormResponse as FormResponseType } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 
 interface ResponseSummaryProps {
   form: Form;
   responses: FormResponseType[];
 }
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
   if (responses.length === 0) {

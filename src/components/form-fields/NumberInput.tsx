@@ -15,13 +15,13 @@ const NumberInput: React.FC<NumberInputProps> = ({ field }) => {
   const maxValue = field.properties?.max as number | undefined;
 
   // TODO: Implement input change handling
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Handle the change, potentially calling a parent onChange prop
-    // if (onChange) {
-    //   onChange(value);
-    // }
-  };
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   // Handle the change, potentially calling a parent onChange prop
+  //   // if (onChange) {
+  //   //   onChange(value);
+  //   // }
+  // };
 
   return (
     <div className="space-y-2">
@@ -36,7 +36,7 @@ const NumberInput: React.FC<NumberInputProps> = ({ field }) => {
         required={field.required}
         min={minValue}
         max={maxValue}
-        onChange={handleInputChange}
+        // onChange={handleInputChange}
       />
       {/* TODO: Add help text/description if available in field properties */}
       {/* {field.description && <p className="text-sm text-muted-foreground">{field.description}</p>} */}

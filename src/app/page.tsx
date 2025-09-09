@@ -3,7 +3,7 @@ import { CheckCircle, Bot, Rows, Share2, BarChart, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserNav } from '@/components/user-nav';
 import { cn } from '@/lib/utils';
@@ -130,7 +130,7 @@ export default async function Home() {
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Ready to build your first form?</h2>
-            <p className="mt-4 text-lg text-muted-foreground">Join thousands of creators and start collecting responses today. It's free to get started.</p>
+            <p className="mt-4 text-lg text-muted-foreground">Join thousands of creators and start collecting responses today. It&apos;s free to get started.</p>
             <div className="mt-8">
               <Button size="lg" asChild>
                 <Link href="/signup">Create Your FormSet Account</Link>

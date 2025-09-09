@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import { Trash2, Undo } from 'lucide-react';
 import { FormField } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,9 +17,6 @@ import {
   SheetFooter,
   SheetClose,
 } from '@/components/ui/sheet';
-import { Trash2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Undo } from 'lucide-react';
 
 interface FieldSettingsPanelProps {
   field: FormField;
@@ -36,7 +34,6 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
   onUndo,
 }) => {
   const { toast } = useToast();
-  const [deletedField, setDeletedField] = useState<FormField | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     updateField(field.id, { [e.target.name]: e.target.value });
@@ -48,7 +45,6 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
 
   const handleDeleteField = () => {
     const fieldToDelete = { ...field };
-    setDeletedField(fieldToDelete);
     removeField(field.id);
     onClose();
 
