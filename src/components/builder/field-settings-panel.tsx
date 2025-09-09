@@ -36,16 +36,16 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    updateField(field.id, { [e.target.name]: e.target.value });
+    updateField(field.id as string, { [e.target.name]: e.target.value });
   };
 
   const handleCheckboxChange = (checked: boolean) => {
-    updateField(field.id, { required: checked });
+    updateField(field.id as string, { required: checked });
   };
 
   const handleDeleteField = () => {
     const fieldToDelete = { ...field };
-    removeField(field.id);
+    removeField(field.id as string);
     onClose();
 
     toast({
@@ -85,7 +85,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   onChange={(e) => {
                     const newOptions = [...options];
                     newOptions[index] = { ...newOptions[index], label: e.target.value, value: e.target.value.toLowerCase().replace(/\s+/g, '-') };
-                    updateField(field.id, { options: newOptions });
+                    updateField(field.id as string, { options: newOptions });
                   }}
                   className="flex-1"
                 />
@@ -94,7 +94,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   size="sm"
                   onClick={() => {
                     const newOptions = options.filter((_, i) => i !== index);
-                    updateField(field.id, { options: newOptions });
+                    updateField(field.id as string, { options: newOptions });
                   }}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -107,7 +107,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               onClick={() => {
                  const newOptionNumber = (field.options?.length || 0) + 1;
                  const newOption = { value: `option-${newOptionNumber}`, label: `Option ${newOptionNumber}` };
-                 updateField(field.id, { options: [...(field.options || []), newOption] });
+                 updateField(field.id as string, { options: [...(field.options || []), newOption] });
               }}
             >
               Add Option
@@ -125,7 +125,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   placeholder='Min'
                   value={field.properties?.min ?? ''}
                   onChange={(e) =>
-                    updateField(field.id, { properties: { ...field.properties, min: e.target.value ? parseFloat(e.target.value) : undefined } })
+                    updateField(field.id as string, { properties: { ...field.properties, min: e.target.value ? parseFloat(e.target.value) : undefined } })
                   }
                   className="flex-1"
                 />
@@ -135,7 +135,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                   placeholder='Max'
                   value={field.properties?.max ?? ''}
                   onChange={(e) =>
-                    updateField(field.id, { properties: { ...field.properties, max: e.target.value ? parseFloat(e.target.value) : undefined } })
+                    updateField(field.id as string, { properties: { ...field.properties, max: e.target.value ? parseFloat(e.target.value) : undefined } })
                   }
                   className="flex-1"
                 />
@@ -151,19 +151,19 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
                     type="number"
                     placeholder='Min'
                     value={field.properties?.min ?? 0}
-                    onChange={(e) => updateField(field.id, { properties: { ...field.properties, min: parseFloat(e.target.value) } })}
+                    onChange={(e) => updateField(field.id as string, { properties: { ...field.properties, min: parseFloat(e.target.value) } })}
                   />
                   <Input
                     type="number"
                     placeholder='Max'
                     value={field.properties?.max ?? 100}
-                    onChange={(e) => updateField(field.id, { properties: { ...field.properties, max: parseFloat(e.target.value) } })}
+                    onChange={(e) => updateField(field.id as string, { properties: { ...field.properties, max: parseFloat(e.target.value) } })}
                   />
                   <Input
                     type="number"
                     placeholder='Step'
                     value={field.properties?.step ?? 1}
-                    onChange={(e) => updateField(field.id, { properties: { ...field.properties, step: parseFloat(e.target.value) } })}
+                    onChange={(e) => updateField(field.id as string, { properties: { ...field.properties, step: parseFloat(e.target.value) } })}
                   />
               </div>
             </div>
@@ -178,7 +178,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               placeholder="e.g., image/*, .pdf, .docx"
               value={field.properties?.accept || ''}
               onChange={(e) =>
-                updateField(field.id, { properties: { ...field.properties, accept: e.target.value } })
+                updateField(field.id as string, { properties: { ...field.properties, accept: e.target.value } })
               }
             />
              <p className="text-xs text-muted-foreground">
@@ -223,7 +223,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               id="description"
               name="description"
               value={field.properties?.description || ''}
-              onChange={(e) => updateField(field.id, { properties: { ...field.properties, description: e.target.value } })}
+              onChange={(e) => updateField(field.id as string, { properties: { ...field.properties, description: e.target.value } })}
             />
           </div>
           <div className="flex items-center space-x-2">

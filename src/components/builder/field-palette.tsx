@@ -2,7 +2,7 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import type { FormFieldType } from '@/lib/types';
+import type { FormField as FormFieldType } from '@/lib/types';
 import { fieldTypes } from '@/lib/form-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

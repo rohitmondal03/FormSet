@@ -20,8 +20,8 @@ import { getSuggestions } from '@/lib/actions';
 import type { FormField } from '@/lib/types';
 
 interface AISuggesterProps {
-  fields: FormField[];
-  setFields: React.Dispatch<React.SetStateAction<FormField[]>>;
+  fields: Omit<FormField, "form_id" | "validations" | "properties" | "placeholder" | "options">[];
+  setFields: React.Dispatch<React.SetStateAction<Omit<FormField, "form_id" | "validations" | "properties" | "placeholder" | "options">[]>>;
 }
 
 function SubmitButton() {
@@ -37,7 +37,7 @@ export function AISuggester({ fields, setFields }: AISuggesterProps) {
   const [state, formAction] = useActionState(getSuggestions, { suggestions: [], error: undefined });
 
   const addSuggestion = (suggestion: string) => {
-    const newField: FormField = {
+    const newField: Omit<FormField, "form_id" | "validations" | "properties" | "placeholder" | "options"> = {
       id: crypto.randomUUID(),
       type: 'text', // default to text, user can change it
       label: suggestion,
@@ -46,6 +46,7 @@ export function AISuggester({ fields, setFields }: AISuggesterProps) {
     };
     setFields([...fields, newField]);
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>

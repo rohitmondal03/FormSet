@@ -24,7 +24,7 @@ export function FormFieldWrapper({ field, onSelect, removeField }: FormFieldWrap
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: field.id });
+  } = useSortable({ id: field.id as string });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -48,7 +48,7 @@ export function FormFieldWrapper({ field, onSelect, removeField }: FormFieldWrap
           <Button variant="outline" size={"lg"} className="size-7" onClick={() => onSelect(field)}>
             <Settings className="size-4" />
           </Button>
-          <Button variant="destructive" size={"lg"} className="size-7" onClick={() => removeField(field.id)}>
+          <Button variant="destructive" size={"lg"} className="size-7" onClick={() => removeField(field.id as string)}>
             <TrashIcon className='size-4' />
           </Button>
         </div>

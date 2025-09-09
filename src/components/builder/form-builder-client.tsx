@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Save, Eye, CopyIcon, BadgeInfo } from 'lucide-react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, } from '@dnd-kit/sortable';
-import type { Form, FormField, FormFieldType } from '@/lib/types';
+import type { Form, FormField } from '@/lib/types';
 import { fieldTypes } from '@/lib/form-utils';
 import { copyText } from '@/lib/form-utils';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +27,7 @@ import { FormCanvas } from './form-canvas';
 import { AISuggester } from './ai-suggester';
 
 interface FormBuilderClientProps {
-  form: Form;
+  form: Form & { fields: FormField[] };
 }
 
 export function FormBuilderClient({ form }: FormBuilderClientProps) {
@@ -35,7 +35,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const { toast } = useToast();
   const [title, setTitle] = useState(form.title);
   const [description, setDescription] = useState(form.description);
-  const [fields, setFields] = useState<FormField[]>(form.fields.sort((a,b) => a.order - b.order));
+  const [fields, setFields] = useState<FormField[]>(form.fields.sort((a, b) => a.order - b.order));
   const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(form.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedField, setSelectedField] = useState<FormField | null>(null);
@@ -50,7 +50,9 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     useSensor(KeyboardSensor)
   )
 
-  const addField = (type: FormFieldType, index: number = fields.length) => {
+  const addField = (type: FormField['type'], index: number = fields.length) => {
+    if (!form || !form.id) return;
+
     const newField: FormField = {
       id: crypto.randomUUID(),
       type,
@@ -58,8 +60,12 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
       required: false,
       order: index,
       options: [],
+      form_id: form.id,
+      placeholder: null,
+      properties: null,
+      validation: null
     };
-    
+
     if (type === 'radio' || type === 'select' || type === 'checkbox') {
       newField.options = [{ value: 'option-1', label: 'Option 1' }];
     }
@@ -92,31 +98,39 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const isPaletteItem = active.data.current?.isPaletteItem;
+
+    if(!form || !form.id) return;
+
     if (isPaletteItem) {
-        const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
-        if (!fieldTypeData) return;
-        setActiveField({
-            id: `palette-${active.data.current?.type}`,
-            type: active.data.current?.type,
-            label: fieldTypeData.label,
-            required: false,
-            order: -1
-        });
+      const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
+      if (!fieldTypeData) return;
+      setActiveField({
+        id: `palette-${active.data.current?.type}`,
+        type: active.data.current?.type,
+        label: fieldTypeData.label,
+        required: false,
+        order: -1,
+        form_id: form.id,
+        placeholder: null,
+        properties: null,
+        validation: null,
+        options: null
+      });
     } else {
-        const field = fields.find(f => f.id === active.id);
-        if (field) {
-            setActiveField(field);
-        }
+      const field = fields.find(f => f.id === active.id);
+      if (field) {
+        setActiveField(field);
+      }
     }
   };
-  
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveField(null);
     if (!over) return;
 
     const isPaletteItem = active.data.current?.isPaletteItem;
-    
+
     if (isPaletteItem) {
       const overId = over.id === 'form-canvas-droppable' ? null : over.id;
       const overIndex = overId ? fields.findIndex(f => f.id === overId) : fields.length;
@@ -131,7 +145,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
           const oldIndex = items.findIndex((item) => item.id === activeId);
           const newIndex = items.findIndex((item) => item.id === overId);
           const reorderedItems = arrayMove(items, oldIndex, newIndex);
-          return reorderedItems.map((item, index) => ({...item, order: index}));
+          return reorderedItems.map((item, index) => ({ ...item, order: index }));
         });
       }
     }
@@ -140,7 +154,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
   const handleSave = async () => {
     setIsSaving(true);
-    const formToSave: Form = {
+    const formToSave: Form & { fields: FormField[] } = {
       ...form,
       title,
       description,
@@ -195,9 +209,9 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <span tabIndex={0}>
-                 <Button variant="outline" size="sm" disabled>
-                    <Eye className="mr-2 h-4 w-4" /> Preview
-                 </Button>
+                <Button variant="outline" size="sm" disabled>
+                  <Eye className="mr-2 h-4 w-4" /> Preview
+                </Button>
               </span>
             </TooltipTrigger>
             <TooltipContent>
@@ -209,7 +223,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     }
 
     return (
-       <Button variant="secondary" size="sm" asChild>
+      <Button variant="secondary" size="sm" asChild>
         <Link href={`/f/${form.id}`} target="_blank">
           <Eye className="mr-2 h-4 w-4" /> Preview
         </Link>
@@ -267,7 +281,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
             </div>
           </div>
           <div className='w-full mt-2 lg:mt-0'>
-            <Textarea id="form-description" value={description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
+            <Textarea id="form-description" value={!description ? undefined : description} onChange={e => setDescription(e.target.value)} className="border border-zinc-600 w-full" placeholder='Enter form description' />
           </div>
           <div className="flex items-center space-x-2 pt-2">
             <Switch id="limit-one-response" checked={limitOneResponsePerEmail || false} onCheckedChange={setLimitOneResponsePerEmail} />
@@ -306,8 +320,8 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
         {activeField && (
           <FormFieldWrapper
             field={activeField}
-            onSelect={() => {}}
-            removeField={() => {}}
+            onSelect={() => { }}
+            removeField={() => { }}
           />
         )}
       </DragOverlay>

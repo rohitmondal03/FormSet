@@ -8,9 +8,9 @@ interface FormBuilderPageProps {
 }
 
 export default async function FormBuilderPage({ params }: FormBuilderPageProps) {
-  const { formId } = (await params);
+  const formId = (await params).formId;
 
-  let form: Form | null = null;
+  let form: Form & { fields: FormField[], responseCount: number, url: string } | null = null;
   const error: Error | null = null;
   const supabase = await createClient();
 
@@ -20,10 +20,11 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       title: 'Untitled Form',
       description: '',
       fields: [],
-      createdAt: new Date(),
+      created_at: new Date().toISOString(),
       responseCount: 0,
       url: '',
       limit_one_response_per_email: false,
+      user_id: '',
     }
   }
   else {
@@ -43,10 +44,11 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
       title: form_data.title,
       description: form_data.description ?? '',
       fields: form_data.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
-      createdAt: new Date(form_data.created_at),
+      created_at: new Date(form_data.created_at).toISOString(),
       responseCount: form_data.form_responses[0]?.count || 0,
       url: `/f/${form_data.id}`,
       limit_one_response_per_email: form_data.limit_one_response_per_email,
+      user_id: form_data.user_id
     }
   }
 
@@ -61,4 +63,3 @@ export default async function FormBuilderPage({ params }: FormBuilderPageProps) 
   return <FormBuilderClient form={form} />;
 }
 
-    

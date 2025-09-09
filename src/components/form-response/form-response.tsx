@@ -16,8 +16,8 @@ import { exportResponses } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ResponseTable } from '@/components/response-table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { ResponseSummary } from './response-summary';
 
 interface FormResponseProps {
@@ -27,7 +27,7 @@ interface FormResponseProps {
 
 export function FormResponse({ responses, formData }: FormResponseProps) {
   const { toast } = useToast();
-  const [form, setForm] = useState<Form | null>(null);
+  const [form, setForm] = useState<Form & { responseCount: number } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
   }, [formData, responses.length]);
 
   const handleExport = async (format: 'csv' | 'xlsx' | 'pdf' | 'docx') => {
-    if (!form) return;
+    if (!form || !form.id) return;
     setIsExporting(true);
     toast({
       title: 'Exporting...',
