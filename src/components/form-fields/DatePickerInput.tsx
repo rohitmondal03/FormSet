@@ -27,7 +27,7 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange 
     }
   };
 
-  const properties = (field.properties as Record<string, unknown>) || {};
+  const properties = (field.properties as Record<string, string | number | boolean | Date | undefined>) || {};
 
   return (
     <div className="space-y-2">
