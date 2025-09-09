@@ -7,8 +7,8 @@ import type { Form, FormField, FormResponse as FormResponseType } from '@/lib/ty
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface ResponseSummaryProps {
-  form: Form;
-  responses: FormResponseType[];
+  form: Partial<Form>;
+  responses: Partial<FormResponseType>[];
 }
 
 export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
@@ -33,7 +33,7 @@ export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
     }
 
     responses.forEach(response => {
-      const answer = response.data[field.id];
+      const answer = response.data?.[field.id];
       if (Array.isArray(answer)) { // Checkboxes
         answer.forEach(val => {
           const option = (field.options as {value: string, label: string}[])?.find(opt => opt.value === val);
@@ -53,7 +53,7 @@ export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
   };
 
   const getNumericSummary = (field: FormField) => {
-    const values = responses.map(r => r.data[field.id]).filter(v => typeof v === 'number' || !isNaN(Number(v))) as number[];
+    const values = responses.map(r => r.data?.[field.id]).filter(v => typeof v === 'number' || !isNaN(Number(v))) as number[];
     if (values.length === 0) return { avg: 0, min: 0, max: 0, distribution: [] };
     
     const sum = values.reduce((acc, v) => acc + Number(v), 0);
@@ -76,7 +76,7 @@ export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
 
   return (
     <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-      {form.fields.map(field => {
+      {form.fields?.map(field => {
         if (['radio', 'select', 'checkbox'].includes(field.type)) {
           const data = getSummaryData(field);
           return (
@@ -133,7 +133,7 @@ export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
                <CardContent>
                   <ul className="space-y-3">
                     {responses.slice(0, 5).map(r => {
-                      const answer = r.data[field.id];
+                      const answer = r.data?.[field.id];
                       return answer ? (
                         <li key={r.id} className="text-sm p-3 bg-muted/50 rounded-md border">
                           {String(answer)}

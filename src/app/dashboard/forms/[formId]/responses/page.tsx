@@ -18,11 +18,11 @@ export default async function FormResponsesPage({ params }: FormResponsePageProp
     .eq('id', formId)
     .single();
 
-  const transformedForm: Form = {
+  const transformedForm: Partial<Form> = {
     id: formData.id,
     title: formData.title,
     description: formData.description ?? '',
-    createdAt: new Date(formData.created_at),
+    created_at: new Date(formData.created_at).toISOString(),
     url: `/f/${formData.id}`,
     fields: formData.form_fields,
     responseCount: 0, // This will be updated by response count
@@ -36,9 +36,8 @@ export default async function FormResponsesPage({ params }: FormResponsePageProp
     .eq('form_id', formId)
     .order('created_at', { ascending: false });
 
-  const transformedResponses: FormResponseType[] = responseData?.map(r => ({
+  const transformedResponses: Partial<FormResponseType>[] = responseData?.map((r: Partial<FormResponseType>) => ({
     id: r.id,
-    submittedAt: new Date(r.created_at),
     data: r.data,
   })) ?? [];
 

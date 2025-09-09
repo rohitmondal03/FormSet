@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { FileSearch } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import type { Form, FormResponse as FormResponseType, Json } from '@/lib/types';
+import type { Form, FormResponse as FormResponseType, JsonType } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -27,8 +27,8 @@ import { PDFViewer } from './pdf-viewer';
 import { ScrollArea } from './ui/scroll-area';
 
 interface ResponseTableProps {
-  form: Form | null;
-  responses: FormResponseType[];
+  form: Partial<Form> | null;
+  responses: Partial<FormResponseType>[];
 }
 
 export function ResponseTable({ form, responses }: ResponseTableProps) {
@@ -48,7 +48,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     setIsFileDialogOpen(true);
   };
 
-  const renderCell = (data: Json | Json[]) => {
+  const renderCell = (data: JsonType | JsonType[]) => {
     if (typeof data === 'string' && (data.startsWith('http') || data.startsWith('https:'))) {
       const lower = data.toLowerCase();
       if (lower.endsWith('.pdf')) {
@@ -118,10 +118,10 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
                 {responses.length > 0 ? (
                   responses.map((response) => (
                     <TableRow key={response.id}>
-                      <TableCell>{format(new Date(response.created_at), 'MMM d, yyyy, h:mm a')}</TableCell>
+                      <TableCell>{format(new Date(response?.created_at as string), 'MMM d, yyyy, h:mm a')}</TableCell>
                       {form?.fields?.map((field) => (
                         <TableCell key={field.id}>
-                          {response.data && (response.data as Record<string, Json | Json[]>)[field.id] ? renderCell((response.data as Record<string, Json | Json[]>)[field.id]) : '-'}
+                          {response.data && (response.data as Record<string, JsonType | JsonType[]>)[field.id] ? renderCell((response.data as Record<string, JsonType | JsonType[]>)[field.id]) : '-'}
                         </TableCell>
                       ))}
                     </TableRow>

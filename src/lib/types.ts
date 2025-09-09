@@ -1,6 +1,7 @@
 
 import type { Database, Json } from "../../supabase/database.types";
 
+export type JsonType = Json;
 type PublicSchema = Database["public"];
 type TableType = PublicSchema["Tables"];
 type FormRow = TableType["forms"]["Row"];
@@ -9,7 +10,7 @@ type FormResponseRow = TableType["form_responses"]["Row"];
 
 export type FormField = FormFieldRow;
 
-export type Form = Omit<FormRow, "limit_one_response_per_email"> & {
+export type Form = FormRow & {
     limit_one_response_per_email: boolean;
     fields: FormField[];
     responseCount: number;

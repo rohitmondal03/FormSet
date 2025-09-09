@@ -21,13 +21,13 @@ import { ResponseTable } from '@/components/response-table';
 import { ResponseSummary } from './response-summary';
 
 interface FormResponseProps {
-  responses: FormResponseType[];
-  formData: Form;
+  responses: Partial<FormResponseType>[];
+  formData: Partial<Form>;
 }
 
 export function FormResponse({ responses, formData }: FormResponseProps) {
   const { toast } = useToast();
-  const [form, setForm] = useState<Form & { responseCount: number } | null>(null);
+  const [form, setForm] = useState<Partial<Form> | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
@@ -103,15 +103,15 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
         </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="summary">
+      <Tabs defaultValue="responses">
         <TabsList>
-          <TabsTrigger value="summary">
-            <BarChart2 className="mr-2 size-4" />
-            Summary
-          </TabsTrigger>
           <TabsTrigger value="responses">
             <FileSpreadsheetIcon className="mr-2 size-4" />
             Responses
+          </TabsTrigger>
+          <TabsTrigger value="summary">
+            <BarChart2 className="mr-2 size-4" />
+            Summary
           </TabsTrigger>
         </TabsList>
         <TabsContent value="summary" className="mt-4">
