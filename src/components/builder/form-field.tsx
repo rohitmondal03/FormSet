@@ -48,11 +48,7 @@ export function FormFieldWrapper({ field, onSelect, removeField }: FormFieldWrap
           <Button variant="outline" size={"sm"} className="size-7 p-1" onClick={() => onSelect(field)}>
             <Settings className="size-4" />
           </Button>
-<<<<<<< HEAD
-          <Button variant="destructive" size={"lg"} className="size-7" onClick={() => removeField(field.id as string)}>
-=======
           <Button variant="destructive" size={"sm"} className="size-7 p-1" onClick={() => removeField(field.id)}>
->>>>>>> 81c29b0 (resolve the lint errors in this application)
             <TrashIcon className='size-4' />
           </Button>
         </div>
