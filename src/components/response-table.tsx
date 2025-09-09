@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { FileSearch } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import type { Form, FormResponse } from '@/lib/types';
+import type { Form, FormResponse as FormResponseType } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -28,7 +28,7 @@ import { ScrollArea } from './ui/scroll-area';
 
 interface ResponseTableProps {
   form: Form | null;
-  responses: FormResponse[];
+  responses: FormResponseType[];
 }
 
 export function ResponseTable({ form, responses }: ResponseTableProps) {
@@ -36,7 +36,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
   const [selectedFileType, setSelectedFileType] = useState<'pdf' | 'image' | 'docx' | null>(null);
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
-  const headers = ['Submitted At', ...form?.fields.map((f) => f.label) || []];
+  const headers = ['Submitted At', ...form?.fields?.map((f) => f.label) || []];
 
   const refineText = (text: string) => {
     return text.trim().replace(/\s+/g, ' ').replaceAll("-", " ").toUpperCase();
@@ -48,7 +48,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
     setIsFileDialogOpen(true);
   };
 
-  const renderCell = (data: string | number | boolean | null | Array<string>) => {
+  const renderCell = (data: any) => {
     if (typeof data === 'string' && (data.startsWith('http') || data.startsWith('https:'))) {
       const lower = data.toLowerCase();
       if (lower.endsWith('.pdf')) {
@@ -119,9 +119,9 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
                   responses.map((response) => (
                     <TableRow key={response.id}>
                       <TableCell>{format(new Date(response.created_at), 'MMM d, yyyy, h:mm a')}</TableCell>
-                      {form?.fields.map((field) => (
+                      {form?.fields?.map((field) => (
                         <TableCell key={field.id}>
-                          {response.data[field.id] ? renderCell(response.data[field.id]) : '-'}
+                          {response.data && (response.data as any)[field.id] ? renderCell((response.data as any)[field.id]) : '-'}
                         </TableCell>
                       ))}
                     </TableRow>

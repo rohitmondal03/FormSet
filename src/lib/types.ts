@@ -4,9 +4,10 @@ type PublicSchema = Database["public"];
 type TableType = PublicSchema["Tables"];
 type FormRow = TableType["forms"]["Row"];
 type FormFieldRow = TableType["form_fields"]["Row"];
+type FormResponseRow = TableType["form_responses"]["Row"];
 
 export type FormField = FormFieldRow;
-export type Form = Omit<FormRow, "updated_at"> & {
+export type Form = FormRow & {
     fields?: FormField[];
     responseCount?: number;
     url?: string;
@@ -16,7 +17,7 @@ export type Form = Omit<FormRow, "updated_at"> & {
 export type FormAnswer = TableType["form_answers"]["Row"];
 
 // This corresponds to the form_responses table
-export type FormResponse = TableType["form_responses"]["Row"];
+export type FormResponse = FormResponseRow;
 
 // This corresponds to the profiles table
 export type Profile = TableType["profiles"]["Row"];

@@ -189,8 +189,8 @@ export function UserNav() {
         avatarPreview={avatarPreview}
         profileAvatarURL={profile?.avatar_url}
         avatarFallback={getInitials(profile?.full_name, user?.email || '')}
-        fullName={profile?.full_name || ''}
-        email={user?.email || ''}
+        fullName={profile?.full_name || undefined}
+        email={user?.email}
         setProfileOpen={setProfileOpen}
         handleProfileSave={handleProfileSave}
         handleAvatarChange={handleAvatarChange}

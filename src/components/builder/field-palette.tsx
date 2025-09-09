@@ -2,14 +2,14 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import type { FormField as FormFieldType } from '@/lib/types';
+import type { FormField } from '@/lib/types';
 import { fieldTypes } from '@/lib/form-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DraggablePaletteItemProps {
-  type: FormFieldType;
+  type: FormField['type'];
   label: string;
   Icon: React.ElementType;
 }

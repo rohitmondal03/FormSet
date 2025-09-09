@@ -35,7 +35,7 @@ interface PublicFormProps {
 export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
+  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | string[] | File | null>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
@@ -132,7 +132,7 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-  const handleValueChange = useCallback((fieldId: string | undefined, value: string | number | boolean | { value: string, checked: boolean } | Date | null, type?: FormField['type']) => {
+  const handleValueChange = useCallback((fieldId: string | undefined, value: string | number | boolean | { value: string, checked: boolean } | Date | File | null, type?: FormField['type']) => {
     if (!fieldId) return;
 
     setFormValues(prev => {
@@ -216,7 +216,7 @@ export function PublicForm({ form }: PublicFormProps) {
             ),
             radio: (
               <RadioGroup name={field.id} required={field.required} className='space-y-2 pt-1' onValueChange={(value) => handleValueChange(field.id, value)}>
-                {(field.options as {value: string, label: string}[])?.map(opt => (
+                {((field.options as {value: string, label: string}[]) || []).map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <RadioGroupItem
                       value={opt.value}
@@ -229,7 +229,7 @@ export function PublicForm({ form }: PublicFormProps) {
             ),
             checkbox: (
               <div className="space-y-2 pt-1">
-                {(field.options as {value: string, label: string}[])?.map(opt => (
+                {((field.options as {value: string, label: string}[]) || []).map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <Checkbox
                       id={`${id}-${opt.value}`}
@@ -248,7 +248,7 @@ export function PublicForm({ form }: PublicFormProps) {
                   <SelectValue placeholder={field.placeholder || 'Select an option'} />
                 </SelectTrigger>
                 <SelectContent>
-                  {(field.options as {value: string, label: string}[])?.map(opt => (
+                  {((field.options as {value: string, label: string}[]) || []).map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -263,8 +263,8 @@ export function PublicForm({ form }: PublicFormProps) {
                 type="number"
                 placeholder={field.placeholder || ''}
                 required={field.required}
-                min={field.properties?.min}
-                max={field.properties?.max}
+                min={(field.properties as any)?.min}
+                max={(field.properties as any)?.max}
                 onChange={(e) => handleValueChange(field.id, e.target.value)}
               />
             ),
@@ -286,23 +286,23 @@ export function PublicForm({ form }: PublicFormProps) {
               <div className="flex items-center gap-4 pt-2">
                 <Slider
                   id={id}
-                  min={field.properties?.min || 0}
-                  max={field.properties?.max || 100}
-                  step={field.properties?.step || 1}
-                  value={[(formValues[field.id] as number) || field.properties?.min || 0]}
+                  min={(field.properties as any)?.min || 0}
+                  max={(field.properties as any)?.max || 100}
+                  step={(field.properties as any)?.step || 1}
+                  value={[(formValues[field.id] as number) || (field.properties as any)?.min || 0]}
                   onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
                 />
                 <span className="text-sm font-semibold w-14 text-center py-1.5 px-2 rounded-md bg-muted text-muted-foreground">
-                  {formValues[field.id] || field.properties?.min || 0}
+                  {formValues[field.id] || (field.properties as any)?.min || 0}
                 </span>
               </div>
             ),
             paragraph: (
-              <p className="text-muted-foreground">{field.properties?.description || ''}</p>
+              <p className="text-muted-foreground">{(field.properties as any)?.description || ''}</p>
             )
           }[field.type]
         }
-        {field.properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{field.properties.description}</p>}
+        {field.properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{(field.properties as any).description}</p>}
       </div>
     );
   };
