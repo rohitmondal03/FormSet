@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Eye, CopyIcon, BadgeInfo } from 'lucide-react';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, } from '@dnd-kit/sortable';
 import type { Form, FormField } from '@/lib/types';
 import { fieldTypes } from '@/lib/form-utils';
@@ -102,6 +102,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     if(!form || !form.id) return;
 
     if (isPaletteItem) {
+<<<<<<< HEAD
       const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
       if (!fieldTypeData) return;
       setActiveField({
@@ -116,6 +117,22 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
         validation: null,
         options: null
       });
+=======
+        const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
+        if (!fieldTypeData) return;
+        setActiveField({
+            id: `palette-${active.data.current?.type}`,
+            type: active.data.current?.type,
+            label: fieldTypeData.label,
+            required: false,
+            order: -1,
+            form_id: form.id,
+            placeholder: null,
+            properties: null,
+            validation: null,
+            options: null
+        });
+>>>>>>> 81c29b0 (resolve the lint errors in this application)
     } else {
       const field = fields.find(f => f.id === active.id);
       if (field) {
@@ -272,7 +289,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
               placeholder="Form Title"
             />
             <div className="flex items-center gap-2 w-fit">
-              {/* <AISuggester fields={fields} setFields={setFields} /> */}
+              <AISuggester fields={fields} setFields={setFields} />
               <PreviewButton />
               <Button variant="secondary" size="sm" onClick={handleShare}>
                 <CopyIcon className="mr-2 h-4 w-4" /> Copy Link

@@ -118,7 +118,7 @@ export function ResponseTable({ form, responses }: ResponseTableProps) {
                 {responses.length > 0 ? (
                   responses.map((response) => (
                     <TableRow key={response.id}>
-                      <TableCell>{format(new Date(response.submittedAt), 'MMM d, yyyy, h:mm a')}</TableCell>
+                      <TableCell>{format(new Date(response.created_at), 'MMM d, yyyy, h:mm a')}</TableCell>
                       {form?.fields.map((field) => (
                         <TableCell key={field.id}>
                           {response.data[field.id] ? renderCell(response.data[field.id]) : '-'}

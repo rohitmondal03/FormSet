@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2, Undo } from 'lucide-react';
-import { FormField } from '@/lib/types';
+import type { FormField } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -241,7 +241,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               <Trash2 className="mr-2 h-4 w-4" /> Delete
             </Button>
              <SheetClose asChild>
-                <Button variant="default">Save</Button>
+                <Button variant="default">Done</Button>
             </SheetClose>
         </SheetFooter>
       </SheetContent>

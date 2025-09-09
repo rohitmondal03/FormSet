@@ -1,18 +1,22 @@
-import { Database } from "../../supabase/database.types";
+import type { Database } from "../../supabase/database.types";
 
-type TableType = Database["public"]["Tables"];
+type PublicSchema = Database["public"];
+type TableType = PublicSchema["Tables"];
+type FormRow = TableType["forms"]["Row"];
+type FormFieldRow = TableType["form_fields"]["Row"];
 
-// This corresponds to the form_fields table
-export type FormField = TableType["form_fields"]["Insert"]
+export type FormField = FormFieldRow;
+export type Form = Omit<FormRow, "updated_at"> & {
+    fields?: FormField[];
+    responseCount?: number;
+    url?: string;
+};
 
 // This corresponds to the form_answers table
-export type FormAnswer = TableType["form_answers"]["Insert"]
-
-// This corresponds to the forms table
-export type Form = TableType["forms"]["Insert"]
+export type FormAnswer = TableType["form_answers"]["Row"];
 
 // This corresponds to the form_responses table
-export type FormResponse = TableType["form_responses"]["Insert"]
+export type FormResponse = TableType["form_responses"]["Row"];
 
 // This corresponds to the profiles table
-export type Profile = TableType["profiles"]["Insert"]
+export type Profile = TableType["profiles"]["Row"];

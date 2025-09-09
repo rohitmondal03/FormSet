@@ -29,20 +29,20 @@ export function ResponseSummary({ form, responses }: ResponseSummaryProps) {
     const counts: { [key: string]: number } = {};
 
     if (field.options) {
-      field.options.forEach(opt => counts[opt.label] = 0);
+      (field.options as {label: string}[]).forEach(opt => counts[opt.label] = 0);
     }
 
     responses.forEach(response => {
       const answer = response.data[field.id];
       if (Array.isArray(answer)) { // Checkboxes
         answer.forEach(val => {
-          const option = field.options?.find(opt => opt.value === val);
+          const option = (field.options as {value: string, label: string}[])?.find(opt => opt.value === val);
           if (option) {
              counts[option.label] = (counts[option.label] || 0) + 1;
           }
         });
       } else { // Radio, Select
-          const option = field.options?.find(opt => opt.value === answer);
+          const option = (field.options as {value: string, label: string}[])?.find(opt => opt.value === answer);
           if(option) {
             counts[option.label] = (counts[option.label] || 0) + 1;
           }

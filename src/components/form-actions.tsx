@@ -6,7 +6,7 @@ import { MoreHorizontal, BarChart, Edit, Trash2, Link2, CopyIcon, Undo } from 'l
 import { deleteForm, undoDeleteForm } from '@/lib/actions';
 import { copyText } from '@/lib/form-utils';
 import { useToast } from '@/hooks/use-toast';
-import { Form, FormField } from '@/lib/types';
+import type { Form, FormField } from '@/lib/types';
 import {
   DropdownMenu,
   DropdownMenuContent,

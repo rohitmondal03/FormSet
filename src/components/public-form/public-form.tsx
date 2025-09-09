@@ -35,7 +35,7 @@ interface PublicFormProps {
 export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | null>[]>([]);
+  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
@@ -69,7 +69,7 @@ export function PublicForm({ form }: PublicFormProps) {
 
   const validateForm = useCallback(() => {
     // Check for submitter email
-    if (!formValues.submitter_email || !/\S+@\S+\.\S+/.test(formValues.submitter_email)) {
+    if (!formValues.submitter_email || !/\S+@\S+\.\S+/.test(formValues.submitter_email as string)) {
       return false;
     }
 
@@ -103,11 +103,11 @@ export function PublicForm({ form }: PublicFormProps) {
     // Add hidden field values to FormData
     for (const field of form.fields) {
       if (field.type === 'rating' || field.type === 'slider') {
-        formData.append(field.id, formValues[field.id] || '');
+        formData.append(field.id, (formValues[field.id] || '').toString());
       }
     }
     
-    formData.append('submitter_email', formValues.submitter_email || '');
+    formData.append('submitter_email', (formValues.submitter_email || '').toString());
 
     const result = await submitResponse(form.id, formData);
 
@@ -132,16 +132,18 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-  const handleValueChange = useCallback((fieldId?: string, value: any, type?: FormField['type']) => {
+  const handleValueChange = useCallback((fieldId: string | undefined, value: string | number | boolean | { value: string, checked: boolean } | Date | null, type?: FormField['type']) => {
+    if (!fieldId) return;
+
     setFormValues(prev => {
       if (type === 'checkbox') {
+        const checkboxValue = value as { value: string; checked: boolean };
+        const existing = (prev[fieldId] as string[] | undefined) || [];
 
-        const existing = prev[fieldId];
-
-        if (value.checked) {
-          return { ...prev, [fieldId]: [...existing, value.value] };
+        if (checkboxValue.checked) {
+          return { ...prev, [fieldId]: [...existing, checkboxValue.value] };
         } else {
-          return { ...prev, [fieldId]: existing.filter(item => item !== value.value) };
+          return { ...prev, [fieldId]: existing.filter(item => item !== checkboxValue.value) };
         }
       }
       return { ...prev, [fieldId]: value }
@@ -214,7 +216,7 @@ export function PublicForm({ form }: PublicFormProps) {
             ),
             radio: (
               <RadioGroup name={field.id} required={field.required} className='space-y-2 pt-1' onValueChange={(value) => handleValueChange(field.id, value)}>
-                {field.options?.map(opt => (
+                {(field.options as {value: string, label: string}[])?.map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <RadioGroupItem
                       value={opt.value}
@@ -227,13 +229,13 @@ export function PublicForm({ form }: PublicFormProps) {
             ),
             checkbox: (
               <div className="space-y-2 pt-1">
-                {field.options?.map(opt => (
+                {(field.options as {value: string, label: string}[])?.map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <Checkbox
                       id={`${id}-${opt.value}`}
                       name={field.id}
                       value={opt.value}
-                      onCheckedChange={(checked) => handleValueChange(field.id, { value: opt.value, checked }, 'checkbox')}
+                      onCheckedChange={(checked) => handleValueChange(field.id, { value: opt.value, checked: !!checked }, 'checkbox')}
                     />
                     <Label htmlFor={`${id}-${opt.value}`} className="font-normal">{opt.label}</Label>
                   </div>
@@ -246,7 +248,7 @@ export function PublicForm({ form }: PublicFormProps) {
                   <SelectValue placeholder={field.placeholder || 'Select an option'} />
                 </SelectTrigger>
                 <SelectContent>
-                  {field.options?.map(opt => (
+                  {(field.options as {value: string, label: string}[])?.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -273,7 +275,7 @@ export function PublicForm({ form }: PublicFormProps) {
                     key={value}
                     className={cn(
                       "h-8 w-8 cursor-pointer transition-colors",
-                      (formValues[field.id] || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/50 hover:text-muted-foreground"
+                      (formValues[field.id] as number || 0) >= value ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/50 hover:text-muted-foreground"
                     )}
                     onClick={() => handleValueChange(field.id, value, field.type)}
                   />
@@ -287,7 +289,7 @@ export function PublicForm({ form }: PublicFormProps) {
                   min={field.properties?.min || 0}
                   max={field.properties?.max || 100}
                   step={field.properties?.step || 1}
-                  value={[formValues[field.id] || field.properties?.min || 0]}
+                  value={[(formValues[field.id] as number) || field.properties?.min || 0]}
                   onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
                 />
                 <span className="text-sm font-semibold w-14 text-center py-1.5 px-2 rounded-md bg-muted text-muted-foreground">
