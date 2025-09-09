@@ -11,6 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import type { FormField } from '@/lib/types';
+import type { SelectSingleEventHandler } from 'react-day-picker';
 
 interface DatePickerInputProps {
   field: FormField;
@@ -19,14 +20,14 @@ interface DatePickerInputProps {
 const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange }) => {
   const [date, setDate] = React.useState<Date>();
 
-  const handleDateSelect = (selectedDate: Date | undefined) => {
+  const handleDateSelect: SelectSingleEventHandler = (selectedDate) => {
     setDate(selectedDate);
     if (onValueChange) {
       onValueChange(selectedDate);
     }
   };
 
-  const properties = field.properties as Record<string, unknown> || {};
+  const properties = (field.properties as Record<string, unknown>) || {};
 
   return (
     <div className="space-y-2">
