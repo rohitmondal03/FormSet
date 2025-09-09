@@ -18,7 +18,7 @@ const MultipleChoiceInput: React.FC<MultipleChoiceInputProps> = ({ field, onValu
   //   onInputChange(field.id, value);
   // };
 
-  const options: { value: string; label: string }[] = field.properties?.options || [];
+  const options: { value: string; label: string }[] = (field.options as { value: string; label: string }[]) || [];
 
   return (
     <div className="space-y-2">

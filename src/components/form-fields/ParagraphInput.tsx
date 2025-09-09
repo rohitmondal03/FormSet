@@ -17,6 +17,8 @@ const ParagraphInput: React.FC<ParagraphInputProps> = ({ field, onValueChange })
     onValueChange(e.target.value);
   };
 
+  const properties = field.properties as Record<string, any> | null;
+
   return (
     <div className="space-y-2">
       <Label htmlFor={field.id}>{field.label}{field.required && <span className="text-red-500 ml-1">*</span>}</Label>
@@ -26,8 +28,8 @@ const ParagraphInput: React.FC<ParagraphInputProps> = ({ field, onValueChange })
         value={value}
         onChange={handleChange}
       />
-      {field.properties?.helpText && (
-        <p className="text-sm text-muted-foreground">{field.properties.helpText}</p>
+      {properties?.helpText && (
+        <p className="text-sm text-muted-foreground">{properties.helpText}</p>
       )}
     </div>
   );

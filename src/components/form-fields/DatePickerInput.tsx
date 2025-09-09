@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
-import { FormField } from '@/lib/types'; // Assuming FormField type is in '@/lib/types'
+import type { FormField } from '@/lib/types'; // Assuming FormField type is in '@/lib/types'
 
 interface DatePickerInputProps {
   field: FormField;
@@ -26,6 +26,8 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange 
       onValueChange(selectedDate);
     }
   };
+
+  const properties = field.properties as Record<string, any> || {};
 
   return (
     <div className="space-y-2">
@@ -55,8 +57,8 @@ const DatePickerInput: React.FC<DatePickerInputProps> = ({ field, onValueChange 
           />
         </PopoverContent>
       </Popover>
-      {field.properties?.description && (
-        <p className="text-sm text-muted-foreground">{field.properties.description}</p>
+      {properties?.description && (
+        <p className="text-sm text-muted-foreground">{properties.description}</p>
       )}
     </div>
   );

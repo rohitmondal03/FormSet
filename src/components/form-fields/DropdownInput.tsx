@@ -19,7 +19,7 @@ interface DropdownInputProps {
 
 export default function DropdownInput({ field }: DropdownInputProps) {
   // Assuming field.properties.options is an array of strings or objects like { value: string, label: string }
-  const options = field.properties?.options || [];
+  const options = (field.options as {value: string, label: string}[]) || [];
 
   // Placeholder for handling selection
   return (
@@ -39,9 +39,9 @@ export default function DropdownInput({ field }: DropdownInputProps) {
           {options.map((option, index: number) => (
             <SelectItem
               key={index}
-              value={typeof option === 'string' ? option : option.value}
+              value={option.value}
             >
-              {option.label || option}
+              {option.label}
             </SelectItem>
           ))}
         </SelectContent>

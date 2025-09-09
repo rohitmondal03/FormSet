@@ -12,7 +12,7 @@ interface CheckboxInputProps {
 
 const CheckboxInput: React.FC<CheckboxInputProps> = ({ field }) => {
   // Assuming options are stored in field.properties as an array of { value: string, label: string }
-  const options: { value: string; label: string }[] = field.properties?.options || [];
+  const options: { value: string; label: string }[] = (field.options as { value: string; label: string }[]) || [];
 
   // Placeholder for managing selected values
   // const [selectedValues, setSelectedValues] = React.useState<string[]>([]);

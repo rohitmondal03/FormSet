@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormField } from '@/lib/types';
+import type { FormField } from '@/lib/types';
 
 interface NumberInputProps {
   field: FormField;
@@ -11,8 +11,9 @@ interface NumberInputProps {
 
 const NumberInput: React.FC<NumberInputProps> = ({ field }) => {
   // Access min/max from field.properties
-  const minValue = field.properties?.min as number | undefined;
-  const maxValue = field.properties?.max as number | undefined;
+  const properties = field.properties as Record<string, any> | null;
+  const minValue = properties?.min as number | undefined;
+  const maxValue = properties?.max as number | undefined;
 
   // TODO: Implement input change handling
   // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

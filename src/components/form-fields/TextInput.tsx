@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormField } from '@/lib/types'; // Assuming FormField type is in '@/lib/types'
+import type { FormField } from '@/lib/types'; // Assuming FormField type is in '@/lib/types'
 
 interface TextInputProps {
   field: FormField;
@@ -14,6 +14,7 @@ const TextInput: React.FC<TextInputProps> = ({ field }) => {
   //   const value = event.target.value;
   //   onInputChange(value);
   // };
+  const properties = field.properties as Record<string, any> | null;
 
   return (
     <div className="space-y-2">
@@ -30,8 +31,8 @@ const TextInput: React.FC<TextInputProps> = ({ field }) => {
         // onChange={handleInputChange}
       />
       {/* Optional: Display help text if available */}
-      {field.properties?.helpText && (
-        <p className="text-sm text-muted-foreground">{field.properties.helpText}</p>
+      {properties?.helpText && (
+        <p className="text-sm text-muted-foreground">{properties.helpText}</p>
       )}
     </div>
   );

@@ -35,7 +35,7 @@ interface PublicFormProps {
 export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | string[] | File | null>>({});
+  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | string[] | File | Date | null>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
@@ -102,8 +102,13 @@ export function PublicForm({ form }: PublicFormProps) {
 
     // Add hidden field values to FormData
     for (const field of form.fields) {
-      if (field.type === 'rating' || field.type === 'slider') {
-        formData.append(field.id, (formValues[field.id] || '').toString());
+      if (['rating', 'slider', 'date'].includes(field.type)) {
+        const value = formValues[field.id];
+        if (value instanceof Date) {
+            formData.append(field.id, format(value, 'yyyy-MM-dd'));
+        } else if (value) {
+            formData.append(field.id, value.toString());
+        }
       }
     }
     
@@ -167,6 +172,8 @@ export function PublicForm({ form }: PublicFormProps) {
 
   const renderField = (field: FormField) => {
     const id = `field-${field.id}`;
+    const properties = field.properties as Record<string, any> | null;
+
     return (
       <div key={field.id} className="space-y-2">
         <Label className='' htmlFor={id}>
@@ -197,7 +204,7 @@ export function PublicForm({ form }: PublicFormProps) {
             date: (
               <div>
                 <DatePicker
-                  onChange={(date) => handleValueChange(field.id, date ? format(date, 'yyyy-MM-dd') : '', field.type)}
+                  onChange={(date) => handleValueChange(field.id, date || null, field.type)}
                 />
               </div>
             ),
@@ -263,8 +270,8 @@ export function PublicForm({ form }: PublicFormProps) {
                 type="number"
                 placeholder={field.placeholder || ''}
                 required={field.required}
-                min={(field.properties as any)?.min}
-                max={(field.properties as any)?.max}
+                min={properties?.min}
+                max={properties?.max}
                 onChange={(e) => handleValueChange(field.id, e.target.value)}
               />
             ),
@@ -286,23 +293,23 @@ export function PublicForm({ form }: PublicFormProps) {
               <div className="flex items-center gap-4 pt-2">
                 <Slider
                   id={id}
-                  min={(field.properties as any)?.min || 0}
-                  max={(field.properties as any)?.max || 100}
-                  step={(field.properties as any)?.step || 1}
-                  value={[(formValues[field.id] as number) || (field.properties as any)?.min || 0]}
+                  min={properties?.min || 0}
+                  max={properties?.max || 100}
+                  step={properties?.step || 1}
+                  value={[(formValues[field.id] as number) || properties?.min || 0]}
                   onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
                 />
                 <span className="text-sm font-semibold w-14 text-center py-1.5 px-2 rounded-md bg-muted text-muted-foreground">
-                  {formValues[field.id] || (field.properties as any)?.min || 0}
+                  {formValues[field.id] || properties?.min || 0}
                 </span>
               </div>
             ),
             paragraph: (
-              <p className="text-muted-foreground">{(field.properties as any)?.description || ''}</p>
+              <p className="text-muted-foreground">{properties?.description || ''}</p>
             )
           }[field.type]
         }
-        {field.properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{(field.properties as any).description}</p>}
+        {properties?.description && field.type !== 'paragraph' && <p className="text-sm text-muted-foreground pt-1">{properties.description}</p>}
       </div>
     );
   };

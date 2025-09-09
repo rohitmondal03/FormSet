@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { FormField } from '@/lib/types'; // Adjust the import path as necessary
+import type { FormField } from '@/lib/types'; // Adjust the import path as necessary
 import { Label } from '@/components/ui/label'; // Assuming you use shadcn/ui Label
 import { Input } from '@/components/ui/input'; // Assuming you might use Input for a number rating
 
@@ -15,9 +15,10 @@ const RatingInput: React.FC<RatingInputProps> = ({ field }) => {
 
   // Assuming properties might look like:
   // { type: 'stars', max: 5 } or { type: 'number', min: 1, max: 10 }
-  const ratingType = properties?.type || 'stars'; // Default to stars
-  const maxRating = properties?.max || 5; // Default max stars to 5
-  const minRating = properties?.min || 1; // Default min number rating to 1
+  const typedProperties = properties as Record<string, any> | null;
+  const ratingType = typedProperties?.type || 'stars'; // Default to stars
+  const maxRating = typedProperties?.max || 5; // Default max stars to 5
+  const minRating = typedProperties?.min || 1; // Default min number rating to 1
 
   const renderRatingSystem = () => {
     if (ratingType === 'stars') {
