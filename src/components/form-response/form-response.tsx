@@ -91,14 +91,14 @@ export function FormResponse({ responses, formData }: FormResponseProps) {
               <FileSpreadsheet className="mr-2 size-4" />
               <span>Download as XLSX</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport('pdf')}>
+            {/* <DropdownMenuItem onClick={() => handleExport('pdf')}>
               <FileType className="mr-2 size-4" />
               <span>Download as PDF</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('docx')}>
               <FileUp className="mr-2 size-4" />
               <span>Download as DOCX</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
