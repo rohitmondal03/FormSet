@@ -33,10 +33,14 @@ interface PublicFormProps {
   form: Omit<Form, "user_id">;
 }
 
+type AllowedValue = string | number | boolean | string[] | File | Date | null;
+interface CheckboxValue { value: string; checked: boolean };
+
+
 export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | string[] | File | Date | null>>({});
+  const [formValues, setFormValues] = useState<Record<string, AllowedValue>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
@@ -138,12 +142,12 @@ export function PublicForm({ form }: PublicFormProps) {
     }
   };
 
-  const handleValueChange = useCallback((fieldId: string | undefined, value: string | number | boolean | { value: string; checked: boolean } | Date | File | null, type?: FormField['type']) => {
+  const handleValueChange = useCallback((fieldId: string | undefined, value: AllowedValue | CheckboxValue, type?: FormField['type']) => {
     if (!fieldId) return;
 
     setFormValues(prev => {
       if (type === 'checkbox') {
-        const checkboxValue = value as { value: string; checked: boolean };
+        const checkboxValue = value as CheckboxValue;
         const existing = (prev[fieldId] as string[] | undefined) || [];
 
         if (checkboxValue.checked) {
@@ -152,7 +156,7 @@ export function PublicForm({ form }: PublicFormProps) {
           return { ...prev, [fieldId]: existing.filter(item => item !== checkboxValue.value) };
         }
       }
-      return { ...prev, [fieldId]: value }
+      return { ...prev, [fieldId]: value as AllowedValue }
     });
   }, [setFormValues]);
 
