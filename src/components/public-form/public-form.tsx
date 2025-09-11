@@ -57,7 +57,7 @@ export function PublicForm({ form }: PublicFormProps) {
     if (form.limit_one_response_per_email) {
       startTransition(async () => {
         setEmailStatus('checking');
-        const result = await checkExistingResponse(form.id, email);
+        const result = await checkExistingResponse(form.id as string, email);
         if (result.exists) {
           setEmailStatus('exists');
         } else if (result.error) {
