@@ -303,7 +303,7 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
                 <TooltipTrigger asChild>
                   <button type='button'><BadgeInfo className="h-4 w-4 text-zinc-500" /></button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className=''>
                   <p>Limiting to one response per email helps prevent spam and abuse.</p>
                 </TooltipContent>
               </Tooltip>
