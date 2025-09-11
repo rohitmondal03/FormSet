@@ -32,12 +32,12 @@ export default async function PublicFormPage({ params }: PublicFormPageProps) {
     )
   }
 
-  const fetchedForm: Form = {
+  const fetchedForm: Omit<Form, "user_id"> = {
     id: formData.id,
     title: formData.title,
     description: formData.description ?? '',
     fields: formData.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
-    createdAt: new Date(formData.created_at),
+    created_at: new Date(formData.created_at).toISOString(),
     responseCount: 0,
     url: '',
     limit_one_response_per_email: formData.limit_one_response_per_email,

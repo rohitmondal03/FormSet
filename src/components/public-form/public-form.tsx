@@ -30,8 +30,9 @@ import { ThemeToggle } from '../theme-toggle';
 type EmailStatus = 'idle' | 'checking' | 'exists' | 'does_not_exist' | 'error';
 
 interface PublicFormProps {
-  form: Form & { fields: FormField[] };
+  form: Omit<Form, "user_id">;
 }
+
 export function PublicForm({ form }: PublicFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
@@ -48,7 +49,7 @@ export function PublicForm({ form }: PublicFormProps) {
       setEmailStatus('idle');
       return;
     }
-    
+
     if (form.limit_one_response_per_email) {
       startTransition(async () => {
         setEmailStatus('checking');
@@ -63,7 +64,7 @@ export function PublicForm({ form }: PublicFormProps) {
         }
       });
     } else {
-        setEmailStatus('does_not_exist');
+      setEmailStatus('does_not_exist');
     }
   };
 
@@ -74,7 +75,7 @@ export function PublicForm({ form }: PublicFormProps) {
     }
 
     if (form.limit_one_response_per_email && emailStatus !== 'does_not_exist') {
-        return false;
+      return false;
     }
 
     // Check all required fields
@@ -105,16 +106,16 @@ export function PublicForm({ form }: PublicFormProps) {
       if (['rating', 'slider', 'date'].includes(field.type)) {
         const value = formValues[field.id];
         if (value instanceof Date) {
-            formData.append(field.id, format(value, 'yyyy-MM-dd'));
+          formData.append(field.id, format(value, 'yyyy-MM-dd'));
         } else if (value) {
-            formData.append(field.id, value.toString());
+          formData.append(field.id, value.toString());
         }
       }
     }
-    
+
     formData.append('submitter_email', (formValues.submitter_email || '').toString());
 
-    const result = await submitResponse(form.id, formData);
+    const result = await submitResponse(form.id as string, formData);
 
     setSubmitting(false);
 
@@ -172,7 +173,7 @@ export function PublicForm({ form }: PublicFormProps) {
 
   const renderField = (field: FormField) => {
     const id = `field-${field.id}`;
-    const properties = field.properties as Record<string, unknown> | null;
+    const properties = field.properties as Record<string, string | number | File | undefined> | null;
 
     return (
       <div key={field.id} className="space-y-2">
@@ -223,7 +224,7 @@ export function PublicForm({ form }: PublicFormProps) {
             ),
             radio: (
               <RadioGroup name={field.id} required={field.required} className='space-y-2 pt-1' onValueChange={(value) => handleValueChange(field.id, value)}>
-                {((field.options as {value: string, label: string}[]) || []).map(opt => (
+                {((field.options as { value: string, label: string }[]) || []).map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <RadioGroupItem
                       value={opt.value}
@@ -236,7 +237,7 @@ export function PublicForm({ form }: PublicFormProps) {
             ),
             checkbox: (
               <div className="space-y-2 pt-1">
-                {((field.options as {value: string, label: string}[]) || []).map(opt => (
+                {((field.options as { value: string, label: string }[]) || []).map(opt => (
                   <div key={opt.value} className="flex items-center space-x-3">
                     <Checkbox
                       id={`${id}-${opt.value}`}
@@ -255,7 +256,7 @@ export function PublicForm({ form }: PublicFormProps) {
                   <SelectValue placeholder={field.placeholder || 'Select an option'} />
                 </SelectTrigger>
                 <SelectContent>
-                  {((field.options as {value: string, label: string}[]) || []).map(opt => (
+                  {((field.options as { value: string, label: string }[]) || []).map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -300,7 +301,7 @@ export function PublicForm({ form }: PublicFormProps) {
                   onValueChange={([value]) => handleValueChange(field.id, value, field.type)}
                 />
                 <span className="text-sm font-semibold w-14 text-center py-1.5 px-2 rounded-md bg-muted text-muted-foreground">
-                  {formValues[field.id] || (properties?.min as number) || 0}
+                  {(formValues[field.id] as number) || (properties?.min as number) || 0}
                 </span>
               </div>
             ),
@@ -333,34 +334,39 @@ export function PublicForm({ form }: PublicFormProps) {
     <div className="min-h-screen bg-muted/20 dark:bg-background">
       <div className="container mx-auto max-w-2xl py-12 px-4">
         <main className="bg-card p-8 sm:p-12 rounded-2xl border-2 dark:border-zinc-500 shadow-lg space-y-8">
-          <header className="space-y-4">
+          <header className="space-y-8">
             <div className="flex justify-between items-start">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">{form.title}</h1>
+              <h1 className="text-4xl font-bold tracking-tight text-foreground underline underline-offset-8 decoration-muted-foreground">{form.title}</h1>
               <ThemeToggle />
             </div>
-            {form.description && <p className="text-lg text-muted-foreground">{form.description}</p>}
-            <p className='text-sm text-muted-foreground/80 pt-2'>
-              Fields marked with <span className='text-destructive'>*</span> are required.
-            </p>
+            {form.description
+              && <p className="text-base">{form.description}</p>}
+            <ul className='list-disc list-inside text-muted-foreground'>
+              <li className='leading-normal'>
+                Fields marked with <span className='text-destructive'>*</span> are required.
+              </li>
+              {form.limit_one_response_per_email
+                && <li className='leading-normal'>Only one response per email address is allowed.</li>}
+            </ul>
           </header>
           <Separator className='bg-black dark:bg-zinc-200' />
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="space-y-2">
-                <Label htmlFor="submitter-email" className="flex items-center">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Your Email Address
-                    <span className="text-red-600 ml-1">*</span>
-                </Label>
-                <Input
-                    id="submitter-email"
-                    name="submitter_email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    required
-                    onChange={(e) => handleValueChange('submitter_email', e.target.value)}
-                    onBlur={handleEmailBlur}
-                />
-                {renderEmailStatus()}
+              <Label htmlFor="submitter-email" className="flex items-center">
+                <Mail className="mr-2 h-4 w-4" />
+                Your Email Address
+                <span className="text-red-600 ml-1">*</span>
+              </Label>
+              <Input
+                id="submitter-email"
+                name="submitter_email"
+                type="email"
+                placeholder="your.email@example.com"
+                required
+                onChange={(e) => handleValueChange('submitter_email', e.target.value)}
+                onBlur={handleEmailBlur}
+              />
+              {renderEmailStatus()}
             </div>
             {form.fields.map(renderField)}
             <Separator className='bg-black dark:bg-zinc-200' />
