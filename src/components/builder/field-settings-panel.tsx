@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/sheet';
 
 interface FieldSettingsPanelProps {
-  field: FormField;
+  field: Partial<FormField>;
   updateField: (id: string, updatedField: Partial<FormField>) => void;
   removeField: (id: string) => void;
   onClose: () => void;
@@ -37,16 +37,16 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    updateField(field.id, { [e.target.name]: e.target.value });
+    updateField(field.id as string, { [e.target.name]: e.target.value });
   };
 
   const handleCheckboxChange = (checked: boolean) => {
-    updateField(field.id, { required: checked });
+    updateField(field.id as string, { required: checked });
   };
 
   const handleDeleteField = () => {
     const fieldToDelete = { ...field };
-    removeField(field.id);
+    removeField(field.id as string);
     onClose();
 
     toast({
@@ -57,7 +57,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
           variant="outline"
           size="sm"
           onClick={() => {
-            onUndo(fieldToDelete);
+            onUndo(fieldToDelete as FormField);
             toast({
               title: "Field Restored",
               description: `The field "${fieldToDelete.label}" has been restored.`,
@@ -226,7 +226,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
               id="description"
               name="description"
               value={((field.properties as Record<string, unknown>)?.description as string) || ''}
-              onChange={(e) => updateField(field.id, { properties: { ...(field.properties as Record<string, unknown> || {}), description: e.target.value } })}
+              onChange={(e) => updateField(field.id as string, { properties: { ...(field.properties as Record<string, unknown> || {}), description: e.target.value } })}
             />
           </div>
           <div className="flex items-center space-x-2">
@@ -237,7 +237,7 @@ const FieldSettingsPanel: React.FC<FieldSettingsPanelProps> = ({
             />
             <Label htmlFor="required">Required</Label>
           </div>
-          {renderTypeSpecificSettings(field)}
+          {renderTypeSpecificSettings(field as FormField)}
         </div>
         <SheetFooter className="mt-auto">
             <Button variant="destructive" onClick={handleDeleteField}>

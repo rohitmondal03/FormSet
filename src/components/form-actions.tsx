@@ -25,8 +25,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
 import { Button } from '@/components/ui/button';
+
 
 export function FormActions({ formId }: { formId: string }) {
   const { toast } = useToast();
@@ -114,33 +114,33 @@ export function FormActions({ formId }: { formId: string }) {
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>
             <DropdownMenuItem
-              className="w-full text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
-              onSelect={(e) => e.preventDefault()} // Prevent DropdownMenu from closing
+              className="w-full font-semibold text-red-500 focus:bg-destructive/90 focus:text-destructive-foreground"
+              onSelect={(e) => e.preventDefault()}
             >
               <Trash2 className="mr-2 size-4" />
               <span>Delete</span>
             </DropdownMenuItem>
           </AlertDialogTrigger>
-          
         </DropdownMenuContent>
       </DropdownMenu>
-       <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete this form and all of its associated responses.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                Delete Form
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete this form and all of its associated responses.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            Delete Form
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
     </AlertDialog>
   );
 }

@@ -3,6 +3,8 @@
 import { useActionState } from 'react';
 import { Bot, Plus, Sparkles } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
+import type { FormField } from '@/lib/types';
+import { getSuggestions } from '@/lib/actions';
 import {
   Dialog,
   DialogContent,
@@ -16,12 +18,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { getSuggestions } from '@/lib/actions';
-import type { FormField } from '@/lib/types';
 
 interface AISuggesterProps {
-  fields: Omit<FormField, "form_id" | "validation" | "properties" | "placeholder" | "options">[];
-  setFields: React.Dispatch<React.SetStateAction<Omit<FormField, "form_id" | "validation" | "properties" | "placeholder" | "options">[]>>;
+  fields: Partial<FormField>[];
+  setFields: React.Dispatch<Partial<FormField>[]>;
 }
 
 function SubmitButton() {

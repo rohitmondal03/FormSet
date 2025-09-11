@@ -5,18 +5,24 @@ import { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, Headi
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { Form, FormResponse } from './types';
 
-function prepareDataForExport(form: Form, responses: FormResponse[]) {
+interface Response { 
+  id: string;
+  submittedAt: Date;
+  data: Record<string, [] | string | number | boolean | null>;
+}
+
+function prepareDataForExport(form: Omit<Form, "user_id">, responses: Response[]) {
   const headers = form.fields.map(field => field.label);
   const data = responses.map(response => {
     const row: Record<string, [] | string | number | boolean | null> = {};
     form.fields.forEach(field => {
       const value = response.data[field.id];
       if (Array.isArray(value)) {
-        row[field.label] = value.join(', ');
+        row[field.label as string] = value.join(', ');
       } else if (typeof value === 'object' && value !== null) {
-        row[field.label] = JSON.stringify(value);
+        row[field.label as string] = JSON.stringify(value);
       } else {
-        row[field.label] = value ?? '';
+        row[field.label ] = value ?? '';
       }
     });
     return row;
@@ -24,13 +30,13 @@ function prepareDataForExport(form: Form, responses: FormResponse[]) {
   return { headers, data };
 }
 
-export function generateCsv(form: Form, responses: FormResponse[]): string {
+export function generateCsv(form: Omit<Form, "user_id">, responses: Response[]): string {
   const { headers, data } = prepareDataForExport(form, responses);
   const parser = new Parser({ fields: headers });
   return parser.parse(data);
 }
 
-export async function generateXlsx(form: Form, responses: FormResponse[]): Promise<string> {
+export async function generateXlsx(form: Omit<Form, "user_id">, responses: Response[]): Promise<string> {
   const { headers, data } = prepareDataForExport(form, responses);
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(form.title);
@@ -44,7 +50,7 @@ export async function generateXlsx(form: Form, responses: FormResponse[]): Promi
   return Buffer.from(buffer).toString('base64');
 }
 
-export async function generateDocx(form: Form, responses: FormResponse[]): Promise<string> {
+export async function generateDocx(form: Omit<Form, "user_id">, responses: Response[]): Promise<string> {
   const { headers, data } = prepareDataForExport(form, responses);
   
   const tableHeader = new TableRow({
@@ -89,7 +95,7 @@ export async function generateDocx(form: Form, responses: FormResponse[]): Promi
 }
 
 
-export async function generatePdf(form: Form, responses: FormResponse[]): Promise<string> {
+export async function generatePdf(form: Omit<Form, "user_id">, responses: Response[]): Promise<string> {
   const { headers, data } = prepareDataForExport(form, responses);
 
   const pdfDoc = await PDFDocument.create();

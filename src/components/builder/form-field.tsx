@@ -1,9 +1,9 @@
 
 'use client';
 
+import { GripVertical, Settings, TrashIcon } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Settings, TrashIcon } from 'lucide-react';
 import type { FormField } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { fieldTypes } from '@/lib/form-utils';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface FormFieldWrapperProps {
-  field: FormField;
+  field: Partial<FormField>;
   onSelect: (field: FormField) => void;
   removeField: (id: string) => void;
 }
@@ -45,10 +45,10 @@ export function FormFieldWrapper({ field, onSelect, removeField }: FormFieldWrap
           <GripVertical className="h-5 w-5" />
         </div>
         <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover/field:opacity-100 transition-opacity">
-          <Button variant="outline" size={"sm"} className="size-7 p-1" onClick={() => onSelect(field)}>
+          <Button variant="outline" size={"sm"} className="size-7 p-1" onClick={() => onSelect(field as FormField)}>
             <Settings className="size-4" />
           </Button>
-          <Button variant="destructive" size={"sm"} className="size-7 p-1" onClick={() => removeField(field.id)}>
+          <Button variant="destructive" size={"sm"} className="size-7 p-1" onClick={() => removeField(field.id as string)}>
             <TrashIcon className='size-4' />
           </Button>
         </div>

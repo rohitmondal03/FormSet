@@ -62,9 +62,7 @@ export default async function Home() {
             </div>
           ) : (
             <>
-              <Button variant={"default"}>
-                <Link href="/dashboard">Go to Dashboard</Link>
-              </Button>
+              <Link href="/dashboard" className={cn(buttonVariants({ variant: "default" }))}>Go to Dashboard</Link>
               <UserNav />
             </>
           )}
@@ -150,6 +148,6 @@ export default async function Home() {
           <p className="text-muted-foreground text-sm mt-4 sm:mt-0">&copy; {new Date().getFullYear()} FormSet. All rights reserved.</p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }

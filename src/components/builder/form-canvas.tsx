@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { FormFieldWrapper } from './form-field';
 
 interface FormCanvasProps {
-  fields: FormField[];
+  fields: Partial<FormField>[];
   setSelectedField: (field: FormField | null) => void;
   removeField: (id: string) => void;
 }

@@ -136,7 +136,7 @@ export function UserNav() {
   };
 
   if (loading) {
-    return <Skeleton className="h-9 w-9 rounded-full" />;
+    return <Skeleton className="size-9 rounded-full" />;
   }
   
   if (!user) {
@@ -147,8 +147,8 @@ export function UserNav() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-9 w-9">
+          <Button variant="ghost" className="relative size-8 rounded-full">
+            <Avatar className="size-9">
               <AvatarImage src={profile?.avatar_url || ''} alt={user?.email || '@user'} />
               <AvatarFallback>{getInitials(profile?.full_name, user?.email || '')}</AvatarFallback>
             </Avatar>
@@ -165,17 +165,17 @@ export function UserNav() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => { setProfileOpen(true); setAvatarPreview(undefined); }}>
-            <UserIcon className="mr-2 h-4 w-4" />
+            <UserIcon className="mr-2 size-4" />
             <span>Profile</span>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Settings className="mr-2 size-4" />
             <span>Settings</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <form action={logout}>
             <Button variant={"destructive"} type='submit' className="relative w-full">
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut className="mr-2 size-4" />
               <span>Log out</span>
             </Button>
           </form>

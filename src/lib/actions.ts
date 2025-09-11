@@ -506,11 +506,11 @@ export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | '
     throw new Error("Could not fetch responses.");
   }
 
-  const form: Form = {
+  const form: Omit<Form, "user_id"> = {
     id: formData.id,
     title: `${formData.title} Responses`,
     description: formData.description ?? '',
-    createdAt: new Date(formData.created_at),
+    created_at: new Date(formData.created_at).toISOString(),
     fields: formData.form_fields.sort((a: FormField, b: FormField) => a.order - b.order),
     responseCount: responsesData.length,
     url: `/f/${formData.id}`,
@@ -518,8 +518,8 @@ export async function exportResponses(formId: string, format: 'csv' | 'xlsx' | '
   };
 
   const responses = responsesData.map(r => ({
-    id: r.id,
-    submittedAt: new Date(r.created_at),
+    id: r.id as string,
+    submittedAt: new Date(r.created_at) as Date,
     data: r.data,
   }));
 

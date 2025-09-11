@@ -35,12 +35,13 @@ export default async function DashboardPage() {
   const forms: Form[] = data?.map(form => ({
     id: form.id as string,
     title: form.title as string,
-    createdAt: new Date(form.created_at),
-    responseCount: form.form_responses[0]?.count ?? 0,
     description: '', 
+    created_at: new Date(form.created_at).toISOString(),
+    responseCount: form.form_responses[0]?.count ?? 0,
     fields: [], 
     url: `/f/${form.id}`,
     limit_one_response_per_email: form.limit_one_response_per_email,
+    user_id: user.id,
   })) ?? [];
 
   return (
@@ -75,9 +76,9 @@ export default async function DashboardPage() {
                       <Badge variant="secondary">{form.responseCount}</Badge>
                     </Link>
                   </TableCell>
-                  <TableCell>{format(form.createdAt, 'MMM d, yyyy')}</TableCell>
+                  <TableCell>{format(form.created_at, 'MMM d, yyyy')}</TableCell>
                   <TableCell className="text-right">
-                    <FormActions formId={form.id} />
+                    <FormActions formId={form.id as string} />
                   </TableCell>
                 </TableRow>
               ))

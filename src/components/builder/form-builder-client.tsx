@@ -25,6 +25,7 @@ import { FormFieldWrapper } from './form-field';
 import { FieldPalette } from './field-palette';
 import { FormCanvas } from './form-canvas';
 import { AISuggester } from './ai-suggester';
+import { Json } from '../../../supabase/database.types';
 
 interface FormBuilderClientProps {
   form: Form & { fields: FormField[] };
@@ -35,11 +36,11 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
   const { toast } = useToast();
   const [title, setTitle] = useState(form.title);
   const [description, setDescription] = useState(form.description);
-  const [fields, setFields] = useState<FormField[]>(form.fields.sort((a, b) => a.order - b.order));
+  const [fields, setFields] = useState<Partial<FormField>[]>(form.fields.sort((a, b) => a.order - b.order));
   const [limitOneResponsePerEmail, setLimitOneResponsePerEmail] = useState(form.limit_one_response_per_email);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedField, setSelectedField] = useState<FormField | null>(null);
-  const [activeField, setActiveField] = useState<FormField | null>(null);
+  const [selectedField, setSelectedField] = useState<Partial<FormField> | null>(null);
+  const [activeField, setActiveField] = useState<Partial<FormField> | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -99,23 +100,23 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
     const { active } = event;
     const isPaletteItem = active.data.current?.isPaletteItem;
 
-    if(!form || !form.id) return;
+    if (!form || !form.id) return;
 
     if (isPaletteItem) {
-        const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
-        if (!fieldTypeData) return;
-        setActiveField({
-            id: `palette-${active.data.current?.type}`,
-            type: active.data.current?.type,
-            label: fieldTypeData.label,
-            required: false,
-            order: -1,
-            form_id: form.id,
-            placeholder: null,
-            properties: null,
-            validation: null,
-            options: null
-        });
+      const fieldTypeData = fieldTypes.find(f => f.type === active.data.current?.type);
+      if (!fieldTypeData) return;
+      setActiveField({
+        id: `palette-${active.data.current?.type}`,
+        type: active.data.current?.type,
+        label: fieldTypeData.label,
+        required: false,
+        order: -1,
+        form_id: form.id,
+        placeholder: null,
+        properties: null,
+        validation: null,
+        options: null
+      });
     } else {
       const field = fields.find(f => f.id === active.id);
       if (field) {
@@ -154,11 +155,22 @@ export function FormBuilderClient({ form }: FormBuilderClientProps) {
 
   const handleSave = async () => {
     setIsSaving(true);
-    const formToSave: Form & { fields: FormField[] } = {
+    const formToSave: Form = {
       ...form,
       title,
       description,
-      fields: fields.map((f, index) => ({ ...f, order: index })),
+      fields: fields.map((f, index) => ({ 
+        order: index, 
+        form_id: form.id as string,
+        id: f.id as string,
+        placeholder: f.placeholder as string,
+        label: f.label as string,
+        options: f.options as Json, 
+        properties: f.properties as Json,
+        validation: f.validation as Json,
+        required: f.required as boolean,
+        type: f.type as string
+      })),
       limit_one_response_per_email: limitOneResponsePerEmail,
     };
 
