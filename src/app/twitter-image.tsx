@@ -10,13 +10,13 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image() {
-  const montserratBold = fetch(
-    new URL('./fonts/Montserrat-Bold.ttf', import.meta.url)
-  ).then((res) => res.arrayBuffer());
+  // const montserratBold = fetch(
+  //   new URL('./fonts/Montserrat-Bold.ttf', import.meta.url)
+  // ).then((res) => res.arrayBuffer());
 
-  const montserratRegular = fetch(
-    new URL('./fonts/Montserrat-Regular.ttf', import.meta.url)
-  ).then((res) => res.arrayBuffer());
+  // const montserratRegular = fetch(
+  //   new URL('./fonts/Montserrat-Regular.ttf', import.meta.url)
+  // ).then((res) => res.arrayBuffer());
 
 
   return new ImageResponse(
@@ -63,20 +63,6 @@ export default async function Image() {
     ),
     {
       ...size,
-      fonts: [
-        {
-          name: 'MontserratBold',
-          data: await montserratBold,
-          style: 'normal',
-          weight: 700,
-        },
-        {
-            name: 'MontserratRegular',
-            data: await montserratRegular,
-            style: 'normal',
-            weight: 400,
-        }
-      ],
     }
   );
 }
