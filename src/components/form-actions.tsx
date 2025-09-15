@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { MoreHorizontal, BarChart, Edit, Trash2, Link2, CopyIcon, Undo } from 'lucide-react';
 import { deleteForm, undoDeleteForm } from '@/lib/actions';
-import { copyText } from '@/lib/form-utils';
+import { copyText } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import type { Form, FormField } from '@/lib/types';
 import {

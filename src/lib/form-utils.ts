@@ -1,4 +1,4 @@
-import type { FormFieldType } from '@/lib/types';
+import type { FormField } from '@/lib/types';
 import {
   CaseSensitive,
   CheckSquare,
@@ -13,7 +13,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 
-export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon }[] = [
+export const fieldTypes: { type: FormField['type']; label: string; Icon: LucideIcon }[] = [
   { type: 'text', label: 'Text Input', Icon: CaseSensitive },
   { type: 'textarea', label: 'Paragraph', Icon: Heading1 },
   { type: 'number', label: 'Number', Icon: Hash },
@@ -26,7 +26,3 @@ export const fieldTypes: { type: FormFieldType; label: string; Icon: LucideIcon 
   { type: 'slider', label: 'Slider', Icon: SlidersHorizontal },
 ];
 
-
-export const copyText = async (linkToOpen: string) => {
-  await navigator.clipboard.writeText(linkToOpen);
-};

@@ -9,7 +9,7 @@ import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent, Keyboa
 import { arrayMove, } from '@dnd-kit/sortable';
 import type { Form, FormField } from '@/lib/types';
 import { fieldTypes } from '@/lib/form-utils';
-import { copyText } from '@/lib/form-utils';
+import { copyText } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { saveForm } from '@/lib/actions';
 import { Input } from '@/components/ui/input';
