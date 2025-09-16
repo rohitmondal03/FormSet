@@ -1,11 +1,11 @@
 # Supabase project config
 # Find your project ID in your project's General Settings: https://supabase.com/dashboard/project/_/settings/general
 
-project_id = "osyhrslmzxvnyjdsnuwz"
+project_id = "formset"
 
 [api]
 # Port to use for the API proxy.
-port = 54321
+port = 55321
 # Schemas to expose in the API.
 schemas = ["public", "storage", "graphql"]
 # Extra schemas to add to the search_path of roles.
@@ -15,13 +15,13 @@ extra_search_path = ["public"]
 
 [db]
 # Port to use for the local database.
-port = 54322
+port = 55322
 # Use a major version number.
 major_version = 15
 
 [studio]
 # Port to use for Supabase Studio.
-port = 54323
+port = 55323
 
 [auth]
 enabled = true
