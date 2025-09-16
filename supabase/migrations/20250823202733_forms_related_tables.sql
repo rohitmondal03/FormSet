@@ -1,5 +1,5 @@
 -- Create the forms table
-CREATE TABLE forms (
+CREATE TABLE IF NOT EXISTS forms (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) NOT NULL,
     title TEXT NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE forms (
 );
 
 -- Create the form_fields table
-CREATE TABLE form_fields (
+CREATE TABLE IF NOT EXISTS form_fields (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     form_id UUID REFERENCES forms(id) ON DELETE CASCADE NOT NULL,
     type TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE form_fields (
 );
 
 -- Create the form_responses table
-CREATE TABLE form_responses (
+CREATE TABLE IF NOT EXISTS form_responses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     form_id UUID REFERENCES forms(id) ON DELETE CASCADE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

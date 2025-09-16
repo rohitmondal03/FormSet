@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useFormStatus } from 'react-dom';
 import { useEffect, useActionState } from 'react';
-import { Bot, Edit, Share2 } from 'lucide-react';
+import { ArrowLeft, Bot, Edit, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { signup } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,7 @@ const AuthFeatures = () => {
       description: 'Share your forms with a unique link and analyze responses.',
     },
   ];
+
   return (
     <div className="hidden lg:flex flex-col items-center justify-center space-y-8 bg-primary/5 p-8 rounded-lg border-l">
       <Link href="/" className="flex items-center gap-2 mb-8">
@@ -119,6 +120,7 @@ export default function SignupPage() {
         description: state.error,
         variant: 'destructive',
       });
+      return;
     }
   }, [state, toast]);
 
@@ -126,20 +128,9 @@ export default function SignupPage() {
     <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
-          <Link href="/" className="lg:hidden flex items-center justify-center gap-2 mb-4">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-primary"
-            >
-              <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="font-bold text-xl">FormSet</span>
-            <span className='sr-only'>Go to Home Page</span>
+           <Link href="/" className="flex items-center justify-center gap-2 mb-4 text-sm text-zinc-400 underline underline-offset-4">
+            <ArrowLeft className='size-5' />
+            <span className=''>Go to Home Page</span>
           </Link>
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight">Create an Account</h1>
@@ -147,14 +138,14 @@ export default function SignupPage() {
               Get started with FormSet for free.
             </p>
           </div>
-          <form action={formAction} className="space-y-6">
+          <div className="space-y-6">
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline">
+                <Button variant="secondary">
                   <GoogleIcon className="mr-2 h-4 w-4" />
                   Google
                 </Button>
-                <Button variant="outline">
+                <Button variant="secondary">
                   <GitHubIcon className="mr-2 h-4 w-4" />
                   GitHub
                 </Button>
@@ -169,33 +160,35 @@ export default function SignupPage() {
                   </span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
-                <Input
-                  id="full_name"
-                  name="full_name"
-                  type="text"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" required autoComplete='new-password' />
-              </div>
+              <form action={formAction} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="full_name">Full Name</Label>
+                  <Input
+                    id="full_name"
+                    name="full_name"
+                    type="text"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" name="password" type="password" required autoComplete='new-password' />
+                </div>
+                <SubmitButton />
+              </form>
             </div>
-            <SubmitButton />
-          </form>
+          </div>
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link

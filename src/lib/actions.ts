@@ -8,7 +8,7 @@ import { suggestFormContent } from '@/ai/flows/suggest-form-content';
 import { z } from 'zod';
 import type { Form, FormField } from '@/lib/types';
 import { loginSchema, signupSchema } from '@/lib/zod/auth';
-import { generateCsv, generateDocx, generatePdf, generateXlsx } from '@/lib/export-utils';
+import { generateCsv, generateDocx, generatePdf, generateXlsx } from '@/lib/utils';
 import { createClient } from '@supabase/supabase-js';
 
 const suggestionSchema = z.object({
@@ -59,7 +59,7 @@ export async function signup(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error, data } = await supabase.auth.signUp({
     email: validatedFields.data.email,
     password: validatedFields.data.password,
     options: {
@@ -234,25 +234,25 @@ export async function submitResponse(formId: string, formData: FormData) {
     console.error("Error fetching form details:", formError);
     return { error: 'Could not load form details for submission.' };
   }
-  
+
   const submitterEmail = formData.get('submitter_email') as string;
 
   if (form.limit_one_response_per_email) {
-      const { data: existingResponse, error: existingResponseError } = await supabase
-        .from('form_responses')
-        .select('id')
-        .eq('form_id', formId)
-        .eq('submitter_email', submitterEmail)
-        .maybeSingle();
+    const { data: existingResponse, error: existingResponseError } = await supabase
+      .from('form_responses')
+      .select('id')
+      .eq('form_id', formId)
+      .eq('submitter_email', submitterEmail)
+      .maybeSingle();
 
-      if (existingResponseError) {
-          console.error("Error checking for existing response:", existingResponseError);
-          return { error: 'An error occurred while validating your submission.' };
-      }
+    if (existingResponseError) {
+      console.error("Error checking for existing response:", existingResponseError);
+      return { error: 'An error occurred while validating your submission.' };
+    }
 
-      if (existingResponse) {
-          return { error: 'This email address has already submitted a response to this form.' };
-      }
+    if (existingResponse) {
+      return { error: 'This email address has already submitted a response to this form.' };
+    }
   }
 
 
@@ -271,9 +271,9 @@ export async function submitResponse(formId: string, formData: FormData) {
 
   for (const field of formFields) {
     const value = formData.getAll(field.id);
-    
+
     if (field.required && (!value || value.length === 0 || value[0] === '')) {
-       return { error: `${field.label} is a required field.` };
+      return { error: `${field.label} is a required field.` };
     }
 
 
@@ -333,7 +333,7 @@ export async function deleteForm(formId: string) {
   if (!user) {
     return { error: 'You must be logged in to delete a form.' };
   }
-  
+
   // First, get the form details to be returned for the "Undo" action
   const { data: form, error: getError } = await supabase
     .from('forms')
@@ -357,7 +357,7 @@ export async function deleteForm(formId: string) {
   }
 
   revalidatePath('/dashboard');
-  
+
   // Return the deleted form data so it can be restored
   return { success: true, deletedForm: form };
 }
@@ -371,7 +371,7 @@ export async function undoDeleteForm(form: Form & { form_fields: FormField[] }) 
   }
 
   const { form_fields, ...formDetails } = form;
-  
+
   const { error: formError } = await supabase.from('forms').insert({
     id: formDetails.id,
     user_id: formDetails.user_id,
@@ -578,7 +578,7 @@ export async function deleteAccount() {
 
   // Sign out the user locally
   await supabase.auth.signOut();
-  
+
   revalidatePath('/', 'layout');
   redirect('/login');
 }

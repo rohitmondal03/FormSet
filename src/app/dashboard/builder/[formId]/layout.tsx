@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: MetadataProps): Promise<Metad
   }
 
   return {
-    title: `${data?.title} | Create Form`,
+    title: formId === "new" ? "Create Form" : `${data?.title} | Form Builder`,
   };
 }
 

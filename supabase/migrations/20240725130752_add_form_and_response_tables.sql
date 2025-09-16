@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS forms (
 CREATE TABLE IF NOT EXISTS form_fields (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     form_id UUID REFERENCES forms(id) ON DELETE CASCADE NOT NULL,
-    order INT NOT NULL,
+    "order" INT NOT NULL,
     type TEXT NOT NULL,
     label TEXT NOT NULL,
     placeholder TEXT,

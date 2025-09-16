@@ -23,6 +23,15 @@ major_version = 15
 # Port to use for Supabase Studio.
 port = 55323
 
+[inbucket]
+port = 55324
+
+# [realtime]
+# port = 55325
+
+[analytics]
+port = 55327
+
 [auth]
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used

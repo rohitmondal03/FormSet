@@ -1,6 +1,6 @@
 
--- Create profiles table
-create table profiles (
+-- CREATE profile table
+CREATE TABLE IF NOT EXISTS profile (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
   email TEXT,
@@ -8,32 +8,32 @@ create table profiles (
   avatar_url TEXT
 );
 
--- search index on user_id
-create index idx_profiles_user_id on profiles(user_id);
+-- search INDEX on user_id
+CREATE INDEX idx_profile_user_id ON profile(user_id);
 
 -- Set up Row Level Security
-alter table profiles
-  enable row level security;
+ALTER TABLE profile
+  ENABLE ROW LEVEL SECURITY;
 
-create policy "Public profiles are viewable by everyone." on profiles
-  for select using (true);
+CREATE POLICY "Public profile are viewable by everyone." ON profile
+  FOR SELECT USING (true);
 
-create policy "Users can insert their own profile." on profiles
-  for insert with check (auth.uid() = id);
+CREATE POLICY "Users can insert their own profile." ON profile
+  FOR INSERT WITH CHECK (auth.uid() = id);
 
-create policy "Users can update own profile." on profiles
-  for update using (auth.uid() = id);
+CREATE POLICY "Users can update own profile." ON profile
+  FOR UPDATE USING (auth.uid() = id);
 
--- This trigger automatically creates a profile entry when a new user signs up.
-create function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (user_id, email, full_name)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name');
-  return new;
-end;
-$$ language plpgsql security definer;
+-- This trigger automatically CREATEs a profile entry when a new user signs up.
+CREATE FUNCTION public.handle_new_user()
+RETURNS TRIGGER as $$
+BEGIN
+  INSERT INTO public.profile (user_id, email, full_name)
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY definer;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+CREATE TRIGGER on_auth_user_CREATEd
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
